@@ -12,7 +12,7 @@ Download the binary for your platform from `bin/<platform>/apb` in this repo:
 |---|---|---|
 | Linux x86_64 | `bin/linux-x86_64/apb` | glibc 2.31+ (Ubuntu 20.04+, Debian 11+, Fedora 34+) |
 | macOS | `bin/macos/apb` | macOS 11+. Universal binary — runs natively on both Intel and Apple Silicon. |
-| Windows | (not currently distributed — use WSL2 with the Linux binary, see below) | |
+| Windows x86_64 | `bin/windows-x86_64/apb.exe` | Windows 10 1809+ / Windows 11. MSVC runtime statically linked. |
 
 ### Quick install (Linux)
 
@@ -33,15 +33,22 @@ shasum -a 256 /usr/local/bin/apb  # compare to bin/macos/sha256.txt
 apb --version
 ```
 
-### Windows
-
-We don't currently ship a native Windows binary. The recommended setup is **WSL2 + the Linux binary** — install Ubuntu via the Microsoft Store, then follow the Linux install steps above inside the WSL2 shell. This is the same model Claude Code used through 2025 and works without any feature loss.
+### Quick install (Windows PowerShell)
 
 ```powershell
-# from PowerShell — one-time WSL2 setup
-wsl --install -d Ubuntu
-# then inside Ubuntu, run the Linux quick-install block above
+# Drop into a directory on your PATH, e.g. ~/bin
+$dest = "$env:USERPROFILE\bin\apb.exe"
+New-Item -ItemType Directory -Force -Path (Split-Path $dest) | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/affbros/agencyplaybook-cli/main/bin/windows-x86_64/apb.exe" -OutFile $dest
+Get-FileHash -Algorithm SHA256 $dest  # compare to bin/windows-x86_64/sha256.txt
+apb --version
 ```
+
+If `~/bin` isn't on your PATH yet, add it via *System Properties → Environment Variables → User Variables → Path*.
+
+### Alternative: WSL2 + Linux binary
+
+If you prefer Linux tooling on Windows, install WSL2 (`wsl --install -d Ubuntu`) and run the Linux quick-install block inside Ubuntu. The Linux binary works identically.
 
 ## First-time setup
 

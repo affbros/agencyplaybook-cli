@@ -2,6 +2,17 @@
 
 All notable changes to the `apb` CLI binary distribution. Format inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.2] — 2026-05-19
+
+Restores the Windows binary that was erroneously dropped in v0.1.1. Three platforms ship from this version onward.
+
+### Added
+- `bin/windows-x86_64/apb.exe` — Windows 10 1809+ / Windows 11 native binary (MSVC runtime, statically linked). Built on `windows-latest` GHA runner with the same `APB_DEFAULT_API_URL=https://api.agencyplaybook.io` bake-in as Linux + macOS.
+- README install section + PowerShell one-liner for Windows.
+
+### Changed
+- README: Windows back as a primary install target; WSL2 demoted to an "alternative" section for users who prefer Linux tooling.
+
 ## [0.1.1] — 2026-05-19
 
 **Breaking layout change**: distribution simplified to two platforms.
