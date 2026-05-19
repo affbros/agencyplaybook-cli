@@ -10,7 +10,7 @@ Download the binary for your platform from `bin/<platform>/apb` in this repo:
 
 | Platform | Path | Notes |
 |---|---|---|
-| Linux x86_64 | `bin/linux-x86_64/apb` | glibc 2.31+ (Ubuntu 20.04+, Debian 11+, Fedora 34+) |
+| Linux x86_64 | `bin/linux-x86_64/apb` | glibc 2.35+ (Ubuntu 22.04+, Debian 12+, RHEL 9+, Fedora 36+) |
 | macOS | `bin/macos/apb` | macOS 11+. Universal binary — runs natively on both Intel and Apple Silicon. |
 | Windows x86_64 | `bin/windows-x86_64/apb.exe` | Windows 10 1809+ / Windows 11. MSVC runtime statically linked. |
 

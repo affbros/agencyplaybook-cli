@@ -2,6 +2,11 @@
 
 All notable changes to the `apb` CLI binary distribution. Format inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.4] — 2026-05-19
+
+### Fixed
+- **Linux binary now runs on Debian 12 / Ubuntu 22.04 / RHEL 9.** v0.1.3 was built on Ubuntu 24.04 and required glibc 2.39, which broke on older distros. Build pinned to `ubuntu-22.04` (glibc 2.35). README compat note corrected.
+
 ## [0.1.3] — 2026-05-19
 
 ### Added
