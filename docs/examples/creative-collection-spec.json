@@ -1,0 +1,26 @@
+{
+  "_comment": "Example collection-ad creative spec used by `apb creative create-collection --spec-file <this>`. Pass with --name to override the catalog-default name. The product_set_id under template_data points at a product set you've created via `apb catalog product-set-create`. Hero element is the lead asset (image_hash from `apb creative upload-image`, or video_id from `apb creative upload-video`); child_attachments are auto-filled by Meta from the product_set when omitted.",
+  "object_story_spec": {
+    "page_id": "111111111111111",
+    "instagram_actor_id": "222222222222222",
+    "template_data": {
+      "name": "Premium Coffee Collection",
+      "description": "Single-origin beans, fresh-roasted weekly",
+      "product_set_id": "333333333333333",
+      "format_option": "collection_video",
+      "video_id": "444444444444444",
+      "image_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+      "call_to_action": {
+        "type": "SHOP_NOW",
+        "value": {
+          "link": "https://scandalouscoffee.com/collections/premium"
+        }
+      }
+    }
+  },
+  "degrees_of_freedom_spec": {
+    "creative_features_spec": {
+      "standard_enhancements": { "enroll_status": "OPT_IN" }
+    }
+  }
+}

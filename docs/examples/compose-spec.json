@@ -1,0 +1,78 @@
+{
+  "campaign": {
+    "name": "Q2 2026 Promo",
+    "objective": "OUTCOME_SALES",
+    "status": "PAUSED",
+    "daily_budget": 100.00,
+    "bid_strategy": "LOWEST_COST_WITHOUT_CAP"
+  },
+  "ad_sets": [
+    {
+      "name": "US Broad - Multi Ad",
+      "optimization_goal": "OFFSITE_CONVERSIONS",
+      "billing_event": "IMPRESSIONS",
+      "targeting": {
+        "geo_locations": { "countries": ["US"] },
+        "age_min": 25,
+        "age_max": 55,
+        "targeting_automation": { "advantage_audience": 1 }
+      },
+      "daily_budget": 50.00,
+      "promoted_object": { "pixel_id": "123456", "custom_event_type": "PURCHASE" },
+      "ads": [
+        {
+          "name": "Video Ad - Product Demo",
+          "creative": { "type": "existing", "creative_id": "120210123456" }
+        },
+        {
+          "name": "Banner Ad - Spring Sale",
+          "creative": {
+            "type": "image",
+            "name": "Spring Banner Creative",
+            "spec": {
+              "object_story_spec": {
+                "page_id": "111222333",
+                "link_data": {
+                  "image_hash": "abc123def456",
+                  "message": "Spring sale - 20% off!",
+                  "link": "https://example.com/sale"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "US DCO Test",
+      "optimization_goal": "LINK_CLICKS",
+      "billing_event": "IMPRESSIONS",
+      "targeting": { "geo_locations": { "countries": ["US"] } },
+      "daily_budget": 25.00,
+      "dynamic_creative": {
+        "name": "DCO Creative - Mixed Assets",
+        "page_id": "111222333",
+        "asset_feed_spec": {
+          "images": [
+            { "hash": "abc123" },
+            { "hash": "def456" }
+          ],
+          "videos": [
+            { "video_id": "998877", "thumbnail_hash": "thumb1" }
+          ],
+          "bodies": [
+            { "text": "Save 20% today" },
+            { "text": "Limited time offer" }
+          ],
+          "titles": [
+            { "text": "Spring Sale" },
+            { "text": "Big Savings" }
+          ],
+          "link_urls": [
+            { "website_url": "https://example.com/sale" }
+          ]
+        }
+      }
+    }
+  ]
+}

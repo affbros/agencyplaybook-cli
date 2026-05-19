@@ -1,0 +1,59 @@
+name: Manual binary update
+
+# Manual workflow_dispatch trigger for the public repo. The release pipeline
+# normally lives in the private source repo (affbros/agencyplaybook_io_source
+# at .github/workflows/release.yml) and pushes binaries here automatically on
+# every vX.Y.Z tag. This workflow is a safety valve — if the source-side
+# pipeline failed and binaries need to be re-published manually, an operator
+# can run this with workflow_dispatch.
+#
+# It does NOT build binaries (this repo has no source). It expects binaries
+# to be uploaded as workflow_dispatch inputs OR fetched from the source-repo
+# release run artifacts via gh auth.
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: 'GitHub Actions run ID from affbros/agencyplaybook_io_source release.yml'
+        required: true
+        type: string
+      tag:
+        description: 'Tag to apply on this repo after binaries are committed (e.g., v0.1.0)'
+        required: true
+        type: string
+
+jobs:
+  republish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts from source repo run
+        env:
+          GH_TOKEN: ${{ secrets.SOURCE_REPO_READ_TOKEN }}
+        run: |
+          mkdir -p /tmp/artifacts
+          gh run download ${{ inputs.source_run_id }} \
+            --repo affbros/agencyplaybook_io_source \
+            --dir /tmp/artifacts
+          ls -la /tmp/artifacts/
+      - name: Place binaries
+        run: |
+          # Each artifact is expected to be named apb-<platform>
+          for plat in linux-x86_64 macos-x86_64 macos-aarch64; do
+            cp /tmp/artifacts/apb-$plat/apb bin/$plat/apb
+            chmod +x bin/$plat/apb
+            sha256sum bin/$plat/apb | awk '{print $1"  apb"}' > bin/$plat/sha256.txt
+          done
+          cp /tmp/artifacts/apb-windows-x86_64/apb.exe bin/windows-x86_64/apb.exe
+          sha256sum bin/windows-x86_64/apb.exe | awk '{print $1"  apb.exe"}' > bin/windows-x86_64/sha256.txt
+      - name: Commit + tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bin/
+          git commit -m "Manual republish: ${{ inputs.tag }} from source run ${{ inputs.source_run_id }}"
+          git tag -a ${{ inputs.tag }} -m "Release ${{ inputs.tag }} (manual republish)"
+          git push origin main --follow-tags

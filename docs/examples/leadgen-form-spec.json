@@ -1,0 +1,38 @@
+{
+  "_comment": "Example leadgen form spec used by `apb leadgen create --spec-file <this>`. Pass with --page-id (or auto-discover). Meta freezes most fields post-create; design carefully. Privacy policy URL is required by Meta. `tracking_parameters` are appended to the follow-up redirect (UTMs, etc.).",
+  "name": "Premium Coffee Subscription Inquiry",
+  "locale": "EN_US",
+  "follow_up_action_url": "https://scandalouscoffee.com/thank-you?source=meta-leadgen",
+  "privacy_policy_url": "https://scandalouscoffee.com/privacy",
+  "legal_content": {
+    "custom_disclaimer": {
+      "title": "We respect your inbox",
+      "body": "By submitting this form, you agree to receive emails from Scandalous Coffee. Unsubscribe anytime."
+    }
+  },
+  "questions": [
+    { "type": "FULL_NAME" },
+    { "type": "EMAIL" },
+    { "type": "PHONE" },
+    {
+      "type": "CUSTOM",
+      "key": "monthly_consumption",
+      "label": "How many bags of coffee do you go through monthly?",
+      "options": [
+        { "value": "1-2 bags", "key": "low" },
+        { "value": "3-5 bags", "key": "medium" },
+        { "value": "6+ bags", "key": "high" }
+      ]
+    },
+    {
+      "type": "CUSTOM",
+      "key": "preferred_roast",
+      "label": "Preferred roast level"
+    }
+  ],
+  "tracking_parameters": [
+    { "key": "utm_source", "value": "meta-ads" },
+    { "key": "utm_medium", "value": "leadgen-form" },
+    { "key": "utm_campaign", "value": "premium-subscription" }
+  ]
+}
