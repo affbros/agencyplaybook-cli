@@ -1,1 +1,0 @@
-Binary will be populated by CI on tag push (universal binary built via lipo on macos-14 runner — supports both Intel Macs and Apple Silicon).
