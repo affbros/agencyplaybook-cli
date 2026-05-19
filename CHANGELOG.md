@@ -2,6 +2,14 @@
 
 All notable changes to the `apb` CLI binary distribution. Format inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.3] — 2026-05-19
+
+### Added
+- Global config file support at `~/.apb/.env`. Set `APB_API_KEY` and `APB_API_URL` once and the CLI works from any directory — no need for a `.env` in every project folder. CWD `.env` still wins over the global one for per-project overrides. README install section rewritten with copy-paste setup blocks for Linux/macOS and Windows PowerShell.
+
+### Changed
+- README clarifies the credential precedence chain: shell env → CWD `.env` → `~/.apb/.env` → compile-time defaults.
+
 ## [0.1.2] — 2026-05-19
 
 Restores the Windows binary that was erroneously dropped in v0.1.1. Three platforms ship from this version onward.

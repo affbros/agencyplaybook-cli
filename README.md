@@ -52,17 +52,47 @@ If you prefer Linux tooling on Windows, install WSL2 (`wsl --install -d Ubuntu`)
 
 ## First-time setup
 
+The `apb` CLI looks for your API credentials in this order:
+
+1. Shell environment (`export APB_API_KEY=...`)
+2. `.env` file in your current working directory
+3. `~/.apb/.env` (global, recommended for the downloaded binary)
+4. Compile-time defaults (only `APB_API_URL` defaults to `https://api.agencyplaybook.io`)
+
+The simplest setup uses a global config file so the CLI works from any directory:
+
 ```bash
-# 1. Set your API key (get one from https://agencyplaybook.io once the beta opens — until then, override APB_API_URL to a self-hosted endpoint)
-export APB_API_KEY=apb_live_pro_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# Linux / macOS — one-time
+mkdir -p ~/.apb && chmod 700 ~/.apb
+cat > ~/.apb/.env <<'EOF'
+APB_API_KEY=apb_live_pro_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+APB_API_URL=https://api.agencyplaybook.io
+EOF
+chmod 600 ~/.apb/.env
 
-# 2. Optional: override the API base if you're not on the production endpoint
-# export APB_API_URL=http://localhost:3750  # if running the SaaS stack locally
-
-# 3. Verify
+# Verify
 apb auth status
 apb account list
 ```
+
+```powershell
+# Windows PowerShell — one-time
+$apbDir = "$env:USERPROFILE\.apb"
+New-Item -ItemType Directory -Force -Path $apbDir | Out-Null
+@"
+APB_API_KEY=apb_live_pro_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+APB_API_URL=https://api.agencyplaybook.io
+"@ | Out-File -Encoding ASCII "$apbDir\.env"
+
+apb auth status
+apb account list
+```
+
+**Per-project override**: drop a `.env` file in any project's root directory and the values there take precedence over `~/.apb/.env` for invocations from that directory. Useful for switching between accounts or pointing at a self-hosted API.
+
+**Get an API key**: AgencyPlaybook.io is in private beta. Until public signup opens, contact `hi@agencyplaybook.io` for early access, or override `APB_API_URL` to point at your own self-hosted API endpoint.
+
+**Update the CLI**: when a new release ships, re-download the binary from `bin/<platform>/` in this repo. The config file at `~/.apb/.env` carries over — only the binary itself changes.
 
 ## Common commands
 
