@@ -2,6 +2,24 @@
 
 All notable changes to the `apb` CLI binary distribution. Format inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.1] — 2026-05-19
+
+**Breaking layout change**: distribution simplified to two platforms.
+
+### Changed
+- macOS distribution is now a single **universal binary** at `bin/macos/apb`. Replaces the prior `bin/macos-x86_64/` and `bin/macos-aarch64/` split. Built on macos-14 via `lipo -create` merging both arch slices; runs natively on Intel and Apple Silicon Macs without Rosetta.
+
+### Removed
+- `bin/windows-x86_64/` — Windows users should install WSL2 and run the Linux binary inside Ubuntu. Same approach Claude Code used through 2025. Documented in README.
+
+### Added
+- macOS universal binary now built natively by CI (was a placeholder in v0.1.0).
+- Refreshed Linux x86_64 binary built by CI for consistency.
+
+### Notes
+- All binaries built with `APB_DEFAULT_API_URL=https://api.agencyplaybook.io` baked in.
+- Both binaries verified to contain no runner host paths.
+
 ## [0.1.0] — 2026-05-19
 
 Initial public release.

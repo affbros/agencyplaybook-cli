@@ -11,25 +11,36 @@ Download the binary for your platform from `bin/<platform>/apb` in this repo:
 | Platform | Path | Notes |
 |---|---|---|
 | Linux x86_64 | `bin/linux-x86_64/apb` | glibc 2.31+ (Ubuntu 20.04+, Debian 11+, Fedora 34+) |
-| macOS Intel | `bin/macos-x86_64/apb` | macOS 11+ (Big Sur and later) |
-| macOS Apple Silicon | `bin/macos-aarch64/apb` | macOS 11+ on M1/M2/M3/M4 |
-| Windows | `bin/windows-x86_64/apb.exe` | Windows 10 1809+ |
+| macOS | `bin/macos/apb` | macOS 11+. Universal binary — runs natively on both Intel and Apple Silicon. |
+| Windows | (not currently distributed — use WSL2 with the Linux binary, see below) | |
 
-### Quick install (Linux/macOS)
+### Quick install (Linux)
 
 ```bash
-# Download + put on PATH (Linux example)
 curl -fsSL https://raw.githubusercontent.com/affbros/agencyplaybook-cli/main/bin/linux-x86_64/apb -o /usr/local/bin/apb
 chmod +x /usr/local/bin/apb
 sha256sum /usr/local/bin/apb  # compare to bin/linux-x86_64/sha256.txt
 apb --version
 ```
 
-### Quick install (Windows PowerShell)
+### Quick install (macOS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/affbros/agencyplaybook-cli/main/bin/macos/apb -o /usr/local/bin/apb
+chmod +x /usr/local/bin/apb
+xattr -d com.apple.quarantine /usr/local/bin/apb 2>/dev/null  # bypass Gatekeeper for downloaded binary
+shasum -a 256 /usr/local/bin/apb  # compare to bin/macos/sha256.txt
+apb --version
+```
+
+### Windows
+
+We don't currently ship a native Windows binary. The recommended setup is **WSL2 + the Linux binary** — install Ubuntu via the Microsoft Store, then follow the Linux install steps above inside the WSL2 shell. This is the same model Claude Code used through 2025 and works without any feature loss.
 
 ```powershell
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/affbros/agencyplaybook-cli/main/bin/windows-x86_64/apb.exe" -OutFile "$env:USERPROFILE\bin\apb.exe"
-apb --version
+# from PowerShell — one-time WSL2 setup
+wsl --install -d Ubuntu
+# then inside Ubuntu, run the Linux quick-install block above
 ```
 
 ## First-time setup
