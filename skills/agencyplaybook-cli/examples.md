@@ -165,7 +165,7 @@ apb split-test create \
   --name "Q3 creative test" \
   --variant-a-adset 23847001 --variant-a-ad 23847011 \
   --variant-b-adset 23847002 --variant-b-ad 23847012 \
-  --objective ctr \
+  --objective OUTCOME_TRAFFIC \
   --duration-days 7 \
   --execute
 apb split-test status --id abc123

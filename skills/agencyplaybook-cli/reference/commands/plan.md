@@ -6,7 +6,7 @@
 
 Approve a batch of plans
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -31,7 +31,7 @@ apb plan approve-batch --ids <IDS> --approve-plan-id <APPROVE_PLAN_ID>
 
 Run canary (partial) execution
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -55,7 +55,7 @@ apb plan canary --plan-id <PLAN_ID> --pct <PCT>
 
 Create a new execution plan
 
-**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -105,7 +105,7 @@ apb plan doctor --plan-id <PLAN_ID>
 
 Execute a plan
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -128,7 +128,7 @@ apb plan execute --plan-id <PLAN_ID>
 
 Execute a plan with safety checks
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -178,7 +178,7 @@ apb plan list --limit <LIMIT> --status <STATUS>
 
 Review a batch of plans
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -202,7 +202,7 @@ apb plan review-batch --ids <IDS>
 
 Validate a plan without executing
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
