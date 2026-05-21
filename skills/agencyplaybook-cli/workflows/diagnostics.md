@@ -1,6 +1,6 @@
 # Diagnostic playbooks — which to run, when, and how
 
-`apb` ships 24 playbooks across 4 pillars. Picking the right one matters more than running them all.
+`apb` ships 26 playbook subcommands — 24 diagnostics across 4 pillars (below), plus `evaluate` (generic rule eval) and `catalog` (lists the playbook catalog). Picking the right one matters more than running them all.
 
 ## Pillar routing
 
@@ -12,7 +12,7 @@
 | Want to scale spend safely | Scaling | `apb playbook scale-roadmap` |
 | "Tell me everything that's wrong" | Turnaround | `apb playbook health-score`, then `reset-rebuild-advisor` if score <60 |
 
-## The 24 playbooks
+## The 24 diagnostic playbooks
 
 ### Learning (5)
 
@@ -57,10 +57,9 @@ apb playbook <name> --days 30 --json | jq '.data'
 ```
 
 Most playbooks accept:
-- `--days <N>` — lookback window (default 30, max 90)
-- `--account <act_…>` — scope to one account
-- `--accounts all` — fan out across all authorized accounts
-- `--since YYYY-MM-DD --until YYYY-MM-DD` — explicit date range
+- `--days <N>` — lookback window (default varies by playbook: e.g. health-score 30, fatigue-index 28, waste-audit 14)
+- `--account <act_…>` — scope to one account (playbooks are per-account; there is no `--accounts` fan-out — loop instead)
+- `--since YYYY-MM-DD` (or relative, e.g. `28d`) — overrides `--days`. Playbooks take `--since` standalone; the `--since`/`--until` *pair* belongs to `report insights`, not playbooks.
 - `--json` — machine-parseable output
 
 ## Interpretation patterns
@@ -92,11 +91,13 @@ This returns a 4-phase plan. Phase 1 (immediate): pause lowest-quartile spend. P
 
 ### Closed-loop with a plan
 
-Many playbook outputs include `recommended_actions[]` that can be fed straight into a plan:
+Playbook outputs are advisory — there is no `--from-recommendations` flag. To act on the findings, author a plan spec from them, then create the plan from that spec:
 
 ```bash
 apb playbook waste-audit --days 30 --json > recs.json
-apb plan create --from-recommendations recs.json --json | jq -r '.data.id'
+# Transform recs.json into a plan spec (see `apb campaign compose-from-spec --help`
+# for the schema), then:
+apb plan create --spec-file plan-spec.json --json | jq -r '.data.id'
 # Then validate + execute as in workflows/automation.md
 ```
 
@@ -114,10 +115,13 @@ apb plan create --from-recommendations recs.json --json | jq -r '.data.id'
 
 ## Multi-account fan-out
 
+Playbooks run per-account — loop to fan out (the `--accounts all` fan-out exists on `report insights`, not playbooks):
+
 ```bash
-apb playbook health-score --accounts all --days 30 --json | \
-  jq -r '.data.per_account[] | "\(.account_id)\t\(.composite_score)"' | \
-  sort -k2 -n
+for acct in act_111 act_222 act_333; do
+  score=$(apb playbook health-score --account "$acct" --days 30 --json | jq -r '.data.composite_score')
+  printf '%s\t%s\n' "$acct" "$score"
+done | sort -k2 -n
 ```
 
 Identifies the weakest accounts first.

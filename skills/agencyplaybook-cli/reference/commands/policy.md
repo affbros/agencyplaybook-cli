@@ -6,7 +6,7 @@
 
 Set a policy profile value
 
-**Scope:** `read:reports` · **Min tier:** starter
+**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -24,14 +24,14 @@ Set a policy profile value
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb policy profile set --profile <PROFILE> --value <VALUE>
+apb policy profile set --execute --profile <PROFILE> --value <VALUE>
 ```
 
 ### `apb policy profile show`
 
 Show current policy profile
 
-**Scope:** `read:reports` · **Min tier:** starter
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|

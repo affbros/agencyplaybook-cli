@@ -6,7 +6,7 @@
 
 Apply an action plan or build strategy bridge output
 
-**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:automation` · **Min tier:** enterprise · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -32,7 +32,7 @@ apb action apply --execute --plan-id <PLAN_ID> --adset <ADSET>
 
 Generate safe plan seeds from recommendation diagnostics (no execution)
 
-**Scope:** `read:playbooks:full` · **Min tier:** agency
+**Scope:** `write:automation` · **Min tier:** enterprise
 
 | Flag | Value | Description |
 |---|---|---|
@@ -56,7 +56,7 @@ apb action autoplan --days <DAYS> --limit <LIMIT>
 
 Generate an action plan
 
-**Scope:** `read:playbooks:full` · **Min tier:** agency
+**Scope:** `write:automation` · **Min tier:** enterprise
 
 | Flag | Value | Description |
 |---|---|---|

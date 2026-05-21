@@ -6,7 +6,7 @@
 
 Create website custom audience from pixel rules
 
-**Scope:** `read:pixels` · **Min tier:** professional
+**Scope:** `read:pixels` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -26,14 +26,14 @@ Create website custom audience from pixel rules
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb pixel audience-create --pixel-id <PIXEL_ID> --name <NAME>
+apb pixel audience-create --execute --pixel-id <PIXEL_ID> --name <NAME>
 ```
 
 ### `apb pixel create`
 
 Create a new pixel
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `read:pixels` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -196,7 +196,7 @@ apb pixel quality --pixel-id <PIXEL_ID>
 
 Send batch events from a JSON file (CAPI)
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `read:pixels` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -221,7 +221,7 @@ apb pixel send-batch --execute --pixel-id <PIXEL_ID> --file <FILE>
 
 Send a single server-side event (CAPI)
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `read:pixels` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -401,7 +401,7 @@ apb pixel unshare --id <ID> --account-id <ACCOUNT_ID>
 
 Update pixel settings
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `read:pixels` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|

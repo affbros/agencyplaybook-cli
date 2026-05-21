@@ -93,11 +93,11 @@ Radius ≥3 prints a confirmation prompt unless `--no-input` is set. Radius 5 al
 ## Batch review (for human-in-the-loop systems)
 
 ```bash
-# Review all CREATED plans for an account
-apb plan review-batch --account act_1234567890 --status CREATED
+# Review a batch of plans for an account (--all, or --ids p1,p2,p3)
+apb plan review-batch --all --account act_1234567890
 
-# Approve a batch (sets all to VALIDATED-equivalent)
-apb plan approve-batch --plan-ids p1,p2,p3 --execute
+# Approve specific plans (sets all to VALIDATED-equivalent)
+apb plan approve-batch --ids p1,p2,p3 --execute
 ```
 
 ## Canary execution
@@ -126,7 +126,7 @@ case $? in
   1) echo "Generic / unmapped failure" ;;
   2) echo "Validation failed — fix the spec, do not retry" ;;
   3) echo "Auth / scope — escalate" ;;
-  4) echo "Safety gate — missing --execute or --confirm-destructive" ;;
+  4) echo "Safety gate — --execute set but an env gate (READ_ONLY/ALLOW_WRITES/APB_ALLOW_MUTATIONS) blocked the write" ;;
   5) echo "Network / rate-limit / 5xx — back off and retry" ;;
   6) echo "Partial success (reserved)" ;;
 esac

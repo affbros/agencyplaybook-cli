@@ -6,7 +6,7 @@
 
 Create a budget schedule
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -33,7 +33,7 @@ apb campaign budget-schedule create --execute --campaign <CAMPAIGN> --daily-budg
 
 Compose a new campaign from source campaigns/adsets/ads
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -60,7 +60,7 @@ apb campaign compose --execute --name <NAME> --source-campaigns <SOURCE_CAMPAIGN
 
 Create a full campaign stack from a JSON spec file or preset
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -87,7 +87,7 @@ apb campaign compose-from-spec --execute --spec-file <SPEC_FILE> --preset <PRESE
 
 Create a new campaign
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -118,7 +118,7 @@ apb campaign create --execute --name <NAME> --objective <OBJECTIVE>
 
 Hard-delete a campaign via the Graph API `DELETE` verb (irreversible). Requires `--confirm-destructive`. Use `update-status --status ARCHIVED` for a reversible cleanup instead
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -142,7 +142,7 @@ apb campaign delete --execute --confirm-destructive --id <ID> --campaign <CAMPAI
 
 Duplicate an existing campaign
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `admin:duplicate` · **Min tier:** enterprise · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -243,7 +243,7 @@ apb campaign pacing --id <ID> --campaign <CAMPAIGN>
 
 Delete a saved preset
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -266,7 +266,7 @@ apb campaign preset delete --execute --confirm-destructive --name <NAME>
 
 List all saved presets
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -288,7 +288,7 @@ apb campaign preset list
 
 Save a compose spec as a named preset
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -312,7 +312,7 @@ apb campaign preset save --name <NAME> --spec-file <SPEC_FILE>
 
 Show a preset's full spec
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -335,7 +335,7 @@ apb campaign preset show --name <NAME>
 
 Update campaign settings
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -367,7 +367,7 @@ apb campaign update --execute --id <ID> --campaign <CAMPAIGN>
 
 Update campaign status
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -385,5 +385,5 @@ Update campaign status
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb campaign update-status --id <ID> --campaign <CAMPAIGN>
+apb campaign update-status --execute --id <ID> --campaign <CAMPAIGN>
 ```

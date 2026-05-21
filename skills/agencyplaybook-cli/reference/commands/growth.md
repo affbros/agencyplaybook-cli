@@ -6,7 +6,7 @@
 
 Compute growth score
 
-**Scope:** `read:playbooks:full` · **Min tier:** agency
+**Scope:** `read:reports` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|

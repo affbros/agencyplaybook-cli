@@ -6,7 +6,7 @@
 
 Approve a batch of plans
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -31,7 +31,7 @@ apb plan approve-batch --ids <IDS> --approve-plan-id <APPROVE_PLAN_ID>
 
 Run canary (partial) execution
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -55,7 +55,7 @@ apb plan canary --plan-id <PLAN_ID> --pct <PCT>
 
 Create a new execution plan
 
-**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -82,7 +82,7 @@ apb plan create --execute --campaign <CAMPAIGN> --name <NAME>
 
 Run plan diagnostics
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -105,7 +105,7 @@ apb plan doctor --plan-id <PLAN_ID>
 
 Execute a plan
 
-**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -121,14 +121,14 @@ Execute a plan
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb plan execute --execute --plan-id <PLAN_ID>
+apb plan execute --plan-id <PLAN_ID>
 ```
 
 ### `apb plan execute-safe`
 
 Execute a plan with safety checks
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -154,7 +154,7 @@ apb plan execute-safe --plan-id <PLAN_ID>
 
 List existing plans
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -178,7 +178,7 @@ apb plan list --limit <LIMIT> --status <STATUS>
 
 Review a batch of plans
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|
@@ -202,7 +202,7 @@ apb plan review-batch --ids <IDS>
 
 Validate a plan without executing
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `read:campaigns` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|

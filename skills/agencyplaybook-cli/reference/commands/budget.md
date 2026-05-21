@@ -6,7 +6,7 @@
 
 Run budget simulation
 
-**Scope:** `read:reports` · **Min tier:** starter
+**Scope:** `write:budgets` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|

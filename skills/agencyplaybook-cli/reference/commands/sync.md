@@ -30,7 +30,7 @@ apb sync diff --campaign <CAMPAIGN> --path <PATH>
 
 Pull remote state to local
 
-**Scope:** `admin:sync` · **Min tier:** enterprise
+**Scope:** `admin:sync` · **Min tier:** enterprise · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -47,5 +47,5 @@ Pull remote state to local
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb sync pull --campaign <CAMPAIGN> --path <PATH>
+apb sync pull --execute --campaign <CAMPAIGN> --path <PATH>
 ```

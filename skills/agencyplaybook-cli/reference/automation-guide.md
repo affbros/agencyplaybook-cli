@@ -23,18 +23,18 @@ Read-only commands need none of these (other than optional `--json`):
 
 ```bash
 apb account list --json
-apb report insights --account act_123 --since 30d --json
+apb report insights --account act_123 --days 30 --json
 apb playbook fatigue-index --account act_123 --json
 ```
 
-Mutations always require `--execute`; destructive ones additionally require `--confirm-destructive`. The CLI fails fast with exit code 4 if you forget either:
+Mutations always require `--execute` (without it the CLI dry-runs and exits 0); destructive ones additionally require `--confirm-destructive` (omitting it is a validation error, exit 2):
 
 ```bash
 apb campaign update-status --id @spring-sale --status PAUSED --execute --json
 apb campaign delete --id @old-test --execute --confirm-destructive --json
 ```
 
-**`--no-input` does not bypass any safety gate.** If a write needs `--execute`, `--no-input` does not supply it; the command still exits 4. The flag's only job is to forbid stdin reads — see *Safety Model* below.
+**`--no-input` does not bypass any safety gate.** If a write needs `--execute`, `--no-input` does not supply it; the command simply **dry-runs and exits 0** (it does not mutate). The flag's only job is to forbid stdin reads — see *Safety Model* below.
 
 ---
 
@@ -48,7 +48,7 @@ Every failure maps to a documented exit code. Scripts and CI runners can branch 
 | `1` | General / unmapped | I/O error, config parse failure, fall-through |
 | `2` | Validation / invalid input | clap parse error, missing required flag, malformed JSON, invalid `--url` |
 | `3` | Auth / permission | invalid `APB_API_KEY`, expired token, unauthorized account, missing scope, tier upgrade required |
-| `4` | Safety gate blocked | `--execute` provided on a mutation but env-gates (`READ_ONLY` / `ALLOW_WRITES` / `APB_ALLOW_MUTATIONS`) blocked the write; `--confirm-destructive` missing on a destructive op; `--no-input` set on a would-prompt path. **Without `--execute` the CLI dry-runs and exits 0** — see "Dry-run a campaign change" below. |
+| `4` | Safety gate blocked | `--execute` provided on a mutation but env-gates (`READ_ONLY` / `ALLOW_WRITES` / `APB_ALLOW_MUTATIONS`) blocked the write (`write_blocked`); or `--no-input` blocked a would-prompt path (`safety_gate_blocked`). **Without `--execute` the CLI dry-runs and exits 0; a missing `--confirm-destructive` is exit 2 (validation), not 4.** |
 | `5` | Network / rate-limit / 5xx | Meta API timeout, 429 throttle, 5xx response, connection refused |
 | `6` | Partial success | reserved for future batch operations |
 
@@ -59,10 +59,10 @@ When `--json` is set on a failing command, stdout emits a structured envelope. S
   "ok": false,
   "error": {
     "code": "write_blocked",
-    "message": "Write blocked: [\"--execute flag not provided\"]",
+    "message": "Write blocked: READ_ONLY != false",
     "exit_code": 4,
     "details": {
-      "reasons": ["--execute flag not provided", "READ_ONLY=true"]
+      "reasons": ["READ_ONLY != false", "ALLOW_WRITES != true"]
     }
   }
 }
@@ -77,6 +77,8 @@ Per-class `error.details` payloads:
 | Insufficient scope | `insufficient_scope` | `required_scope`, `current_tier`, `minimum_tier` |
 | Account not authorized | `account_not_authorized` | `account_id` |
 | Rate limited | `rate_limited` | `retry_after_ms` |
+
+Errors **not** in this table (e.g. `validation_error`, `auth_error`) emit a flat envelope — `code` + `message` + `exit_code`, with no `details` object.
 
 ---
 
@@ -94,7 +96,7 @@ apb doctor check --no-input --json
 ```bash
 apb report insights \
   --account act_123 \
-  --since 7d \
+  --days 7 \
   --no-input --json \
   > reports/$(date -I).json
 ```
@@ -300,7 +302,7 @@ The CLI's safety contract is layered. Each layer must explicitly permit before a
 3. **`--execute`** — explicit per-invocation flag.
 4. **`--confirm-destructive`** — required for DELETE / ARCHIVE / $0 budget / >200% budget moves.
 
-A failure at any layer aborts with exit code 4 and a JSON envelope naming the missing flag in `error.details.required_flags`.
+Env-gate and `--no-input`-prompt failures abort with **exit 4** — `write_blocked` (`error.details.reasons`) or `safety_gate_blocked` (`error.details.required_flags`). Note the other two layers differ: a missing `--execute` **dry-runs and exits 0** (no abort), and a missing `--confirm-destructive` is a **validation error (exit 2)**.
 
 **`--no-input` never implies approval.** It is a contract between the operator and the CLI that stdin will not be read; nothing more. If you pipe `apb` into a script, you must still satisfy every gate the operation requires. The CLI will refuse rather than guess.
 

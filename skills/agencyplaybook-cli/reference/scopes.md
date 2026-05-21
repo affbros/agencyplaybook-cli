@@ -1,24 +1,52 @@
 # Scopes & Tier Requirements
 
-Each apb command requires a SaaS scope, which is granted by your subscription tier.
-Hitting a command your tier doesn't cover returns `403 insufficient_scope`.
+Each `apb` command requires one SaaS scope, granted by your subscription tier.
+A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
-## Tier scope counts (canonical)
+## Tier → scope matrix
 
-| Tier | Scopes | Rate limit (rpm) |
-|---|---|---|
-| Starter | 4 | 60 |
-| Professional | 11 | 300 |
-| Agency | 23 | 600 |
-| Enterprise | 27 | 1000 |
-| Free Enterprise | 27 | 1000 |
+| Scope | Starter | Professional | Agency | Enterprise | Free Enterprise |
+|---|:-:|:-:|:-:|:-:|:-:|
+| `read:analytics` *(API-only)* | · | · | ✓ | ✓ | ✓ |
+| `read:audiences` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:campaigns` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `read:catalogs` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:coverage` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `read:custom-conversions` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:datasets` | · | · | ✓ | ✓ | ✓ |
+| `read:leadgen` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:leadgen:export` | · | · | ✓ | ✓ | ✓ |
+| `read:pixels` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:playbooks:core` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:playbooks:full` | · | · | ✓ | ✓ | ✓ |
+| `read:reports` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `read:reports:advanced` | · | ✓ | ✓ | ✓ | ✓ |
+| `read:rules` | · | · | ✓ | ✓ | ✓ |
+| `read:search` | ✓ | ✓ | ✓ | ✓ | ✓ |
+| `write:audience-data` | · | · | ✓ | ✓ | ✓ |
+| `write:automation` | · | · | · | ✓ | ✓ |
+| `write:budgets` | · | · | ✓ | ✓ | ✓ |
+| `write:campaigns` | · | · | ✓ | ✓ | ✓ |
+| `write:catalogs` | · | · | ✓ | ✓ | ✓ |
+| `write:custom-conversions` | · | · | ✓ | ✓ | ✓ |
+| `write:leadgen` | · | · | ✓ | ✓ | ✓ |
+| `write:rules` | · | · | ✓ | ✓ | ✓ |
+| `admin:duplicate` | · | · | · | ✓ | ✓ |
+| `admin:split-test` | · | · | · | ✓ | ✓ |
+| `admin:sync` | · | · | · | ✓ | ✓ |
 
-Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/auth/tier-scopes.json` at Express startup).
+| | Starter | Professional | Agency | Enterprise | Free Enterprise |
+|---|:-:|:-:|:-:|:-:|:-:|
+| **Scopes** | 4 | 11 | 23 | 27 | 27 |
+| **Rate limit (rpm)** | 60 | 300 | 600 | 1000 | 1000 |
+
+`·` = not granted. Scopes marked *(API-only)* gate HTTP-API features that have no `apb` command. Your tier is set by your subscription plan.
 
 ## Commands per scope
 
-### `admin:duplicate` (1 commands)
+### `admin:duplicate` (2 commands)
 
+- `apb campaign duplicate`
 - `apb duplicate`
 
 ### `admin:split-test` (4 commands)
@@ -48,30 +76,30 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb account overview`
 - `apb account pages`
 - `apb account set-default`
-- `apb ad create-multi`
 - `apb ad get`
 - `apb ad list`
 - `apb ad preview`
-- `apb ad update-status`
 - `apb adset get`
 - `apb adset list`
-- `apb adset update-budget`
-- `apb adset update-status`
-- `apb adset update-targeting`
 - `apb campaign get`
 - `apb campaign list`
 - `apb campaign pacing`
-- `apb campaign preset list`
-- `apb campaign preset save`
-- `apb campaign preset show`
-- `apb campaign update-status`
 - `apb creative asset-audit`
 - `apb creative get`
 - `apb creative list`
-- `apb creative upload-image`
-- `apb creative upload-video`
 - `apb creative upload-video-status`
 - `apb library search`
+- `apb plan approve-batch`
+- `apb plan canary`
+- `apb plan create`
+- `apb plan doctor`
+- `apb plan execute`
+- `apb plan execute-safe`
+- `apb plan list`
+- `apb plan review-batch`
+- `apb plan validate`
+- `apb policy profile set`
+- `apb policy profile show`
 - `apb targeting behavior-search`
 - `apb targeting delivery-estimate`
 - `apb targeting demographic-search`
@@ -81,14 +109,11 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb targeting interest-suggest`
 - `apb targeting interest-validate`
 
-### `read:catalogs` (8 commands)
+### `read:catalogs` (5 commands)
 
 - `apb catalog get`
 - `apb catalog list`
 - `apb catalog product-feeds`
-- `apb catalog product-set-create`
-- `apb catalog product-set-delete`
-- `apb catalog product-set-update`
 - `apb catalog product-sets`
 - `apb catalog products`
 
@@ -122,31 +147,47 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb dataset schema-validate`
 - `apb dataset targeting-pack`
 
-### `read:leadgen` (3 commands)
+### `read:leadgen` (2 commands)
 
 - `apb leadgen get`
-- `apb leadgen leads`
 - `apb leadgen list`
 
-### `read:pixels` (15 commands)
+### `read:leadgen:export` (2 commands)
+
+- `apb leadgen leads`
+- `apb leadgen leads-export`
+
+### `read:pixels` (19 commands)
 
 - `apb pixel audience-create`
+- `apb pixel create`
 - `apb pixel diagnostics`
 - `apb pixel events`
 - `apb pixel get`
 - `apb pixel health`
 - `apb pixel list`
 - `apb pixel quality`
+- `apb pixel send-batch`
+- `apb pixel send-event`
 - `apb pixel share`
 - `apb pixel shared-accounts`
 - `apb pixel shared-agencies`
 - `apb pixel signal`
 - `apb pixel stats`
 - `apb pixel unshare`
+- `apb pixel update`
 - `apb pixel users`
 - `apb pixel validate-events`
 
-### `read:playbooks:core` (26 commands)
+### `read:playbooks:core` (5 commands)
+
+- `apb playbook fatigue-index`
+- `apb playbook health-score`
+- `apb playbook launch-check`
+- `apb playbook waste-audit`
+- `apb playbook weekly-digest`
+
+### `read:playbooks:full` (21 commands)
 
 - `apb playbook anomaly-detect`
 - `apb playbook broad-targeting-audit`
@@ -160,9 +201,6 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb playbook evaluate`
 - `apb playbook event-downgrade-ladder`
 - `apb playbook event-hierarchy-audit`
-- `apb playbook fatigue-index`
-- `apb playbook health-score`
-- `apb playbook launch-check`
 - `apb playbook learning-accelerator`
 - `apb playbook no-touch-compliance`
 - `apb playbook placement-audit`
@@ -172,19 +210,10 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb playbook roas-recovery`
 - `apb playbook saturation`
 - `apb playbook scale-roadmap`
-- `apb playbook waste-audit`
-- `apb playbook weekly-digest`
 
-### `read:playbooks:full` (3 commands)
+### `read:reports` (20 commands)
 
-- `apb action autoplan`
-- `apb action plan`
 - `apb growth score`
-
-### `read:reports` (24 commands)
-
-- `apb ask`
-- `apb budget simulate`
 - `apb learning diagnose`
 - `apb learning prescribe`
 - `apb learning scorecard`
@@ -193,10 +222,7 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb metrics creative-quality`
 - `apb metrics funnel`
 - `apb metrics objective-pack`
-- `apb policy profile set`
-- `apb policy profile show`
 - `apb report breakdown`
-- `apb report compare`
 - `apb report insights`
 - `apb report insights-async fetch`
 - `apb report insights-async start`
@@ -208,15 +234,20 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb report profile run`
 - `apb report profile save`
 
+### `read:reports:advanced` (1 commands)
+
+- `apb report compare`
+
 ### `read:rules` (4 commands)
 
 - `apb rules get`
 - `apb rules list`
-- `apb rules preview`
+- `apb rules templates apply`
 - `apb rules templates list`
 
-### `read:search` (1 commands)
+### `read:search` (2 commands)
 
+- `apb ask`
 - `apb search`
 
 ### `write:audience-data` (2 commands)
@@ -224,17 +255,31 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb audience users-add`
 - `apb audience users-remove`
 
-### `write:campaigns` (38 commands)
+### `write:automation` (5 commands)
 
 - `apb action apply`
+- `apb action autoplan`
+- `apb action plan`
+- `apb andromeda launch`
+- `apb andromeda plan`
+
+### `write:budgets` (1 commands)
+
+- `apb budget simulate`
+
+### `write:campaigns` (32 commands)
+
 - `apb ad create`
+- `apb ad create-multi`
 - `apb ad delete`
 - `apb ad update`
+- `apb ad update-status`
 - `apb adset create`
 - `apb adset delete`
 - `apb adset update`
-- `apb andromeda launch`
-- `apb andromeda plan`
+- `apb adset update-budget`
+- `apb adset update-status`
+- `apb adset update-targeting`
 - `apb audience create`
 - `apb audience create-lookalike`
 - `apb campaign budget-schedule create`
@@ -242,32 +287,27 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb campaign compose-from-spec`
 - `apb campaign create`
 - `apb campaign delete`
-- `apb campaign duplicate`
 - `apb campaign preset delete`
+- `apb campaign preset list`
+- `apb campaign preset save`
+- `apb campaign preset show`
 - `apb campaign update`
+- `apb campaign update-status`
 - `apb creative create-carousel`
 - `apb creative create-collection`
 - `apb creative create-dynamic`
 - `apb creative create-image`
 - `apb creative create-video`
 - `apb creative update`
-- `apb pixel create`
-- `apb pixel send-batch`
-- `apb pixel send-event`
-- `apb pixel update`
-- `apb plan approve-batch`
-- `apb plan canary`
-- `apb plan create`
-- `apb plan doctor`
-- `apb plan execute`
-- `apb plan execute-safe`
-- `apb plan list`
-- `apb plan review-batch`
-- `apb plan validate`
+- `apb creative upload-image`
+- `apb creative upload-video`
 
-### `write:catalogs` (2 commands)
+### `write:catalogs` (5 commands)
 
 - `apb catalog create`
+- `apb catalog product-set-create`
+- `apb catalog product-set-delete`
+- `apb catalog product-set-update`
 - `apb catalog update`
 
 ### `write:custom-conversions` (3 commands)
@@ -276,10 +316,9 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb custom-conversion delete`
 - `apb custom-conversion update`
 
-### `write:leadgen` (2 commands)
+### `write:leadgen` (1 commands)
 
 - `apb leadgen create`
-- `apb leadgen leads-export`
 
 ### `write:rules` (7 commands)
 
@@ -288,7 +327,7 @@ Source: `server/lib/tier-scopes.js` (asserted against `rust/crates/apb-core/src/
 - `apb rules disable`
 - `apb rules enable`
 - `apb rules execute`
-- `apb rules templates apply`
+- `apb rules preview`
 - `apb rules update`
 
 ### `—` (20 commands)

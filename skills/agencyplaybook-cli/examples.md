@@ -74,8 +74,8 @@ Skip looking up Meta IDs — pass campaign / adset / ad names directly:
 # Numeric IDs still work
 apb campaign get --id 23847562834756123
 
-# But names work too (must match exactly one campaign)
-apb campaign get --id "Q3 Launch" --resolve-names
+# But names work too (auto-resolved; must match exactly one campaign)
+apb campaign get --id "Q3 Launch"
 
 # Or use aliases. Create one: apb alias set <name> <id>
 apb campaign get --id @q3
@@ -88,7 +88,7 @@ apb campaign get --id @q3
 apb leadgen leads-export --form-id 1234567890 --output leads.csv
 
 # 2. Hash & upload into a custom audience for retargeting
-apb audience users-add --audience-id 9876543210 --data-file leads.csv --execute
+apb audience users-add --id 9876543210 --data-file leads.csv --execute
 
 # PII discipline: apb logs only {audience_id, schema, row_count, batch_count}.
 # Never the email/phone values.
@@ -121,7 +121,6 @@ case $? in
   0) echo "OK" ;;
   2) echo "Bad input — e.g. malformed --url; fix and rerun" ;;
   3) echo "Auth failed — bad/expired key or insufficient scope; refresh/upgrade" ;;
-  4) echo "Safety gate — supply --execute / --confirm-destructive" ;;
   5) echo "Network / rate-limit — back off and retry" ;;
   *) echo "Unexpected (1 = general/unmapped)" ;;
 esac
@@ -163,13 +162,14 @@ apb custom-conversion create \
 
 ```bash
 apb split-test create \
-  --campaign-id 23847562834756123 \
-  --variants 'A:adsetA,B:adsetB' \
-  --metric ctr \
+  --name "Q3 creative test" \
+  --variant-a-adset 23847001 --variant-a-ad 23847011 \
+  --variant-b-adset 23847002 --variant-b-ad 23847012 \
+  --objective ctr \
   --duration-days 7 \
   --execute
-apb split-test status --test-id abc
-apb split-test promote --test-id abc --winner B --execute --confirm-destructive
+apb split-test status --id abc123
+apb split-test promote --id abc123 --winner B --scale 1.5 --execute --confirm-destructive
 ```
 
 ## 15. Sync local state with Meta

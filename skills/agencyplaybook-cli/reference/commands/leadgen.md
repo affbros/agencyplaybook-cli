@@ -53,7 +53,7 @@ apb leadgen get --id <ID>
 
 List leads for a form (PII — requires `read:leadgen:export` scope). Includes `field_data` with submitter responses
 
-**Scope:** `read:leadgen` · **Min tier:** professional
+**Scope:** `read:leadgen:export` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -80,7 +80,7 @@ apb leadgen leads --form-id <FORM_ID> --since <SINCE>
 
 Bulk-export leads to CSV (default) or JSON, with optional pagination follow-loop. PII — requires `read:leadgen:export` scope
 
-**Scope:** `write:leadgen` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `read:leadgen:export` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -101,7 +101,7 @@ Bulk-export leads to CSV (default) or JSON, with optional pagination follow-loop
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb leadgen leads-export --execute --form-id <FORM_ID> --since <SINCE>
+apb leadgen leads-export --form-id <FORM_ID> --since <SINCE>
 ```
 
 ### `apb leadgen list`

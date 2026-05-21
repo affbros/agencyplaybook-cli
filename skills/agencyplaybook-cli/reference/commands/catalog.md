@@ -100,7 +100,7 @@ apb catalog product-feeds --id <ID>
 
 Create a product set within a catalog
 
-**Scope:** `read:catalogs` · **Min tier:** professional
+**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -118,14 +118,14 @@ Create a product set within a catalog
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb catalog product-set-create --catalog-id <CATALOG_ID> --name <NAME>
+apb catalog product-set-create --execute --catalog-id <CATALOG_ID> --name <NAME>
 ```
 
 ### `apb catalog product-set-delete`
 
 Hard-delete a product set (irreversible). Requires `--confirm-destructive`
 
-**Scope:** `read:catalogs` · **Min tier:** professional
+**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -141,14 +141,14 @@ Hard-delete a product set (irreversible). Requires `--confirm-destructive`
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb catalog product-set-delete --id <ID>
+apb catalog product-set-delete --execute --confirm-destructive --id <ID>
 ```
 
 ### `apb catalog product-set-update`
 
 Update an existing product set (any subset of fields)
 
-**Scope:** `read:catalogs` · **Min tier:** professional
+**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -166,7 +166,7 @@ Update an existing product set (any subset of fields)
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb catalog product-set-update --id <ID> --name <NAME>
+apb catalog product-set-update --execute --id <ID> --name <NAME>
 ```
 
 ### `apb catalog product-sets`

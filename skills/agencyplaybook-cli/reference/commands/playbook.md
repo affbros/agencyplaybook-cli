@@ -6,7 +6,7 @@
 
 Flag cost anomalies vs trailing baseline
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -31,7 +31,7 @@ apb playbook anomaly-detect --days <DAYS> --since <SINCE>
 
 Audit active ad sets for over-narrow targeting (stacked interests, restrictive age bounds, custom-audience-only, Advantage+ disabled)
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -53,7 +53,7 @@ apb playbook broad-targeting-audit
 
 Audit pixels for CAPI (Conversions API) coverage to recover signal lost to iOS/ATT and ad-blockers
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -75,7 +75,7 @@ apb playbook capi-dual-signal
 
 List the full playbook catalog grouped by pillar
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -97,7 +97,7 @@ apb playbook catalog
 
 Audit ABO campaigns for high CPA dispersion across adsets and recommend CBO migration where appropriate
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -121,7 +121,7 @@ apb playbook cbo-vs-abo-audit --days <DAYS> --since <SINCE>
 
 Detect ad-set fragmentation: campaigns where multiple adsets each have too few conversions to learn but could clear the threshold if merged into a stronger survivor
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -145,7 +145,7 @@ apb playbook consolidation-advisor --days <DAYS> --since <SINCE>
 
 Creative format diversity audit
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -169,7 +169,7 @@ apb playbook creative-mix --days <DAYS> --since <SINCE>
 
 Hourly performance heatmap
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -193,7 +193,7 @@ apb playbook daypart --days <DAYS> --since <SINCE>
 
 Detect ad sets with overlapping targeting (auction self-competition)
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -210,14 +210,14 @@ Detect ad sets with overlapping targeting (auction self-competition)
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb playbook duplicate-detect --days <DAYS> --since <SINCE>
+apb playbook duplicate-detect --execute --days <DAYS> --since <SINCE>
 ```
 
 ### `apb playbook evaluate`
 
 Evaluate account against playbook rules
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -243,7 +243,7 @@ apb playbook evaluate --campaign <CAMPAIGN> --days <DAYS>
 
 Walk the Meta event ladder (Purchase → IC → ATC → VC) and recommend downgrading the optimization event on adsets below the 50/week learning threshold
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -267,7 +267,7 @@ apb playbook event-downgrade-ladder --days <DAYS> --since <SINCE>
 
 Detect funnel-stage misalignment between TOF/MOF/BOF naming conventions and the adset's optimization_goal
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -289,7 +289,7 @@ apb playbook event-hierarchy-audit
 
 Score each ad's creative fatigue (0-100)
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:core` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -313,7 +313,7 @@ apb playbook fatigue-index --days <DAYS> --since <SINCE>
 
 Account health score (0-100) with weighted diagnostics
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:core` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -337,7 +337,7 @@ apb playbook health-score --days <DAYS> --since <SINCE>
 
 New account readiness checklist
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:core` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -361,7 +361,7 @@ apb playbook launch-check --days <DAYS> --since <SINCE>
 
 Calculate budget needed to exit learning phase
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -385,7 +385,7 @@ apb playbook learning-accelerator --days <DAYS> --since <SINCE>
 
 Flag learning-phase ad sets that were edited in the last 7 days (edits during learning reset the learning clock)
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -409,7 +409,7 @@ apb playbook no-touch-compliance --days <DAYS> --since <SINCE>
 
 Performance by placement with exclusion recommendations
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -433,7 +433,7 @@ apb playbook placement-audit --days <DAYS> --since <SINCE>
 
 Budget rebalancing recommendations with projections
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -458,7 +458,7 @@ apb playbook rebalance --days <DAYS> --since <SINCE>
 
 Composite turnaround playbook: activates only when account is in deep distress (health-score < 30 + ≥2 red flags), runs health/waste/fatigue/learning sub-playbooks in parallel, and emits a 4-phase rebuild plan
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -482,7 +482,7 @@ apb playbook reset-rebuild-advisor --days <DAYS> --since <SINCE>
 
 Audit retargeting custom audiences and recommend compressing retention windows >30 days to 7-14 day windows
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -504,7 +504,7 @@ apb playbook retargeting-compression
 
 Diagnose ROAS decline and prescribe recovery
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -529,7 +529,7 @@ apb playbook roas-recovery --days <DAYS> --since <SINCE>
 
 Audience saturation detection with expansion projections
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -553,7 +553,7 @@ apb playbook saturation --days <DAYS> --since <SINCE>
 
 Budget scaling projections with diminishing returns
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -577,7 +577,7 @@ apb playbook scale-roadmap --days <DAYS> --since <SINCE>
 
 Find and quantify wasted ad spend
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:core` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -601,7 +601,7 @@ apb playbook waste-audit --days <DAYS> --since <SINCE>
 
 Week-over-week performance digest with monthly projections
 
-**Scope:** `read:playbooks:core` · **Min tier:** starter
+**Scope:** `read:playbooks:core` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|

@@ -6,6 +6,8 @@
 
 Bind an ad account to your API key
 
+**Write op** (requires `--execute`)
+
 | Flag | Value | Description |
 |---|---|---|
 | `--account` | `<ACCOUNT>` | Ad account ID (e.g., act_123456) |
@@ -19,7 +21,7 @@ Bind an ad account to your API key
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb auth accounts add
+apb auth accounts add --execute
 ```
 
 ### `apb auth accounts list`
@@ -46,6 +48,8 @@ apb auth accounts list
 
 Unbind an ad account from your API key
 
+**Write op** (requires `--execute`)
+
 | Flag | Value | Description |
 |---|---|---|
 | `--account` | `<ACCOUNT>` | Ad account ID to remove |
@@ -59,7 +63,7 @@ Unbind an ad account from your API key
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb auth accounts remove
+apb auth accounts remove --execute
 ```
 
 ### `apb auth connect-meta`

@@ -6,7 +6,7 @@
 
 Create a new ad set
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -43,7 +43,7 @@ apb adset create --execute --campaign <CAMPAIGN> --name <NAME>
 
 Hard-delete an ad set via the Graph API `DELETE` verb (irreversible). Requires `--confirm-destructive`
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -118,7 +118,7 @@ apb adset list --campaign <CAMPAIGN> --limit <LIMIT>
 
 Generic ad-set update — change any subset of mutable fields in one call. Use the targeted shortcuts (`update-budget`, `update-targeting`, `update-status`) when only one field changes
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -152,7 +152,7 @@ apb adset update --execute --id <ID> --adset <ADSET>
 
 Update ad-set budget
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -171,14 +171,14 @@ Update ad-set budget
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb adset update-budget --id <ID> --adset <ADSET>
+apb adset update-budget --execute --id <ID> --adset <ADSET>
 ```
 
 ### `apb adset update-status`
 
 Update ad-set status
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -196,14 +196,14 @@ Update ad-set status
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb adset update-status --id <ID> --adset <ADSET>
+apb adset update-status --execute --id <ID> --adset <ADSET>
 ```
 
 ### `apb adset update-targeting`
 
 Update ad-set targeting
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -222,5 +222,5 @@ Update ad-set targeting
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb adset update-targeting --id <ID> --adset <ADSET>
+apb adset update-targeting --execute --id <ID> --adset <ADSET>
 ```

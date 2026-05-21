@@ -6,7 +6,7 @@
 
 Launch ads from a saved Andromeda plan
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `write:automation` · **Min tier:** enterprise
 
 | Flag | Value | Description |
 |---|---|---|
@@ -32,7 +32,7 @@ apb andromeda launch --plan-id <PLAN_ID> --adset <ADSET>
 
 Build a practical creative volume plan and persist a manifest
 
-**Scope:** `write:campaigns` · **Min tier:** agency
+**Scope:** `write:automation` · **Min tier:** enterprise
 
 | Flag | Value | Description |
 |---|---|---|

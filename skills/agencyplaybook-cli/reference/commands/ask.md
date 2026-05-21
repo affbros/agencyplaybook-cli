@@ -6,7 +6,7 @@
 
 Ask a natural-language question
 
-**Scope:** `read:reports` · **Min tier:** starter
+**Scope:** `read:search` · **Min tier:** starter
 
 | Flag | Value | Description |
 |---|---|---|

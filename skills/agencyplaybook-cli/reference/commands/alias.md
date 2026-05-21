@@ -26,6 +26,8 @@ apb alias list
 
 Remove an alias
 
+**Write op** (requires `--execute`)
+
 | Flag | Value | Description |
 |---|---|---|
 | `--json` |  | Output as JSON |
@@ -39,13 +41,15 @@ Remove an alias
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb alias remove
+apb alias remove --execute
 ```
 
 ### `apb alias set`
 
 Set an alias: apb alias set my-page 111222333
 
+**Write op** (requires `--execute`)
+
 | Flag | Value | Description |
 |---|---|---|
 | `--json` |  | Output as JSON |
@@ -59,5 +63,5 @@ Set an alias: apb alias set my-page 111222333
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb alias set
+apb alias set --execute
 ```

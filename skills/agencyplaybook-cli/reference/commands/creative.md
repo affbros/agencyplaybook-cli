@@ -29,7 +29,7 @@ apb creative asset-audit --campaign <CAMPAIGN>
 
 Create a carousel creative from object_story_spec.link_data.child_attachments
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -54,7 +54,7 @@ apb creative create-carousel --execute --name <NAME> --spec <SPEC>
 
 Create a collection ad creative (catalog-driven mobile shopping format). The full spec is too deeply nested for flag-by-flag construction; pass `--spec-file` containing the complete creative payload. See `docs/examples/creative-collection-spec.json` for a working example
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -78,7 +78,7 @@ apb creative create-collection --execute --name <NAME> --spec-file <SPEC_FILE>
 
 Create a dynamic creative with asset_feed_spec (Meta optimizes across multiple assets)
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -109,7 +109,7 @@ apb creative create-dynamic --execute --name <NAME> --page-id <PAGE_ID>
 
 Create an image creative
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -135,7 +135,7 @@ apb creative create-image --execute --name <NAME> --spec <SPEC>
 
 Create a video creative
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -210,7 +210,7 @@ apb creative list --limit <LIMIT> --after <AFTER>
 
 Update a creative
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -237,7 +237,7 @@ apb creative update --execute --id <ID> --creative-id <CREATIVE_ID>
 
 Upload an image asset
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -254,14 +254,14 @@ Upload an image asset
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb creative upload-image --path <PATH> --name <NAME>
+apb creative upload-image --execute --path <PATH> --name <NAME>
 ```
 
 ### `apb creative upload-video`
 
 Upload a video asset
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -278,14 +278,14 @@ Upload a video asset
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb creative upload-video --path <PATH> --name <NAME>
+apb creative upload-video --execute --path <PATH> --name <NAME>
 ```
 
 ### `apb creative upload-video-status`
 
 Check video upload status
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -301,5 +301,5 @@ Check video upload status
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb creative upload-video-status --id <ID>
+apb creative upload-video-status --execute --id <ID>
 ```

@@ -142,7 +142,7 @@ apb account pages
 
 Set the default ad account for CLI commands
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -157,5 +157,5 @@ Set the default ad account for CLI commands
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb account set-default
+apb account set-default --execute
 ```

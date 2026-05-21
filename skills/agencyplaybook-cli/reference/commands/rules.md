@@ -99,7 +99,7 @@ apb rules enable --execute --id <ID>
 
 Manually execute a scheduled rule
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:rules` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -115,7 +115,7 @@ Manually execute a scheduled rule
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb rules execute --execute --id <ID>
+apb rules execute --id <ID>
 ```
 
 ### `apb rules get`
@@ -167,7 +167,7 @@ apb rules list
 
 Preview which entities a rule would affect
 
-**Scope:** `read:rules` · **Min tier:** agency
+**Scope:** `write:rules` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
@@ -190,7 +190,7 @@ apb rules preview --id <ID>
 
 Apply a template to create a rule
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `read:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|

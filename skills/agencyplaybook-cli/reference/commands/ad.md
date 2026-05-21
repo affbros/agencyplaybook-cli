@@ -6,7 +6,7 @@
 
 Create a new ad
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -34,7 +34,7 @@ apb ad create --execute --adset <ADSET> --name <NAME>
 
 Create multiple ads in one ad set (one per creative)
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -53,14 +53,14 @@ Create multiple ads in one ad set (one per creative)
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb ad create-multi --adset <ADSET> --name <NAME>
+apb ad create-multi --execute --adset <ADSET> --name <NAME>
 ```
 
 ### `apb ad delete`
 
 Hard-delete an ad via the Graph API `DELETE` verb (irreversible). Requires `--confirm-destructive`
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -158,7 +158,7 @@ apb ad preview --id <ID> --format <FORMAT>
 
 Update ad settings
 
-**Scope:** `write:campaigns` · **Min tier:** professional · **Write op** (requires `--execute`)
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -186,7 +186,7 @@ apb ad update --execute --id <ID> --creative-id <CREATIVE_ID>
 
 Update ad status
 
-**Scope:** `read:campaigns` · **Min tier:** starter
+**Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -203,5 +203,5 @@ Update ad status
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb ad update-status --id <ID> --status <STATUS>
+apb ad update-status --execute --id <ID> --status <STATUS>
 ```

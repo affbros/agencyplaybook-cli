@@ -34,7 +34,7 @@ apb report breakdown --campaign <CAMPAIGN> --level <LEVEL>
 
 Compare metrics between two time periods
 
-**Scope:** `read:reports` · **Min tier:** starter
+**Scope:** `read:reports:advanced` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
