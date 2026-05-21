@@ -6,6 +6,28 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.8] — 2026-05-21
+
+Behavioral/bugfix release from a live-account review (findings RT-1…RT-10). No command surface change.
+
+### Security
+- **Meta access tokens are now redacted from CLI stdout.** Meta Graph responses embed `access_token=EAA…` inside `paging.next`/`paging.previous` URLs; commands that print raw responses (e.g. `pixel stats`, `pixel events`, `catalog products`, and the CAPI `pixel send-event`/`send-batch` success output) leaked that token to terminal scrollback, CI logs, and piped captures. Tokens are now stripped from paging URLs at the source (so the HTTP API is covered too) and the CLI output formatter redacts any residual token. Opaque `paging.cursors` are preserved, so `--after` pagination is unaffected (RT-2).
+
+### Fixed
+- **`playbook capi-dual-signal` no longer reports a false "CAPI off / grade F"** on accounts where the Conversions API is actively firing. It sent the pixel `/stats` window as Unix epoch seconds (Meta expects `YYYY-MM-DD`) and read event counts from the wrong field, so it always saw zero server events. It now queries `SERVER_ONLY`/`WEB_ONLY` over a correct date range (RT-3).
+- **Diagnostic playbooks now return a distinct "insufficient data" state** (`grade: "N/A"`, `score: null`, `insufficient_data: true`) when there is nothing to analyze, instead of disagreeing — some previously returned grade A/100 ("nothing flagged") and others grade F/0 ("zero average") for the same empty account (RT-1, RT-5).
+- **`report insights --days` rejects `0` and negative values** with a clean "value must be ≥ 1" message instead of returning an ambiguous single-day window (`--days 0`) or a confusing `unexpected argument '-5'` (RT-8, RT-9).
+- **`waste-audit` no longer prints `Best CPA adset:  at $0.00`** when no ad set had a conversion — it now says `N/A (no conversions in window)` (RT-10a).
+- **`leadgen list` / `leadgen leads` give an actionable hint** when Meta returns `(#190) … Page Access Token` instead of surfacing the raw Graph error (RT-10c).
+
+### Changed
+- **Pixel-domain flags accept both `--id` and `--pixel-id` everywhere.** Previously `pixel get`/`stats`/`diagnostics` used `--id` while `pixel signal`/`quality`/`events` and `dataset pixel-*` used `--pixel-id`; both spellings now work across the whole pixel domain via aliases (RT-7).
+- **Playbook ad-set counts now name their basis** so they reconcile across playbooks: "delivering in window" (health-score) vs "status-ACTIVE" (creative-mix/broad-targeting/event-hierarchy) vs "total" (duplicate-detect) (RT-6).
+- **`apb campaign get --help`** now documents that `--id` accepts a numeric ID, an `@alias`, or an exact campaign name (auto-resolved) (NEW-2).
+
+### Notes
+- RT-4 (insights cache "ignores date range") was investigated and is **not a bug**: the response cache key already includes the full query (time range, level, increment). A regression test was added to lock this in. The reported identical spend across `--days 1/7/30` matched an account whose entire spend history fell within the shortest window.
+
 ## [0.1.7] — 2026-05-21
 
 ### Fixed
