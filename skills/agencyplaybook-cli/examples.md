@@ -14,7 +14,7 @@ export APB_API_KEY=apb_live_ent_a8f2c93b4d5e6f7g8h9i0j1k2l3m4n5o
 
 # Smoke test
 apb auth test
-# Exit 0 = connected. Exit 1 = bad key. Exit 2 = bad URL.
+# Exit 0 = connected. Exit 3 = bad/expired key (auth). Exit 2 = bad URL. Exit 5 = network.
 
 # Connect Meta if you haven't already
 apb auth connect-meta             # opens browser, polls for callback
@@ -32,14 +32,14 @@ apb campaign create --name "Q3 Launch" --objective OUTCOME_SALES --status PAUSED
 
 ## 3. Plan create → validate → execute with rollback blueprint
 
-For multi-entity workflows (campaign + adsets + ads), always use a plan — it produces a rollback blueprint on disk that `apb plan rollback <plan-id>` can replay.
+For multi-entity workflows (campaign + adsets + ads), always use a plan — `plan validate` writes a rollback blueprint to disk (used by `plan doctor` for drift detection and audit).
 
 ```bash
 PLAN_ID=$(apb plan create --spec-file my-plan.json --json | jq -r '.data.id')
 apb plan validate --plan-id $PLAN_ID
 apb plan execute-safe --plan-id $PLAN_ID --require-dry-run-pass --execute
-# If anything goes wrong:
-# apb plan rollback --plan-id $PLAN_ID --execute --confirm-destructive
+# There is no one-shot replay command. To revert, pause/delete the created
+# entities or author a reverse plan; inspect drift with: apb plan doctor --plan-id $PLAN_ID
 ```
 
 ## 4. Multi-account fan-out
@@ -77,7 +77,7 @@ apb campaign get --id 23847562834756123
 # But names work too (must match exactly one campaign)
 apb campaign get --id "Q3 Launch" --resolve-names
 
-# Or use aliases (apb alias create --name "@q3" --id 23847562834756123)
+# Or use aliases. Create one: apb alias set <name> <id>
 apb campaign get --id @q3
 ```
 
@@ -111,7 +111,7 @@ apb campaign compose-from-spec --spec-file q3-launch.json --execute
 apb --json report insights --days 30 | jq '.data.campaigns[] | select(.roas > 2)'
 ```
 
-`--json` is a global flag; place it before the domain.
+`--json` is a global flag — it works in any position (most examples here trail it).
 
 ## 10. Exit-code branching in bash
 
@@ -119,22 +119,22 @@ apb --json report insights --days 30 | jq '.data.campaigns[] | select(.roas > 2)
 apb auth test --no-input --json
 case $? in
   0) echo "OK" ;;
-  1) echo "Auth failed — rotate key" ;;
-  2) echo "Network — retry" ;;
-  3) echo "Permission — check scope/tier" ;;
-  4) echo "Rate limited — back off" ;;
-  *) echo "Unexpected" ;;
+  2) echo "Bad input — e.g. malformed --url; fix and rerun" ;;
+  3) echo "Auth failed — bad/expired key or insufficient scope; refresh/upgrade" ;;
+  4) echo "Safety gate — supply --execute / --confirm-destructive" ;;
+  5) echo "Network / rate-limit — back off and retry" ;;
+  *) echo "Unexpected (1 = general/unmapped)" ;;
 esac
 ```
 
 ## 11. Handling 429s gracefully
 
-The CLI honors Meta's `Retry-After` header automatically. For shell scripts, just retry on exit 4:
+The CLI honors Meta's `Retry-After` header automatically. For shell scripts, just retry on exit 5 (network/rate-limit):
 
 ```bash
 for i in 1 2 3; do
   apb report insights --days 30 --no-input --json && break
-  [ $? -eq 4 ] && sleep $((10 * i)) && continue
+  [ $? -eq 5 ] && sleep $((10 * i)) && continue
   break
 done
 ```
@@ -143,9 +143,9 @@ done
 
 ```bash
 apb catalog list                                   # list catalogs
-apb catalog get --catalog-id 1234                  # detail
-apb catalog products list --catalog-id 1234 --after <cursor>   # cursor pagination
-apb catalog product-sets create --catalog-id 1234 --name "Bestsellers" --filter '{...}' --execute
+apb catalog get --id 1234                          # detail
+apb catalog products --id 1234 --after <cursor>    # cursor pagination
+apb catalog product-set-create --catalog-id 1234 --name "Bestsellers" --filter '{...}' --execute
 ```
 
 ## 13. Custom conversion (URL-rule event)
@@ -172,13 +172,13 @@ apb split-test status --test-id abc
 apb split-test promote --test-id abc --winner B --execute --confirm-destructive
 ```
 
-## 15. Sync diff + apply
+## 15. Sync local state with Meta
 
-When your local state has drifted from Meta:
+When your on-disk state has drifted from Meta:
 
 ```bash
-apb sync diff --since 7d                # show diff only
-apb sync apply --since 7d --execute     # apply local changes upstream
+apb sync diff --account act_1234567890   # show drift between local and remote
+apb sync pull --account act_1234567890   # refresh local state from Meta
 ```
 
 ---

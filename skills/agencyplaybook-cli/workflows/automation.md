@@ -5,12 +5,11 @@ When a change touches more than one entity (e.g. "create a campaign with three a
 ## The plan lifecycle
 
 ```
-spec.json → plan create → plan validate → plan execute → (rollback if needed)
+spec.json → plan create → plan validate → plan execute-safe
               ↓ produces a Plan ID
               ↓ status: CREATED
-              → after validate: status VALIDATED
+              → after validate: status VALIDATED (rollback blueprint written to disk)
               → after execute:  status EXECUTED
-              → if rolled back: status ROLLED_BACK
 ```
 
 ## Step 1 — Author a spec
@@ -65,13 +64,18 @@ apb plan execute-safe \
 
 `execute-safe` refuses to run unless validation has passed. The plain `apb plan execute` skips that check — only use it when scripting and you've validated separately.
 
-## Step 5 — Rollback if needed
+## Step 5 — Reverting
+
+There is no one-shot `plan rollback` command. `plan validate` writes a rollback **blueprint** to disk for audit and drift detection. To revert an executed plan, inspect it then pause/delete the entities it created, or author a reverse plan:
 
 ```bash
-apb plan rollback --plan-id $PLAN_ID --execute --confirm-destructive
+# Inspect what was created and check for drift from Meta state
+apb plan doctor --plan-id $PLAN_ID
+# Revert by pausing/deleting the created entities, e.g.:
+apb campaign update-status --id <created-id> --status PAUSED --execute
 ```
 
-The blueprint is on disk; rollback uses it. Note: `--confirm-destructive` is required because rollback can pause/delete entities.
+For single-command full-stack builds, `apb campaign compose-from-spec` instead **auto-pauses** every entity it created (in reverse order) if any step fails — unless you pass `--no-rollback`.
 
 ## Blast radius reference
 
@@ -119,12 +123,12 @@ apb plan doctor --plan-id $PLAN_ID
 apb plan execute-safe --plan-id $PLAN_ID --require-dry-run-pass --execute --no-input --json
 case $? in
   0) echo "Plan executed cleanly" ;;
-  1) echo "Generic failure" ;;
-  2) echo "Network/timeout — retry idempotent" ;;
-  3) echo "Permission/scope — escalate" ;;
-  4) echo "Rate limited — back off and retry" ;;
-  5) echo "Validation failed — fix spec" ;;
-  6) echo "Destructive op needed --confirm-destructive" ;;
+  1) echo "Generic / unmapped failure" ;;
+  2) echo "Validation failed — fix the spec, do not retry" ;;
+  3) echo "Auth / scope — escalate" ;;
+  4) echo "Safety gate — missing --execute or --confirm-destructive" ;;
+  5) echo "Network / rate-limit / 5xx — back off and retry" ;;
+  6) echo "Partial success (reserved)" ;;
 esac
 ```
 

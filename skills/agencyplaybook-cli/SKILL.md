@@ -8,17 +8,18 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-05-20 from the live binary — 228 commands across 34 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-05-21 from the live binary — 228 commands across 34 domains.
 
 ## Routing
 
-- **User asks for a specific command** ("what flags does `apb campaign create` accept?") → read `commands.md` and quote the relevant section.
+- **User asks for a specific command** ("what flags does `apb campaign create` accept?") → open `commands.md` (the domain index), then read `reference/commands/<domain>.md` and quote the relevant section.
 - **User asks "how do I X" workflow** ("how do I dry-run-then-execute a campaign?") → read `examples.md` and adapt the matching canonical example.
 - **User wants step-by-step onboarding** ("set me up with apb") → read `workflows/setup.md`.
 - **User wants automation pattern** ("safe rollout with rollback") → read `workflows/automation.md`.
 - **User wants diagnostic playbook** ("which playbook for low ROAS?") → read `workflows/diagnostics.md`.
 - **User hits a 403** ("insufficient_scope on X") → read `reference/scopes.md` and explain tier gap.
-- **User script needs exit-code branching** → read `reference/exit-codes.md`.
+- **User script needs exit-code branching** → read `reference/exit-codes.md` (the canonical table + decision tree).
+- **User wants the full CI/CD + AI-agent automation guide** (debugging, log sanitization, plain output) → read `reference/automation-guide.md`.
 
 ## Quick start (always check this first)
 
@@ -51,14 +52,14 @@ If the user mentions `apb`, scripting, automation, CI/CD, cron, or "rerunning th
 
 ## Domain index
 
-See `commands.md` for the per-command reference. Domains:
+See `commands.md` for the domain index; per-command detail lives in `reference/commands/<domain>.md`. Domains:
 
 - **auth, doctor, account, meta** — connection & identity
 - **campaign, adset, ad, creative** — entity CRUD
 - **audience, targeting, catalog, custom-conversion, leadgen** — supporting primitives
 - **report, coverage, metrics, learning** — reporting
 - **playbook, growth, action, budget, ask** — diagnostics & recommendations
-- **plan** — multi-step mutation orchestration with rollback
+- **plan** — multi-step mutation orchestration with on-disk rollback blueprints
 - **rules, split-test, sync, duplicate, andromeda, alias** — automation & workflow
 - **pixel, dataset, library, search, policy** — utility
 

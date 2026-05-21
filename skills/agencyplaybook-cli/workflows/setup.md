@@ -73,7 +73,7 @@ apb account set-default --account act_1234567890
 ## Common setup failures
 
 - **`apb` not found** → not on $PATH. Either move it to `/usr/local/bin/apb` or run with the full path.
-- **Exit 1 on `apb auth test`** → bad API key. Generate a fresh one.
+- **Exit 3 on `apb auth test`** → bad/expired API key (auth). Generate a fresh one.
 - **Exit 2 on every call** → wrong endpoint. The hosted default is `https://api.agencyplaybook.io`; unset any stale `APB_API_URL`. For local dev, point at Express on `:3750` (not the Rust API on `:3010`).
 - **403 insufficient_scope** → your tier doesn't include this command. See `reference/scopes.md` for which tier you need.
 - **"App not active" from Meta** → you're not a registered Tester on the dev-mode Meta app. Ask your AgencyPlaybook admin to add you as a Tester.
