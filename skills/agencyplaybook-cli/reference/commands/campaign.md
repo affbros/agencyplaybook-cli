@@ -171,7 +171,7 @@ Get a single campaign
 
 | Flag | Value | Description |
 |---|---|---|
-| `--id` | `<ID>` |  |
+| `--id` | `<ID>` | Campaign numeric ID, a registered @alias, or an exact campaign name (names are auto-resolved to the ID; an unknown name errors cleanly) |
 | `--campaign` | `<CAMPAIGN>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |

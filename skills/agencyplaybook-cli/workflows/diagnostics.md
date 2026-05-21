@@ -2,6 +2,8 @@
 
 `apb` ships 26 playbook subcommands — 24 diagnostics across 4 pillars (below), plus `evaluate` (generic rule eval) and `catalog` (lists the playbook catalog). Picking the right one matters more than running them all.
 
+> **Result envelope.** The 24 diagnostics return `{ grade, score, summary, findings, recommendations }`. `score` is `0–100`, or `null` with `grade: "N/A"` and `insufficient_data: true` when there was nothing to analyze — branch on `insufficient_data`, not on a `0` score or an `F` grade. `playbook catalog` is a *listing*, not a diagnostic, so it intentionally has **no** `grade`/`score`.
+
 ## Pillar routing
 
 | Symptom | Pillar | Best first playbook |

@@ -68,7 +68,7 @@ Pull insights synchronously
 | `--campaign` | `<CAMPAIGN>` |  |
 | `--adset` | `<ADSET>` |  |
 | `--level` | `<LEVEL>` |  |
-| `--days` | `<DAYS>` | Lookback window in days (default 30). Ignored when --since/--until are provided |
+| `--days` | `<DAYS>` | Lookback window in days (default 30, min 1). Ignored when --since/--until are provided |
 | `--limit` | `<LIMIT>` |  |
 | `--time-start` | `<TIME_START>` | Explicit start date (YYYY-MM-DD or relative e.g. 30d). Use with --time-end / --until |
 | `--time-end` | `<TIME_END>` | Explicit end date (YYYY-MM-DD or relative e.g. 0d for today) |
