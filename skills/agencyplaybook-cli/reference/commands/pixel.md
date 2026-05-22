@@ -1,6 +1,6 @@
 # `apb pixel` — Command Reference
 
-19 commands. Auto-generated from the apb binary on 2026-05-21.
+19 commands. Auto-generated from the apb binary on 2026-05-22.
 
 ### `apb pixel audience-create`
 

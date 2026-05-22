@@ -1,6 +1,6 @@
 # `apb playbook` — Command Reference
 
-26 commands. Auto-generated from the apb binary on 2026-05-21.
+26 commands. Auto-generated from the apb binary on 2026-05-22.
 
 ### `apb playbook anomaly-detect`
 
