@@ -6,6 +6,14 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.9] — 2026-05-21
+
+Follow-up to the v0.1.8 review: two fixes that didn't fully take in 0.1.8, re-found on the shipped binary.
+
+### Fixed
+- **`playbook capi-dual-signal` now reports real server/browser event volume** (RT-3, take 2). The v0.1.8 rewrite correctly queried `SERVER_ONLY`/`WEB_ONLY` but summed `count` at the wrong level: Meta's `/stats?aggregation=event` returns **time buckets** (`{start_time, end_time, data:[{value,count}]}`), so the per-event counts are nested one level below `data`. Summing the outer rows always yielded `0`, so CAPI-active accounts still saw `server_events_7d:0` / `capi_active:false` / grade `F`. Now walks the nested `{value,count}` items (handling `count` as int or string). Locked in with a unit test (`sum_stats_event_counts`).
+- **`playbook learning-accelerator` returns the insufficient-data state when ad sets have no conversions** (RT-5, completion). It still graded `F`/`0` when ad sets were running but recorded zero conversions in the window — there is no learning-phase trajectory to grade without conversions. Now returns `grade:"N/A"`, `score:null`, `insufficient_data:true` (matching `scale-roadmap` and the other diagnostics). The `total_adsets == 0` case was already handled; this adds the `total_conversions == 0` case.
+
 ## [0.1.8] — 2026-05-21
 
 Behavioral/bugfix release from a live-account review (findings RT-1…RT-10). No command surface change.
