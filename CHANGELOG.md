@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.10] — 2026-05-22
+
+Campaign-creation fixes found while building a live campaign + video ad against a real account (workstream `campaign-creation-fixes-001`). Two CLI gaps that each produced a Meta 400 mid-funnel.
+
+### Fixed
+- **`campaign create` now sends `is_adset_budget_sharing_enabled` for ABO campaigns.** Meta rejects a campaign with no campaign-level budget (the ad-set-budget model) unless this field is set explicitly (error subcode 4834011 — "You must specify True or False in the field is_adset_budget_sharing_enabled if you are not using campaign budget"). The CLI never sent it. It now defaults the field to `false` whenever no `--daily-budget`/`--lifetime-budget` is given; when a campaign budget *is* set the field is omitted. Locked in with a `resolve_budget_sharing` truth-table unit test. (Also exposed on the HTTP API `POST /api/v1/campaigns` body as `budget_sharing`.)
+
+### Added
+- **`campaign create --budget-sharing <bool>`** — opt into letting ad sets share 20% of their budget (`is_adset_budget_sharing_enabled: true`), or force `false`. Spec files may carry `is_adset_budget_sharing_enabled` / `budget_sharing`.
+- **`creative create-video --thumbnail <path-or-hash>`** — video creatives require a thumbnail (`video_data.image_hash`), else Meta returns subcode 1443226 ("Your ad needs a video thumbnail"). The flag accepts a local image path (uploaded for you via `creative upload-image`) or an existing Meta image hash, and injects it as `object_story_spec.video_data.image_hash`. If no thumbnail is supplied (flag or in-spec `image_hash`/`image_url`), the CLI now fails fast with a clear validation error (exit 2) instead of letting the request 400 at Meta.
+
 ## [0.1.9] — 2026-05-21
 
 Follow-up to the v0.1.8 review: two fixes that didn't fully take in 0.1.8, re-found on the shipped binary.
