@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.12] — 2026-05-24
+
+Access-control hardening for operator BYO mode (follow-up to `meta-static-token-001` / `admin-disable-enforcement-001`). Closes a path where an admin-disabled user/key could keep using the CLI.
+
+### Changed
+- **`META_OAUTH=DISABLED` now requires a valid `APB_API_KEY`.** Previously, setting `META_OAUTH=DISABLED` with a local `META_ACCESS_TOKEN` but **no** `APB_API_KEY` silently dropped the CLI into ungated legacy mode — it never contacted AgencyPlaybook, so disabling the user/key in the admin panel had no effect. BYO mode now fails fast with a clear error unless the platform key is present and resolves (login + tier/scope still enforced every run). Pure legacy mode (no `META_OAUTH`, no key — the standalone Meta tool) is unaffected.
+
+### Fixed
+- **BYO resolution no longer requires a platform Meta token.** A tenant that never connected Meta (the norm under operator-token mode) now resolves cleanly in BYO mode instead of failing with "Failed to parse TenantContext" — the local token is used, the platform key is still validated for access control.
+- **(apb-api / `pg-store` only) Unbound user keys are rejected.** The resolver now refuses a `key_type='user'` API key whose `user_id` is NULL (a legacy key that escapes user-disable revocation); internal/tenant-scoped keys are unaffected. Companion server-side migration backfills and deactivates such keys.
+
 ## [0.1.11] — 2026-05-23
 
 Operator bring-your-own Meta token mode (workstream `meta-static-token-001`) — a hidden escape hatch from the per-tenant OAuth broker for self-hosted / single-operator setups, validated end-to-end against a real account.
