@@ -6,6 +6,16 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.13] — 2026-05-24
+
+Ad-set creation fix found while validating the operator BYO ad-creation flow against a live account — the third Meta-required-field gap in this series (after `is_adset_budget_sharing_enabled` in v0.1.10).
+
+### Fixed
+- **`adset create` and `campaign compose-from-spec` now send `targeting_automation.advantage_audience`.** Meta rejects an ad-set create unless this flag is explicitly `0` or `1` ("you need to enable or disable the Advantage audience feature"). The CLI never set it, so any ad-set/compose create with a minimal targeting spec failed mid-funnel. The service now **defaults it to `0` (off)** when absent — honoring whatever targeting you specified — and respects an explicit value already present in the targeting spec. (Shared apb-core fix → also applies to the HTTP API `POST /api/v1/adsets`.)
+
+### Added
+- **`adset create --advantage-audience <0|1>`** — opt into Advantage audience (`1`) or force it off (`0`). Overrides any value in `--targeting`. Spec/`targeting_automation` passthrough still works for `compose-from-spec`. Exposed on the HTTP API `POST /api/v1/adsets` body as `advantage_audience`.
+
 ## [0.1.12] — 2026-05-24
 
 Access-control hardening for operator BYO mode (follow-up to `meta-static-token-001` / `admin-disable-enforcement-001`). Closes a path where an admin-disabled user/key could keep using the CLI.
