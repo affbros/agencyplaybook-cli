@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.15] — 2026-05-24
+
+Ad-set **dayparting / ad scheduling** support — the one Meta deployment surface APB couldn't reach. Validated end-to-end on a live account (lifetime-budget ad set + 4-window schedule accepted by Meta).
+
+### Added
+- **`adset_schedule` (dayparting) on `adset create`, `adset update`, and `campaign compose-from-spec`** (and the HTTP API `POST/PATCH /api/v1/adsets`). Pass an explicit Meta-format array via **`--adset-schedule`** (inline JSON or file), or build one from hours with **`--daypart-hours "9,12,16,19,21"`** (`--daypart-days 0-6`, `--daypart-timezone USER|ADVERTISER`). Consecutive hours merge into windows.
+- The CLI **auto-sets `pacing_type=["day_parting"]`** when a schedule is present (Meta rejects a schedule otherwise), unless you pass an explicit `--pacing-type`.
+
+### Fixed / Validation
+- **Dayparting requires a lifetime budget.** A schedule combined with `--daily-budget` now fails fast: *"adset_schedule (dayparting) requires a lifetime budget; daily-budget ad sets can't use fixed daypart scheduling…"* — instead of an opaque Meta 400. Lifetime ad-set budgets pass; campaign-CBO (no ad-set budget) passes through for Meta to validate.
+- Dry-run preview for `adset create` now includes the resolved `adset_schedule`.
+
 ## [0.1.14] — 2026-05-24
 
 Targeting helper fixes found while building a duplicate-and-optimize workflow (top-15 states, dayparting, ADD_TO_CART) for a live account. The dry-run mutation path was fine; the targeting *lookup/estimate* helpers were broken.
