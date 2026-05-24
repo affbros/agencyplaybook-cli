@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.14] — 2026-05-24
+
+Targeting helper fixes found while building a duplicate-and-optimize workflow (top-15 states, dayparting, ADD_TO_CART) for a live account. The dry-run mutation path was fine; the targeting *lookup/estimate* helpers were broken.
+
+### Fixed
+- **`targeting geo-search --geo-type region` (and `city`, `geo_market`, …) no longer 400s.** The CLI was sending the location-type value straight through as Meta's `type=` param (`type=region`), which Meta rejects with "Unsupported get request". Location-type values now correctly run against `type=adgeolocation` with a `location_types` filter; only real Meta search types (`adgeolocation`, `adcountry`, `adzipcode`, …) are sent as `type=`. (apb-core → CLI + HTTP API.)
+- **`targeting estimate --spec-file` / `delivery-estimate --spec-file` now read the file.** They were forwarding the literal *path* as the targeting spec, so Meta replied "Targeting spec must be an associative array". The file is now read to its contents (inline `--spec` unchanged). Same latent bug fixed in `adset create --spec-file`.
+
+### Added
+- **Pre-flight targeting validation.** A targeting spec whose `geo_locations.regions`/`cities` entries carry a name but no Meta `key` now fails fast with an actionable message (pointing to `geo-search --location-types`), instead of Meta's opaque "type integer is expected but a type NULL was received". Applied to `targeting estimate`, `delivery-estimate`, and `adset create`.
+
 ## [0.1.13] — 2026-05-24
 
 Ad-set creation fix found while validating the operator BYO ad-creation flow against a live account — the third Meta-required-field gap in this series (after `is_adset_budget_sharing_enabled` in v0.1.10).
