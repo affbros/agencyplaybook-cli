@@ -6,6 +6,16 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.11] — 2026-05-23
+
+Operator bring-your-own Meta token mode (workstream `meta-static-token-001`) — a hidden escape hatch from the per-tenant OAuth broker for self-hosted / single-operator setups, validated end-to-end against a real account.
+
+### Added
+- **`META_OAUTH=DISABLED` + `META_ACCESS_TOKEN` (CLI):** when both are set, `apb` still validates your `APB_API_KEY` against the platform (login + tier/scope enforcement unchanged) but uses your **local** `META_ACCESS_TOKEN` for all Meta calls instead of the platform-resolved OAuth token. Lets an operator drive their own (or a client's) Meta account without completing the OAuth / app-review flow. Default-off — unset `META_OAUTH` for normal per-tenant OAuth behavior.
+
+### Fixed
+- **Null `meta_token` no longer breaks tenant resolution.** `PgTenantResolver` now decodes the legacy `meta_token` column as nullable, so a tenant that never connected Meta (the norm under operator-token mode) resolves cleanly instead of throwing a decode error. (apb-api / `pg-store` only.)
+
 ## [0.1.10] — 2026-05-22
 
 Campaign-creation fixes found while building a live campaign + video ad against a real account (workstream `campaign-creation-fixes-001`). Two CLI gaps that each produced a Meta 400 mid-funnel.
