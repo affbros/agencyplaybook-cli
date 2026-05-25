@@ -6,6 +6,13 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.17] — 2026-05-25
+
+Day-parting safety: catch the daily-budget rejection during dry-run instead of on `--execute`.
+
+### Fixed
+- **`adset update` now pre-flights the budget type before adding a schedule.** Adding day parting (`--daypart-hours` / `--adset-schedule`) to a **live** ad set that's on a **daily budget** — or whose **CBO campaign** is on a daily budget — used to pass the dry-run and then be rejected by Meta (`Campaigns with day parting enabled do not support daily budgets`). The CLI now looks up the existing budget type and fails fast (exit 2) with an actionable message: create a **new** ad set/campaign with a **lifetime budget**, since Meta freezes budget *type* at create (`Changing from lifetime to daily budget or vice versa is not allowed`). The check is best-effort — a failed lookup never blocks the update; only a clearly daily-budget entity errors. (The create-time guard for `--daypart-hours` + `--daily-budget` was already present since 0.1.15; this extends it to the update path the dry-run couldn't see.)
+
 ## [0.1.16] — 2026-05-24
 
 Workflow ergonomics found while building the dayparted campaign — three quality-of-life additions for the duplicate-and-optimize loop.
