@@ -1,6 +1,6 @@
 # `apb andromeda` — Command Reference
 
-2 commands. Auto-generated from the apb binary on 2026-05-22.
+2 commands. Auto-generated from the apb binary on 2026-05-25.
 
 ### `apb andromeda launch`
 

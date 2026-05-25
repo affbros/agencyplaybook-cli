@@ -1,6 +1,6 @@
 # `apb campaign` — Command Reference
 
-15 commands. Auto-generated from the apb binary on 2026-05-22.
+15 commands. Auto-generated from the apb binary on 2026-05-25.
 
 ### `apb campaign budget-schedule create`
 
@@ -100,6 +100,7 @@ Create a new campaign
 | `--bid-strategy` | `<BID_STRATEGY>` |  |
 | `--buying-type` | `<BUYING_TYPE>` |  |
 | `--special-ad-categories` | `<SPECIAL_AD_CATEGORIES>` | Required by Meta for housing/credit/employment/social-issue verticals. Pass as comma-separated values, e.g. `--special-ad-categories HOUSING,CREDIT` |
+| `--budget-sharing` | `<BUDGET_SHARING>` | Meta's `is_adset_budget_sharing_enabled`. Omit and the CLI sends `false` automatically for ABO campaigns (no `--daily-budget` / `--lifetime-budget`), which Meta now requires. Pass `--budget-sharing true` to let ad sets share 20% of their budget [possible values: true, false] |
 | `--spec-file` | `<SPEC_FILE>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |

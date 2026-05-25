@@ -1,6 +1,6 @@
 # `apb adset` — Command Reference
 
-8 commands. Auto-generated from the apb binary on 2026-05-22.
+8 commands. Auto-generated from the apb binary on 2026-05-25.
 
 ### `apb adset create`
 
@@ -22,9 +22,14 @@ Create a new ad set
 | `--pacing-type` | `<PACING_TYPE>` |  |
 | `--targeting` | `<TARGETING>` |  |
 | `--spec-file` | `<SPEC_FILE>` |  |
+| `--advantage-audience` | `<ADVANTAGE_AUDIENCE>` | Advantage audience (0 = off, 1 = on). Meta requires this on ad-set create; defaults to 0 when omitted. Overrides any value in the targeting spec |
 | `--start-time` | `<START_TIME>` |  |
 | `--end-time` | `<END_TIME>` |  |
 | `--promoted-object` | `<PROMOTED_OBJECT>` |  |
+| `--adset-schedule` | `<ADSET_SCHEDULE>` | Dayparting: explicit Meta `adset_schedule` as inline JSON or a file path |
+| `--daypart-hours` | `<DAYPART_HOURS>` | Dayparting builder: comma-separated hours 0-23 (e.g. "9,12,16,19,21"). Consecutive hours merge into windows; built into `adset_schedule` (requires a lifetime budget). Overridden by --adset-schedule |
+| `--daypart-days` | `<DAYPART_DAYS>` | Days for --daypart-hours: comma-separated 0-6 (0=Sunday). Default all 7 |
+| `--daypart-timezone` | `<DAYPART_TIMEZONE>` | Timezone for --daypart-hours: USER (viewer) or ADVERTISER. Default USER |
 | `--status` | `<STATUS>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
@@ -133,6 +138,10 @@ Generic ad-set update — change any subset of mutable fields in one call. Use t
 | `--start-time` | `<START_TIME>` | ISO 8601, e.g. `2026-05-01T00:00:00-0700` |
 | `--end-time` | `<END_TIME>` |  |
 | `--promoted-object` | `<PROMOTED_OBJECT>` | Raw JSON for `promoted_object`, e.g. `{"pixel_id":"123","custom_event_type":"PURCHASE"}` |
+| `--adset-schedule` | `<ADSET_SCHEDULE>` | Dayparting: explicit Meta `adset_schedule` as inline JSON or a file path |
+| `--daypart-hours` | `<DAYPART_HOURS>` | Dayparting builder: comma-separated hours 0-23 (e.g. "9,12,16,19,21"). Consecutive hours merge into windows; built into `adset_schedule` (requires a lifetime budget). Overridden by --adset-schedule |
+| `--daypart-days` | `<DAYPART_DAYS>` | Days for --daypart-hours: comma-separated 0-6 (0=Sunday). Default all 7 |
+| `--daypart-timezone` | `<DAYPART_TIMEZONE>` | Timezone for --daypart-hours: USER (viewer) or ADVERTISER. Default USER |
 | `--status` | `<STATUS>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |

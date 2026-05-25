@@ -1,6 +1,6 @@
 # `apb creative` — Command Reference
 
-12 commands. Auto-generated from the apb binary on 2026-05-22.
+12 commands. Auto-generated from the apb binary on 2026-05-25.
 
 ### `apb creative asset-audit`
 
@@ -144,6 +144,7 @@ Create a video creative
 | `--spec` | `<SPEC>` |  |
 | `--path` | `<PATH>` |  |
 | `--spec-file` | `<SPEC_FILE>` |  |
+| `--thumbnail` | `<THUMBNAIL>` | Video thumbnail: a local image path (uploaded for you) or an existing Meta image hash. Injected as `video_data.image_hash`, which Meta requires for video creatives. If omitted, the spec must already supply `video_data.image_hash` or `video_data.image_url` |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

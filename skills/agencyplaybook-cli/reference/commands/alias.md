@@ -1,6 +1,6 @@
 # `apb alias` — Command Reference
 
-3 commands. Auto-generated from the apb binary on 2026-05-22.
+3 commands. Auto-generated from the apb binary on 2026-05-25.
 
 ### `apb alias list`
 

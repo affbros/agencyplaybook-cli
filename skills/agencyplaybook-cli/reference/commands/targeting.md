@@ -1,6 +1,6 @@
 # `apb targeting` — Command Reference
 
-8 commands. Auto-generated from the apb binary on 2026-05-22.
+9 commands. Auto-generated from the apb binary on 2026-05-25.
 
 ### `apb targeting behavior-search`
 
@@ -99,6 +99,30 @@ Estimate audience size
 
 ```bash
 apb targeting estimate --spec <SPEC> --spec-file <SPEC_FILE>
+```
+
+### `apb targeting geo-resolve`
+
+Resolve region/city NAMES to Meta keys for a targeting spec
+
+**Scope:** `read:campaigns` · **Min tier:** starter
+
+| Flag | Value | Description |
+|---|---|---|
+| `--regions` | `<REGIONS>` | Comma-separated region names, e.g. "Connecticut,Indiana,Washington" |
+| `--cities` | `<CITIES>` | Comma-separated city names |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb targeting geo-resolve --regions <REGIONS> --cities <CITIES>
 ```
 
 ### `apb targeting geo-search`

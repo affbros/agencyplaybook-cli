@@ -1,6 +1,6 @@
 # Canonical `apb` Workflows
 
-15 examples covering the patterns CLI users actually run. Each one is dry-run-first and exit-code-safe.
+16 examples covering the patterns CLI users actually run. Each one is dry-run-first and exit-code-safe.
 
 ---
 
@@ -180,6 +180,33 @@ When your on-disk state has drifted from Meta:
 apb sync diff --account act_1234567890   # show drift between local and remote
 apb sync pull --account act_1234567890   # refresh local state from Meta
 ```
+
+## 16. Dayparting (ad scheduling) — requires a LIFETIME budget
+
+Ad scheduling only works with a **lifetime budget** — Meta rejects daily budgets when day parting is on, and the budget *type* is frozen at create (you cannot convert a running daily-budget campaign to lifetime). So build a **fresh** campaign/ad set with a lifetime budget rather than editing a live daily-budget one:
+
+```bash
+# ABO: budget + bid strategy live on the AD SET (not the campaign).
+# --budget-sharing false marks this as ABO; omit it and the CLI sends false anyway.
+apb campaign create --name "Evening Sales" --objective OUTCOME_SALES \
+  --status PAUSED --budget-sharing false --execute
+
+# Lifetime budget + start/end window are mandatory for a schedule.
+apb adset create --campaign <campaign_id> --optimization-goal OFFSITE_CONVERSIONS \
+  --bid-strategy LOWEST_COST_WITHOUT_CAP \
+  --lifetime-budget 200 \
+  --start-time 2026-06-01T00:00:00 --end-time 2026-06-30T23:59:00 \
+  --daypart-hours "9,12,16,19,21" --daypart-days "1,2,3,4,5" --daypart-timezone USER \
+  --promoted-object '{"pixel_id":"<pixel>","custom_event_type":"ADD_TO_CART"}' \
+  --status PAUSED --execute
+```
+
+The CLI merges consecutive hours into windows, builds `adset_schedule`, and sets `pacing_type: ["day_parting"]` for you. `--daypart-days` is 0–6 (0=Sunday, default all 7); `--daypart-timezone` is `USER` or `ADVERTISER` (default `USER`). Two Meta rejections to recognize (both pass the CLI dry-run, then bounce on `--execute`):
+
+- `--daily-budget` together with day parting → **`Campaigns with day parting enabled do not support daily budgets.`** → switch to `--lifetime-budget`.
+- Flipping an existing campaign/ad set's budget type → **`Changing from lifetime to daily budget or vice versa is not allowed for a campaign.`** → create a new entity instead.
+
+For full manual control, pass Meta's schedule JSON directly with `--adset-schedule '<json|file>'` (it overrides `--daypart-hours`). See `SKILL.md` → "Meta platform constraints".
 
 ---
 

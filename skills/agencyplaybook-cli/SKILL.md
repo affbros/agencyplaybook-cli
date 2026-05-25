@@ -1,14 +1,14 @@
 ---
 name: agencyplaybook-cli
 description: |
-  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 228 commands across 34 domains.
+  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 229 commands across 34 domains.
 
   USE WHEN user says "apb", "agencyplaybook cli", "agencyplaybook", "meta campaign automation", "meta ads via cli", "campaign create", "campaign update", "campaign delete", "duplicate campaign", "scale campaign", "pause campaign", "budget update", "ad set targeting", "creative upload", "audience upload", "lookalike audience", "custom audience", "fatigue check", "waste audit", "health score", "weekly digest", "learning accelerator", "playbook diagnostic", "plan execute", "plan validate", "report insights", "compare periods", "split test", "rules engine", "automation rule", "catalog product set", "custom conversion", "leadgen forms", "pixel health", "CAPI dual signal", "growth score", "retargeting compression", "saturation audit", "broad targeting audit", "no-touch compliance", "consolidation advisor", "ROAS recovery", "anomaly detect", "reset rebuild", "scale roadmap", "rebalance", "daypart audit", "placement audit", "creative mix", "event hierarchy", "duplicate detect", "event downgrade ladder", "andromeda", "dataset clone-plan", "sync diff", "alias create", or otherwise needs to programmatically manage Meta ad accounts via the `apb` CLI.
 ---
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-05-22 from the live binary — 228 commands across 34 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-05-25 from the live binary — 229 commands across 34 domains.
 
 ## Routing
 
@@ -42,6 +42,23 @@ apb campaign list                                          # first real call
 4. **Use `--no-input` for CI/CD and AI-agent execution.** Combine with `--json` for machine-parseable output.
 5. **Never `--no-input --execute` a destructive op without `--confirm-destructive` already in the command line.** The CLI will refuse to proceed.
 6. **Plans over ad-hoc writes.** For anything spanning 2+ entities, use `apb plan create … validate … execute` so the rollback blueprint exists on disk.
+
+## Meta platform constraints (a passing dry-run can still be rejected)
+
+The CLI dry-run validates **your command**, not Meta's account-state rules. Some writes render a clean dry-run and still get rejected by Meta on `--execute`. Known cases the CLI can't fully pre-check:
+
+### Dayparting / ad scheduling requires a LIFETIME budget
+
+`apb adset create … --daypart-hours "9,12,16,19,21"` builds the Meta `adset_schedule` and auto-sets `pacing_type: ["day_parting"]` — but Meta only permits ad scheduling when the **budget is a lifetime budget**, on whichever entity owns the budget:
+
+- **ABO** (budget on the ad set) → use `--lifetime-budget`, **never** `--daily-budget`, on the scheduled ad set.
+- **CBO / Advantage Campaign Budget** (budget on the campaign) → the campaign must use a lifetime budget.
+
+A daily budget triggers: **`Campaigns with day parting enabled do not support daily budgets.`**
+
+**The budget *type* is frozen at create — you cannot convert daily ⇄ lifetime on an existing campaign or ad set.** Attempting it returns: **`Invalid parameter: Changing from lifetime to daily budget or vice versa is not allowed for a campaign.`** So you **cannot retrofit** dayparting onto something already running on a daily budget — **create a new campaign/ad set with a lifetime budget from the start**.
+
+The CLI's create-time guard catches `--daypart-hours` passed *together with* `--daily-budget`. It can **not** see the existing budget type when you only add `--daypart-hours` to a **live** ad set/campaign (an `adset update` / `campaign update`), nor a campaign-level CBO daily budget — those pass dry-run and bounce at Meta. See `examples.md` §16.
 
 ## When to use this skill vs `metaads`
 
@@ -85,6 +102,26 @@ The default endpoint is `https://api.agencyplaybook.io` — no override needed f
 # call that hits Meta's Graph API — always use :3750 for local dev.
 export APB_API_URL=http://localhost:3750
 ```
+
+## Operator token mode (BYO Meta token)
+
+Set `META_OAUTH=DISABLED` **with** a local `META_ACCESS_TOKEN` to bypass the platform's per-tenant Meta OAuth and use your **own** Meta token for every Graph call. Your `APB_API_KEY` is still validated against AgencyPlaybook on every invocation (login + tier/scope + active-user/key enforcement) — only the Meta token is swapped, never the platform gate.
+
+```bash
+# ~/.apb/.env  (or a project-local .env)
+APB_API_KEY=apb_live_<tier>_<32hex>   # still REQUIRED — access control stays on
+META_ACCESS_TOKEN=EAAB...             # your own (System User) Meta token
+META_OAUTH=DISABLED
+```
+
+When to use it:
+- **Self-hosted / single-operator** setups driving one Meta account.
+- **Ad creation while the platform's Meta app is in Development Mode** — the platform OAuth token can't create new page-post creatives (`error_subcode 1885183`), but a System User token from your own (non-dev-mode) app can. Existing/deduped creatives may still go through on the platform token; force a unique creative to surface the block.
+
+Rules:
+- `META_OAUTH=DISABLED` **without** `APB_API_KEY` is refused — the CLI won't run ungated off a bare local token. Set the key, or unset `META_OAUTH` to use `apb` as a standalone Meta tool.
+- The account you target must be reachable by your local token — check with `apb account list`, then `apb account set-default --account act_...`.
+- If an admin disables your user/key, the next call is rejected (a ~30s resolve cache applies; `rm ~/.apb/tenant_context.json` to force an immediate re-check).
 
 ## Updating this skill
 

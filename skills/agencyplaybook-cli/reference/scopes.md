@@ -67,7 +67,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb audience list`
 - `apb audience overlap`
 
-### `read:campaigns` (32 commands)
+### `read:campaigns` (33 commands)
 
 - `apb account info-detailed`
 - `apb account instagram-accounts`
@@ -97,6 +97,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb targeting delivery-estimate`
 - `apb targeting demographic-search`
 - `apb targeting estimate`
+- `apb targeting geo-resolve`
 - `apb targeting geo-search`
 - `apb targeting interest-search`
 - `apb targeting interest-suggest`
