@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.18] — 2026-05-25
+
+Dayparting **readback** fix — `adset get` couldn't see a schedule Meta had actually persisted.
+
+### Fixed
+- **`adset get` now returns the full ad-set state, including `pacing_type` and `adset_schedule`.** The field list previously omitted `pacing_type, adset_schedule, effective_status, updated_time` (plus `configured_status, budget_remaining, destination_type, attribution_spec`), so after a successful dayparting update `adset get` showed no schedule even though Meta had persisted it (a direct Graph fetch confirmed it was there). This was a **readback gap, not a persistence bug** — creation/update were working. Both the CLI and the HTTP API GET use the corrected field list.
+
+### Added
+- **Persisted-state verification on `adset update`.** After an executed update that sets a schedule, the response now carries a `verification` block read back fresh from Graph — `{verified, pacing_type, adset_schedule}` — so you get *confirmed persisted*, not optimistic success.
+- **`adset list` now surfaces `lifetime_budget` and a `dayparting` flag.** Dayparted ad sets run on a lifetime budget, so the old summary (daily-budget only) rendered `-` and hid them.
+
 ## [0.1.17] — 2026-05-25
 
 Day-parting safety: catch the daily-budget rejection during dry-run instead of on `--execute`.
