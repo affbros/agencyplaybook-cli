@@ -17,6 +17,7 @@ This skill packages working knowledge of every `apb` command. Generated on 2026-
 - **User wants step-by-step onboarding** ("set me up with apb") → read `workflows/setup.md`.
 - **User wants automation pattern** ("safe rollout with rollback") → read `workflows/automation.md`.
 - **User wants diagnostic playbook** ("which playbook for low ROAS?") → read `workflows/diagnostics.md`.
+- **User asks to set up day parting / ad scheduling** ("daypart this campaign", "only run ads 9am–9pm", "schedule ads by hour", "run evenings only") → **the campaign type to create is a NEW campaign/ad set on a LIFETIME budget** (ABO: lifetime on the ad set; CBO: lifetime on the campaign). Day parting is impossible on a **daily** budget and budget *type* can't be converted, so **never try to add it to an existing daily-budget campaign** — build a new one. Read "Meta platform constraints" below + `examples.md` §16 before writing any command.
 - **User hits a 403** ("insufficient_scope on X") → read `reference/scopes.md` and explain tier gap.
 - **User script needs exit-code branching** → read `reference/exit-codes.md` (the canonical table + decision tree).
 - **User wants the full CI/CD + AI-agent automation guide** (debugging, log sanitization, plain output) → read `reference/automation-guide.md`.
@@ -47,18 +48,21 @@ apb campaign list                                          # first real call
 
 The CLI dry-run validates **your command**, not Meta's account-state rules. Some writes render a clean dry-run and still get rejected by Meta on `--execute`. Known cases the CLI can't fully pre-check:
 
-### Dayparting / ad scheduling requires a LIFETIME budget
+### Dayparting / ad scheduling → create a LIFETIME-budget campaign
 
-`apb adset create … --daypart-hours "9,12,16,19,21"` builds the Meta `adset_schedule` and auto-sets `pacing_type: ["day_parting"]` — but Meta only permits ad scheduling when the **budget is a lifetime budget**, on whichever entity owns the budget:
+**When day parting is requested, the campaign type to create is a NEW campaign/ad set on a LIFETIME budget.** Choose the structure, then build it fresh:
 
-- **ABO** (budget on the ad set) → use `--lifetime-budget`, **never** `--daily-budget`, on the scheduled ad set.
-- **CBO / Advantage Campaign Budget** (budget on the campaign) → the campaign must use a lifetime budget.
+- **ABO** (budget on the **ad set**) — the usual choice for per-ad-set dayparting: `apb adset create … --lifetime-budget <X> --end-time <T> --daypart-hours "9,12,16,19,21"` (bid strategy also lives on the ad set for ABO). The CLI builds the Meta `adset_schedule` and auto-sets `pacing_type: ["day_parting"]`.
+- **CBO / Advantage Campaign Budget** (budget on the **campaign**) — the campaign carries a lifetime budget; the scheduled ad set carries no own budget.
 
-A daily budget triggers: **`Campaigns with day parting enabled do not support daily budgets.`**
+**Do NOT add day parting to an existing campaign unless it is already on a lifetime budget.** Two reasons it can't be retrofitted:
 
-**The budget *type* is frozen at create — you cannot convert daily ⇄ lifetime on an existing campaign or ad set.** Attempting it returns: **`Invalid parameter: Changing from lifetime to daily budget or vice versa is not allowed for a campaign.`** So you **cannot retrofit** dayparting onto something already running on a daily budget — **create a new campaign/ad set with a lifetime budget from the start**.
+1. A daily budget is rejected outright: **`Campaigns with day parting enabled do not support daily budgets.`**
+2. Budget *type* is **frozen at create** — you cannot convert daily ⇄ lifetime: **`Invalid parameter: Changing from lifetime to daily budget or vice versa is not allowed for a campaign.`**
 
-The CLI's create-time guard catches `--daypart-hours` passed *together with* `--daily-budget`. It can **not** see the existing budget type when you only add `--daypart-hours` to a **live** ad set/campaign (an `adset update` / `campaign update`), nor a campaign-level CBO daily budget — those pass dry-run and bounce at Meta. See `examples.md` §16.
+So the only correct move is to **create a new lifetime-budget campaign/ad set from the start** (and pause/retire the old daily-budget one if it's being replaced).
+
+The CLI guards this so a bad attempt fails fast at **dry-run** rather than on `--execute`: the create-time guard (since 0.1.15) rejects `--daypart-hours` + `--daily-budget` together, and `adset update` (since 0.1.17) pre-flights the existing budget type — including a CBO campaign's — and errors if it's daily. Regardless of CLI version, the fix is identical: build a new lifetime-budget campaign. See `examples.md` §16.
 
 ## When to use this skill vs `metaads`
 
