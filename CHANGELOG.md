@@ -6,6 +6,16 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.19] — 2026-05-25
+
+Pre-flight create guards — catch two common Meta v25 rejections before the API call (during dry-run), with actionable messages, instead of learning the rule from a post-hoc Meta error.
+
+### Added
+- **Campaign objective must be ODAX.** `campaign create` (and `compose-from-spec`) now reject a non-v25 objective up front with a legacy→ODAX hint (e.g. `CONVERSIONS → OUTCOME_SALES`, `LINK_CLICKS → OUTCOME_TRAFFIC`). Valid: `OUTCOME_AWARENESS, OUTCOME_TRAFFIC, OUTCOME_ENGAGEMENT, OUTCOME_LEADS, OUTCOME_SALES, OUTCOME_APP_PROMOTION`.
+- **Conversion ad set requires `promoted_object`.** `adset create` (and `compose-from-spec`) with `--optimization-goal OFFSITE_CONVERSIONS` (or `VALUE`) and no `--promoted-object` now fails fast (exit 2) telling you to pass a pixel + event (`{"pixel_id":"…","custom_event_type":"PURCHASE"}`), instead of Meta rejecting the create later.
+
+Both guards are deterministic (no false positives on valid setups) and fire during dry-run. The `optimization_goal × billing_event` compatibility matrix is intentionally **not** hard-blocked (too broad to encode safely) — deferred to a future soft advisory.
+
 ## [0.1.18] — 2026-05-25
 
 Dayparting **readback** fix — `adset get` couldn't see a schedule Meta had actually persisted.
