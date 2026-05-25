@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.16] — 2026-05-24
+
+Workflow ergonomics found while building the dayparted campaign — three quality-of-life additions for the duplicate-and-optimize loop.
+
+### Added
+- **`targeting geo-resolve --regions "Connecticut,Indiana,Washington" [--cities …]`** — batch-resolves region/city **names → Meta keys** (wrapping `geo-search`, preferring an exact US match) and emits a ready-to-paste `geo_locations` fragment plus `resolved`/`unresolved` lists. No more one search per state.
+- **`created_time` / `updated_time` in `ad list`** — so "the recent video/ad from the last 7-14 days" can be picked reliably. (Meta's ad *creative* object doesn't expose `created_time`; use `ad list` recency, since ads reference their creative.)
+
+### Changed
+- **Richer `campaign compose-from-spec` dry-run preview.** `would_create` now shows, per ad set: `status`, `daily/lifetime_budget`, `billing_event`, `promoted_object`, a `targeting_summary` (countries + region/city counts + age), and `adset_schedule`; per ad: `name`, `status`, and a creative brief (type + id/name); plus campaign `status`/budget and a PAUSED/ACTIVE note.
+
 ## [0.1.15] — 2026-05-24
 
 Ad-set **dayparting / ad scheduling** support — the one Meta deployment surface APB couldn't reach. Validated end-to-end on a live account (lifetime-budget ad set + 4-window schedule accepted by Meta).
