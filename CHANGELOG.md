@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.20] — 2026-05-25
+
+Pacing & scheduling alignment — close the gaps found in the 2026-05-25 live dayparting validation. Headline: catch the "$350 lifetime over a 10-hour flight" class of mistake before the API call.
+
+### Added
+- **Dayparting-windows-vs-flight guard.** `adset create`/`update` now reject (exit 2, during dry-run) a daypart `adset_schedule` whose window(s) fall entirely outside the flight (`start_time`→`end_time`) and could never deliver — the error names the dead windows. Enforced only for `timezone_type=ADVERTISER` windows (exact account-tz comparison); `USER`-tz windows are per-viewer-local and skipped (no false positives). Best-effort: absent/unparseable times, or a flight ≥ 7 days, pass through.
+- **Pacing advisories (non-blocking).** Lifetime-budget setups Meta accepts but that under-deliver now surface an `advisories` array in the create/update result (visible in the dry-run preview): flight < 24h, flight < 6 days (learning phase), or a lifetime/dayparted ad set with no `--end-time`.
+- **`pacing_type` in `adset list`.** List rows now show the raw pacing mode (`standard`/`day_parting`) alongside the existing `dayparting` flag.
+
+### Changed
+- **`adset create` dry-run preview now echoes the full request body.** `would_create` previously showed only a curated subset (name/campaign/optimization_goal/billing_event/status/schedule); it now includes `lifetime_budget`, `targeting`, `promoted_object`, `pacing_type`, `bid_strategy`, and the flight — so the budget/conversion wiring can be verified before `--execute`. (Targeting + promoted_object JSON are now also validated during dry-run.)
+
 ## [0.1.19] — 2026-05-25
 
 Pre-flight create guards — catch two common Meta v25 rejections before the API call (during dry-run), with actionable messages, instead of learning the rule from a post-hoc Meta error.
