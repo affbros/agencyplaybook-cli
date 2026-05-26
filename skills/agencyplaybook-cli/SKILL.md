@@ -8,7 +8,7 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-05-25 from the live binary — 229 commands across 34 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-05-26 from the live binary — 229 commands across 34 domains.
 
 ## Routing
 
@@ -44,9 +44,18 @@ apb campaign list                                          # first real call
 5. **Never `--no-input --execute` a destructive op without `--confirm-destructive` already in the command line.** The CLI will refuse to proceed.
 6. **Plans over ad-hoc writes.** For anything spanning 2+ entities, use `apb plan create … validate … execute` so the rollback blueprint exists on disk.
 
-## Meta platform constraints (a passing dry-run can still be rejected)
+## Meta platform constraints (what the CLI catches before Meta does)
 
-The CLI dry-run validates **your command**, not Meta's account-state rules. Some writes render a clean dry-run and still get rejected by Meta on `--execute`. Known cases the CLI can't fully pre-check:
+The CLI pre-flights a growing set of Meta-side rejections at dry-run. Each guard below runs **before any network call** and exits 2 with an actionable message — so a bad command fails on `--dry-run` rather than after `--execute`:
+
+1. **Objective must be ODAX** (v0.1.19, in `campaign create` and `campaign compose-from-spec`). Legacy values are rejected with the OUTCOME_* mapping (e.g. `CONVERSIONS → OUTCOME_SALES`, `LINK_CLICKS → OUTCOME_TRAFFIC`). The CLI's `--objective` is also a clap enum, so the spec-file / HTTP API paths are the ones this guard defends.
+2. **Conversion goal needs `--promoted-object`** (v0.1.19). `adset create` (and compose) with `--optimization-goal OFFSITE_CONVERSIONS` or `VALUE` and no `--promoted-object` errors with a `{"pixel_id":"…","custom_event_type":"PURCHASE"}` hint. Scoped to website-conversion goals — no false positives on LINK_CLICKS / leads / app-promo.
+3. **Dayparting requires a lifetime budget** (v0.1.15 create, v0.1.17 update). `--daypart-hours` / `--adset-schedule` + `--daily-budget` is rejected on create; on update, the CLI fetches the existing ad set (and its CBO parent campaign) and errors if either is on a daily budget. **Budget type is frozen at create — you cannot convert daily ⇄ lifetime — so the fix is always "create a new entity."**
+4. **Dayparting windows must fit the flight** (v0.1.20). `adset create`/`update` rejects daypart windows (ADVERTISER timezone) whose recurring slot never intersects `start_time`→`end_time`, naming the dead windows. Catches the "lifetime budget over a too-short flight" class (e.g. $350 over 10 hours leaves 3 windows that can't deliver). USER-tz windows and ≥7-day flights pass through (no false positives).
+
+The create/update result also carries a soft **`advisories[]`** array (v0.1.20, non-blocking) for Meta-accepted setups that usually under-deliver: flight < 24h, flight < 6 days (Meta needs ~6 days to exit the learning phase), or a lifetime / dayparted ad set with no `--end-time`. Surface these to the user; don't block on them. The dry-run preview's `would_create` (v0.1.20) shows the **full** request body — budget, targeting, `promoted_object`, `pacing_type`, schedule, flight — so the wiring can be verified before `--execute`.
+
+The remaining Meta rejections are account-state rules the CLI can't pre-check (business verification, page permissions, pixel custom-event validity, etc.) — those still bounce on `--execute`.
 
 ### Dayparting / ad scheduling → create a LIFETIME-budget campaign
 
@@ -62,7 +71,7 @@ The CLI dry-run validates **your command**, not Meta's account-state rules. Some
 
 So the only correct move is to **create a new lifetime-budget campaign/ad set from the start** (and pause/retire the old daily-budget one if it's being replaced).
 
-The CLI guards this so a bad attempt fails fast at **dry-run** rather than on `--execute`: the create-time guard (since 0.1.15) rejects `--daypart-hours` + `--daily-budget` together, and `adset update` (since 0.1.17) pre-flights the existing budget type — including a CBO campaign's — and errors if it's daily. Regardless of CLI version, the fix is identical: build a new lifetime-budget campaign. See `examples.md` §16.
+Guards #3 and #4 above (budget-type-vs-schedule + windows-fit-flight) catch both halves at dry-run. The fix is always to **build a new lifetime-budget campaign/ad set with an `--end-time` that covers the schedule** (≥1 week is typical for a dayparted lifetime flight). See `examples.md` §16.
 
 ## When to use this skill vs `metaads`
 

@@ -201,12 +201,17 @@ apb adset create --campaign <campaign_id> --optimization-goal OFFSITE_CONVERSION
   --status PAUSED --execute
 ```
 
-The CLI merges consecutive hours into windows, builds `adset_schedule`, and sets `pacing_type: ["day_parting"]` for you. `--daypart-days` is 0–6 (0=Sunday, default all 7); `--daypart-timezone` is `USER` or `ADVERTISER` (default `USER`). Two Meta rejections to recognize (both pass the CLI dry-run, then bounce on `--execute`):
+The CLI merges consecutive hours into windows, builds `adset_schedule`, and sets `pacing_type: ["day_parting"]` for you. `--daypart-days` is 0–6 (0=Sunday, default all 7); `--daypart-timezone` is `USER` or `ADVERTISER` (default `USER`).
 
-- `--daily-budget` together with day parting → **`Campaigns with day parting enabled do not support daily budgets.`** → switch to `--lifetime-budget`.
-- Flipping an existing campaign/ad set's budget type → **`Changing from lifetime to daily budget or vice versa is not allowed for a campaign.`** → create a new entity instead.
+Three pre-flight guards fire on `--dry-run` with exit 2 (see `SKILL.md` → "Meta platform constraints" for the full list):
 
-For full manual control, pass Meta's schedule JSON directly with `--adset-schedule '<json|file>'` (it overrides `--daypart-hours`). See `SKILL.md` → "Meta platform constraints".
+- `--daily-budget` together with day parting → *"adset_schedule (dayparting) requires a lifetime budget…"* → switch to `--lifetime-budget` + `--end-time`.
+- Adding day parting to an existing **daily-budget** ad set (or its CBO parent campaign) on `adset update` → the CLI fetches the parent and rejects with the same message. Budget type is frozen at create — create a new entity instead.
+- **Daypart windows past `end_time`** (e.g. windows up to 23:00 but `--end-time …T10:00`) → *"N daypart window(s) fall entirely outside the flight…"*, naming the dead windows. Extend `--end-time` (≥1 week is typical for a dayparted lifetime flight) or trim the schedule. Enforced for ADVERTISER-timezone windows; USER-tz is per-viewer-local and skipped.
+
+The dry-run preview's `would_create` echoes the **full** request body so you can verify budget, targeting, `promoted_object`, `pacing_type`, schedule, and flight before `--execute`. The create/update result also carries a soft `advisories[]` array for short-flight (<24h), pre-learning (<6d), or no-`end_time` lifetime setups Meta accepts but that under-deliver — surface those to the user.
+
+For full manual control, pass Meta's schedule JSON directly with `--adset-schedule '<json|file>'` (it overrides `--daypart-hours`).
 
 ---
 
