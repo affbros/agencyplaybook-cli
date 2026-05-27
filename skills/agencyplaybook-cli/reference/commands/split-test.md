@@ -1,6 +1,6 @@
 # `apb split-test` — Command Reference
 
-4 commands. Auto-generated from the apb binary on 2026-05-26.
+4 commands. Auto-generated from the apb binary on 2026-05-27.
 
 ### `apb split-test create`
 

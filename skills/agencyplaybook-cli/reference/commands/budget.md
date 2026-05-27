@@ -1,6 +1,6 @@
 # `apb budget` — Command Reference
 
-1 commands. Auto-generated from the apb binary on 2026-05-26.
+1 commands. Auto-generated from the apb binary on 2026-05-27.
 
 ### `apb budget simulate`
 

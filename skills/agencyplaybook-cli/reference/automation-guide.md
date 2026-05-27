@@ -82,6 +82,60 @@ Errors **not** in this table (e.g. `validation_error`, `auth_error`) emit a flat
 
 ---
 
+## Pre-flight Guards (`validation_error`, exit 2, during `--dry-run`)
+
+A growing set of Meta-side rejections are now caught **before any network call** — so they fail fast on `--dry-run`, not after `--execute`. All return exit `2` with `error.code = "validation_error"`. Agents can either branch on the exit code (already covered) or pattern-match the message excerpt.
+
+| Guard | Trigger | Message excerpt | Since |
+|---|---|---|---|
+| **Objective must be ODAX** | `campaign create` / `campaign compose-from-spec` with a non-`OUTCOME_*` objective (legacy `CONVERSIONS`, `LINK_CLICKS`, `POST_ENGAGEMENT`, …) | `objective 'CONVERSIONS' is not a valid Meta v25 objective … (CONVERSIONS → OUTCOME_SALES)` | v0.1.19 |
+| **Conversion goal needs `promoted_object`** | `adset create` / compose with `--optimization-goal OFFSITE_CONVERSIONS` or `VALUE` and no `--promoted-object` | `optimization-goal OFFSITE_CONVERSIONS … requires a promoted_object — pass --promoted-object '{"pixel_id":"<id>","custom_event_type":"PURCHASE"}'` | v0.1.19 |
+| **Dayparting needs a lifetime budget** | `--daypart-hours` / `--adset-schedule` + `--daily-budget` on create; or `adset update --adset-schedule` against a daily-budget ad set (or its CBO parent campaign — the CLI fetches both) | `adset_schedule (dayparting) requires a lifetime budget; daily-budget ad sets can't use fixed daypart scheduling` | v0.1.15 (create) / v0.1.17 (update + CBO parent) |
+| **Dayparting windows must fit the flight** | Any `timezone_type=ADVERTISER` window's recurring slot never intersects `start_time → end_time` (e.g. lifetime $350 with windows past `--end-time …T10:00`). Skipped for flights ≥ 7 days. | `N daypart window(s) fall entirely outside the flight (… .. …) and will never deliver: HH:MM-HH:MM, …` | v0.1.20 |
+
+All guards are deterministic and best-effort: `USER`-timezone windows, parse failures on times, and lookup failures (e.g. parent campaign GET errors) **pass through** rather than block — Meta stays the final authority. No false positives by design.
+
+### Soft `advisories[]` (non-blocking, v0.1.20)
+
+The `adset create` / `adset update` result includes an `advisories[]` string array (top-level, alongside `id` or inside the dry-run envelope) for Meta-accepted setups that usually under-deliver:
+
+| Trigger | Sample message |
+|---|---|
+| Lifetime budget, flight < 24h | `Flight is only Xh — a lifetime budget paces poorly over <1 day; use a daily budget or a longer flight.` |
+| Lifetime budget, flight < 6 days | `Flight is ~Xd — Meta typically needs ≥6 days to exit the learning phase; short flights can under-deliver.` |
+| Lifetime / dayparted ad set with no `end_time` | `Lifetime budget / dayparting requires --end-time …` |
+
+Agents should surface advisories to the operator but **not** treat them as failures. The exit code stays `0` (dry-run) or `0` (execute success); `advisories` is omitted when empty.
+
+### Full-body dry-run preview (v0.1.20)
+
+`adset create --dry-run` returns a `would_create` object that contains the **complete** request body Meta would receive: `campaign_id`, `name`, `optimization_goal`, `billing_event`, `targeting` (with `targeting_automation.advantage_audience` injected), `daily_budget` / `lifetime_budget`, `bid_strategy`, `bid_amount`, `pacing_type`, `promoted_object`, `start_time`, `end_time`, `adset_schedule`, `status`. (`adset update` previews the full `changes` map.) Agents can verify budget/conversion/schedule wiring without `--execute`.
+
+```json
+{
+  "ok": true,
+  "dry_run": true,
+  "would_create": {
+    "campaign_id": "120…",
+    "name": "Evening Sales",
+    "optimization_goal": "OFFSITE_CONVERSIONS",
+    "billing_event": "IMPRESSIONS",
+    "lifetime_budget": "35000",
+    "pacing_type": ["day_parting"],
+    "promoted_object": {"pixel_id": "…", "custom_event_type": "ADD_TO_CART"},
+    "adset_schedule": [/* 6 windows */],
+    "start_time": "2026-06-01T00:00:00-0700",
+    "end_time": "2026-06-08T23:59:00-0700",
+    "status": "PAUSED",
+    "targeting": {/* … */}
+  },
+  "advisories": [],
+  "blocked_reasons": ["--execute flag not provided", "READ_ONLY != false", …]
+}
+```
+
+---
+
 ## CI/CD Examples
 
 ### Read-only health check (GitHub Actions, GitLab, etc.)
