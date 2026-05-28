@@ -6,6 +6,53 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-27
+
+**Agency-gaps-v2 workstream.** Four phases of the gap analysis at `docs/tasks/agency-gaps-may-26-v2.md` shipped together: creative format auditor, placement presets, ergonomic builders + leadgen ad-create, built-in compose presets. Net surface: **+7 CLI leaves, +7 API endpoints (229 → 236), zero new tier scopes, zero migrations.** 86 new unit tests pass.
+
+### Added — Creative format auditor (Phase 1, Sprint 1)
+
+- **`apb creative create-*` / `update` now audit specs for unintended Meta v25 format-expansion fields.** Detects 11 risks (CAROUSEL, COLLECTION, AUTOMATIC_FORMAT, CAROUSEL_IMAGE, CAROUSEL_VIDEO, FORMAT_AUTOMATION, degrees_of_freedom_spec, contextual_multi_ads, product_set_id, template_url, `{{product.*}}` syntax). When `--execute` is set with unwhitelisted findings, exits **2** with an actionable error naming each detected risk and the `--allow-*` flag that whitelists it. Fires BEFORE the env-var write gate so the spec-fix message surfaces first. CI use: `--strict-format` upgrades dry-run findings to errors. Spec-review: `--audit-only` runs the auditor and exits 0 without writing. The Scandalous Coffee fix: a single-image creative whose `asset_feed_spec` carried `CAROUSEL/COLLECTION/FORMAT_AUTOMATION` is now blocked at dry-run. See `rust/docs/CREATIVE_AUDITOR.md`.
+- 8 new flags on each affected creative command: `--allow-carousel`, `--allow-collection`, `--allow-automatic-format`, `--allow-format-automation`, `--allow-catalog-template`, `--strict-format`, `--audit-only`, `--creative-format <kind>`.
+- API parity: matching `allow_*` / `strict_format` / `audit_only` JSON body fields on `POST /api/v1/creatives` + `/dynamic` + `/collection` + `PATCH /api/v1/creatives/{id}`.
+
+### Added — Placement presets (Phase 2, Sprint 2)
+
+- **`apb adset create` + `adset update-targeting` now accept `--placements <preset>`** — expands one of 6 curated shapes into v25 `publisher_platforms` / `facebook_positions` / `instagram_positions`. Presets: `feed`, `stories`, `reels`, `stories-reels`, `feed-stories-reels`, `advantage-plus`. Merges cleanly with operator `--targeting` JSON; **fails loud on conflict** (exit 2, message names both sides). IG's feed equivalent is named `stream` in v25 — the preset handles that.
+- API parity: `placements` field on `CreateAdsetBody` + `UpdateTargetingBody` accepts the same kebab-case names via `PlacementPreset::parse_kebab`.
+
+### Added — Ergonomic creative builders + leadgen ad-create (Phase 3, Sprint 3)
+
+- **6 new `creative create-*-simple` / `*-template` builders.** Take operator-friendly flags (`--page-id --image --headline --body --url --cta` etc.) and build the v25 `AdCreative` spec internally — no JSON authoring. All `--image` / `--video` / `--thumbnail` / `--hero-image` flags accept Meta hashes/IDs or local file paths (auto-uploaded under `--execute`).
+  - `creative create-image-simple`
+  - `creative create-video-simple`
+  - `creative create-lead-form-ad` — **first `lead_gen_form_id` injection in the codebase**
+  - `creative create-catalog-creative --format <single|carousel|collection|automatic>` — auto-wires the matching auditor `--allow-*` flag so explicit format intent doesn't trip the auditor
+  - `creative create-story-template` — emits `story_advisories` (9:16 reminder, safe-zone, ≤15s video)
+  - `creative create-reels-video-template` — emits `reels_advisories` (9:16, ≤90s)
+- **`apb leadgen ad-create` end-to-end orchestrator.** One command: validates campaign objective is `OUTCOME_LEADS`, verifies the form belongs to the page (Page-token check fires FIRST so token failures surface before any write), creates lead-form creative referencing `lead_gen_form_id` in `link_data.call_to_action.value`, creates the ad. **Reverse-pause rollback** if ad-create fails after creative succeeded.
+- API parity: 7 paired endpoints — `POST /api/v1/creatives/{image-simple,video-simple,lead-form-ad,catalog,story-template,reels-video-template}` + `POST /api/v1/leadgen/ad-create`.
+- Baseline `endpoint_count` + `cli_leaf_count` bumped **229 → 236** in lockstep with the +7 code change.
+
+### Added — Built-in compose presets (Phase 4, Sprint 4)
+
+- **`apb campaign compose-from-spec --preset <name>` now accepts 6 built-in preset names** — produces full campaign + adset + creative + ad stacks from operator-friendly args (`--campaign-name --page-id --daily-budget` + per-preset extras like `--form-id`, `--catalog-id`, `--product-set-id`, `--pixel-id`).
+  - `sales-video`, `sales-carousel`, `lead-form`, `catalog-sales`, `reels-video`, `stories-video`
+  - `catalog-sales` auto-switches optimization goal to `OFFSITE_CONVERSIONS` when `--pixel-id` is given, else falls back to `LINK_CLICKS`
+  - `reels-video` / `stories-video` reuse Sprint 2's placement shapes
+- **Built-in preset names take precedence over user-saved presets.** Shadow collision (user-saved preset with a built-in name) exits 2 with a clear shadowing message — NEITHER preset is silently used.
+- API parity: `ComposeFromSpecBody` extended with `preset_name` + 7 preset arg fields. `spec` made optional. Same shadow-collision logic server-side.
+
+### Changed
+
+- Parity baseline counts: `endpoint_count` 229 → 236, `cli_leaf_count` 229 → 236, `route_module_count` unchanged at 25.
+- `CLAUDE.md` + `rust/CLAUDE.md` surface-size references updated.
+- API HTTP mapping in `rust/docs/API_REFERENCE.md` extended with the 7 new endpoint rows + a "v0.2.0 Ergonomic Builders" section.
+
+### Pattern reference
+
+All v0.2.0 pre-flight checks follow the v0.1.20 `validate_*()` / `*_advisories()` split established in `services/adset.rs:72,109,194` for the pacing/dayparting work. Pure functions, no I/O, run before any gate check, surface findings in dry-run preview AND in the actionable error on `--execute`.
+
 ## [0.1.20] — 2026-05-25
 
 Pacing & scheduling alignment — close the gaps found in the 2026-05-25 live dayparting validation. Headline: catch the "$350 lifetime over a 10-hour flight" class of mistake before the API call.
