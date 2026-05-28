@@ -1,6 +1,6 @@
 # `apb adset` — Command Reference
 
-8 commands. Auto-generated from the apb binary on 2026-05-27.
+8 commands. Auto-generated from the apb binary on 2026-05-28.
 
 ### `apb adset create`
 
@@ -31,6 +31,7 @@ Create a new ad set
 | `--daypart-days` | `<DAYPART_DAYS>` | Days for --daypart-hours: comma-separated 0-6 (0=Sunday). Default all 7 |
 | `--daypart-timezone` | `<DAYPART_TIMEZONE>` | Timezone for --daypart-hours: USER (viewer) or ADVERTISER. Default USER |
 | `--status` | `<STATUS>` |  |
+| `--placements` | `<PLACEMENTS>` | Placement preset (v0.2.0). Expands into v25 publisher_platforms / facebook_positions / instagram_positions, merged into --targeting / --spec-file. Fails loud (exit 2) when the targeting JSON already sets any of those three keys. See `rust/docs/USAGE_GUIDE.md` § "Reels/Stories placement preset" [possible values: feed, stories, reels, stories-reels, feed-stories-reels, advantage-plus] |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -220,6 +221,7 @@ Update ad-set targeting
 | `--adset` | `<ADSET>` |  |
 | `--spec` | `<SPEC>` |  |
 | `--spec-file` | `<SPEC_FILE>` |  |
+| `--placements` | `<PLACEMENTS>` | Placement preset (v0.2.0). Expands into v25 publisher_platforms / facebook_positions / instagram_positions, merged into the targeting JSON provided via --spec/--spec-file. Fails loud (exit 2) when the targeting JSON already sets any of those three keys [possible values: feed, stories, reels, stories-reels, feed-stories-reels, advantage-plus] |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

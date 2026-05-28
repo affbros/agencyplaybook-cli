@@ -1,14 +1,14 @@
 ---
 name: agencyplaybook-cli
 description: |
-  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 229 commands across 34 domains.
+  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 236 commands across 34 domains.
 
   USE WHEN user says "apb", "agencyplaybook cli", "agencyplaybook", "meta campaign automation", "meta ads via cli", "campaign create", "campaign update", "campaign delete", "duplicate campaign", "scale campaign", "pause campaign", "budget update", "ad set targeting", "creative upload", "audience upload", "lookalike audience", "custom audience", "fatigue check", "waste audit", "health score", "weekly digest", "learning accelerator", "playbook diagnostic", "plan execute", "plan validate", "report insights", "compare periods", "split test", "rules engine", "automation rule", "catalog product set", "custom conversion", "leadgen forms", "pixel health", "CAPI dual signal", "growth score", "retargeting compression", "saturation audit", "broad targeting audit", "no-touch compliance", "consolidation advisor", "ROAS recovery", "anomaly detect", "reset rebuild", "scale roadmap", "rebalance", "daypart audit", "placement audit", "creative mix", "event hierarchy", "duplicate detect", "event downgrade ladder", "andromeda", "dataset clone-plan", "sync diff", "alias create", or otherwise needs to programmatically manage Meta ad accounts via the `apb` CLI.
 ---
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-05-27 from the live binary — 229 commands across 34 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-05-28 from the live binary — 236 commands across 34 domains.
 
 ## Routing
 
@@ -54,6 +54,16 @@ The CLI pre-flights a growing set of Meta-side rejections at dry-run. Each guard
 4. **Dayparting windows must fit the flight** (v0.1.20). `adset create`/`update` rejects daypart windows (ADVERTISER timezone) whose recurring slot never intersects `start_time`→`end_time`, naming the dead windows. Catches the "lifetime budget over a too-short flight" class (e.g. $350 over 10 hours leaves 3 windows that can't deliver). USER-tz windows and ≥7-day flights pass through (no false positives).
 
 The create/update result also carries a soft **`advisories[]`** array (v0.1.20, non-blocking) for Meta-accepted setups that usually under-deliver: flight < 24h, flight < 6 days (Meta needs ~6 days to exit the learning phase), or a lifetime / dayparted ad set with no `--end-time`. Surface these to the user; don't block on them. The dry-run preview's `would_create` (v0.1.20) shows the **full** request body — budget, targeting, `promoted_object`, `pacing_type`, schedule, flight — so the wiring can be verified before `--execute`.
+
+5. **Creative format auditor** (v0.2.0). Every `creative create-*` and `creative update` runs a pure-function auditor on the spec. Detects 11 v25 format-expansion risks (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / product_set_id / template_url / {{product.*}} syntax). When `--execute` is set with unwhitelisted findings, exits 2 with an actionable error naming each detected risk and the `--allow-*` flag that whitelists it — fires BEFORE the env-var write gate so the spec-fix message surfaces first. CI use: `--strict-format` upgrades dry-run findings to errors. Spec-review: `--audit-only` runs the auditor and exits 0 without writing. See `reference/auditor.md` for the full risk taxonomy.
+
+6. **Placement presets** (v0.2.0). `adset create` and `adset update-targeting` accept `--placements <feed|stories|reels|stories-reels|feed-stories-reels|advantage-plus>` — expands into v25 `publisher_platforms` / `facebook_positions` / `instagram_positions`. Merges with operator `--targeting` JSON; **fails loud on conflict** (exit 2, names both sides). IG's feed equivalent is called `stream` in v25 — the preset handles that for you.
+
+7. **Ergonomic creative builders** (v0.2.0). `creative create-image-simple` / `create-video-simple` / `create-lead-form-ad` / `create-catalog-creative` / `create-story-template` / `create-reels-video-template` take operator-friendly flags and build the v25 spec internally — no JSON authoring. `--image` / `--video` / `--thumbnail` accept hashes/IDs OR local file paths (auto-uploaded under `--execute`). `create-catalog-creative --format <single|carousel|collection|automatic>` auto-wires the matching `--allow-*` flag so an intentional `--format collection` doesn't trip the auditor. `creative create-lead-form-ad` injects `lead_gen_form_id` into `link_data.call_to_action.value` — the FIRST occurrence of this field in the codebase.
+
+8. **End-to-end leadgen ad-create** (v0.2.0). `apb leadgen ad-create --campaign --adset --form-id --page-id --image --headline --body --cta` validates the campaign objective is `OUTCOME_LEADS`, verifies the form belongs to the page, creates the lead-form creative + ad in sequence, and reverse-pauses on partial failure. The Page-token check fires FIRST so token failures surface before any creative-write attempt.
+
+9. **Built-in compose presets** (v0.2.0). `apb campaign compose-from-spec --preset <sales-video|sales-carousel|lead-form|catalog-sales|reels-video|stories-video>` produces full campaign + adset + creative + ad stacks from operator-friendly args (`--campaign-name`, `--page-id`, `--daily-budget`, plus per-preset extras). Built-in presets take precedence over user-saved presets; **collision = fail-loud** with a shadowing error (exit 2).
 
 The remaining Meta rejections are account-state rules the CLI can't pre-check (business verification, page permissions, pixel custom-event validity, etc.) — those still bounce on `--execute`.
 

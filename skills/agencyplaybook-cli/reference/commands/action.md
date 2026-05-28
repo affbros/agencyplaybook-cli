@@ -1,6 +1,6 @@
 # `apb action` — Command Reference
 
-3 commands. Auto-generated from the apb binary on 2026-05-27.
+3 commands. Auto-generated from the apb binary on 2026-05-28.
 
 ### `apb action apply`
 

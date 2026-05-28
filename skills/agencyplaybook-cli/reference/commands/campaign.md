@@ -1,6 +1,6 @@
 # `apb campaign` — Command Reference
 
-15 commands. Auto-generated from the apb binary on 2026-05-27.
+15 commands. Auto-generated from the apb binary on 2026-05-28.
 
 ### `apb campaign budget-schedule create`
 
@@ -58,17 +58,24 @@ apb campaign compose --execute --name <NAME> --source-campaigns <SOURCE_CAMPAIGN
 
 ### `apb campaign compose-from-spec`
 
-Create a full campaign stack from a JSON spec file or preset
+Create a full campaign stack from a JSON spec file or preset. Built-in presets (v0.2.0): sales-video, sales-carousel, lead-form, catalog-sales, reels-video, stories-video. User-saved presets (via `campaign preset save`) are also accepted under the same `--preset` flag; built-ins take precedence and emit a shadowing error on name collision
 
 **Scope:** `write:campaigns` · **Min tier:** agency · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
 | `--spec-file` | `<SPEC_FILE>` |  |
-| `--preset` | `<PRESET>` | Load a saved preset by name instead of a spec file |
+| `--preset` | `<PRESET>` | Load a saved preset by name instead of a spec file (built-in or user-saved) |
 | `--no-rollback` |  | Skip rollback on failure (keep partially created entities) |
 | `--with-estimates` |  | Include delivery cost estimates in dry-run preview |
 | `--accounts` | `<ACCOUNTS>` | Deploy to multiple ad accounts (comma-separated, e.g. act_123,act_456) |
+| `--campaign-name` | `<CAMPAIGN_NAME>` |  |
+| `--page-id` | `<PAGE_ID>` |  |
+| `--pixel-id` | `<PIXEL_ID>` |  |
+| `--form-id` | `<FORM_ID>` |  |
+| `--product-set-id` | `<PRODUCT_SET_ID>` |  |
+| `--catalog-id` | `<CATALOG_ID>` |  |
+| `--daily-budget` | `<DAILY_BUDGET>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

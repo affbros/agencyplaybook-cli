@@ -82,6 +82,41 @@ Errors **not** in this table (e.g. `validation_error`, `auth_error`) emit a flat
 
 ---
 
+## Ergonomic creative builders + leadgen ad-create (v0.2.0)
+
+Sprint 3 of agency-gaps-v2 added 7 new `apb` commands paired with 7 API endpoints — operator-friendly builders that generate v25 `AdCreative` JSON internally. CI patterns:
+
+- `apb creative create-image-simple` / `create-video-simple` — single-asset creatives. Image/video flags accept local paths (auto-upload under `--execute`) or Meta hashes/IDs.
+- `apb creative create-lead-form-ad` — injects `lead_gen_form_id` into `link_data.call_to_action.value`. Validates form exists pre-write.
+- `apb creative create-catalog-creative --format <single|carousel|collection|automatic>` — auto-wires the matching Sprint-1 `--allow-*` flag from the `--format` intent. Operators don't need to manually pass `--allow-collection` for a `--format collection` creative.
+- `apb creative create-story-template` / `create-reels-video-template` — emit `story_advisories` / `reels_advisories` arrays (9:16 reminder, safe-zone, video length limits).
+- `apb leadgen ad-create` — end-to-end orchestrator. Validates campaign objective is `OUTCOME_LEADS` + form belongs to page BEFORE any write. Reverse-pauses the creative if ad-create fails.
+
+API parity: every CLI command has a paired `POST /api/v1/creatives/...` (or `/api/v1/leadgen/ad-create`) endpoint accepting the same fields as a typed JSON body. See `rust/docs/API_REFERENCE.md` § v0.2.0 Ergonomic Builders.
+
+## Creative format auditor (v0.2.0, exit 2)
+
+Every `apb creative create-*` and `apb creative update` runs a pure-function auditor on the spec before any write. Detects 11 unintended Meta v25 format-expansion variants (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / `template_url` / `{{product.*}}` / etc. — the Scandalous Coffee class).
+
+For CI / unattended pipelines:
+- `--strict-format` upgrades dry-run findings to exit 2 (fail loud on any finding). Use this in pre-merge checks.
+- `--audit-only` runs the auditor and exits 0 without writing, regardless of `--execute`. Use for spec-review jobs that want to read the `format_audit.findings` array via `--json`.
+- When `--execute` is set and the audit detects unwhitelisted findings, the binary exits 2 BEFORE the write gate's exit 4 — so CI scripts that branch on exit code see the actionable auditor message, not the env complaint.
+- Whitelist matching findings explicitly with `--allow-carousel`, `--allow-collection`, `--allow-automatic-format`, `--allow-format-automation`, `--allow-catalog-template`.
+
+Full risk taxonomy + flag-by-flag reference at [`../rust/docs/CREATIVE_AUDITOR.md`](../rust/docs/CREATIVE_AUDITOR.md).
+
+```yaml
+# Example: GitHub Actions step that audits every committed creative spec.
+- name: Audit creative specs
+  run: |
+    for spec in specs/creative/*.json; do
+      apb creative create-image --name "ci-$(basename $spec .json)" --spec-file "$spec" --strict-format --json
+    done
+```
+
+---
+
 ## Pre-flight Guards (`validation_error`, exit 2, during `--dry-run`)
 
 A growing set of Meta-side rejections are now caught **before any network call** — so they fail fast on `--dry-run`, not after `--execute`. All return exit `2` with `error.code = "validation_error"`. Agents can either branch on the exit code (already covered) or pattern-match the message excerpt.
@@ -92,6 +127,7 @@ A growing set of Meta-side rejections are now caught **before any network call**
 | **Conversion goal needs `promoted_object`** | `adset create` / compose with `--optimization-goal OFFSITE_CONVERSIONS` or `VALUE` and no `--promoted-object` | `optimization-goal OFFSITE_CONVERSIONS … requires a promoted_object — pass --promoted-object '{"pixel_id":"<id>","custom_event_type":"PURCHASE"}'` | v0.1.19 |
 | **Dayparting needs a lifetime budget** | `--daypart-hours` / `--adset-schedule` + `--daily-budget` on create; or `adset update --adset-schedule` against a daily-budget ad set (or its CBO parent campaign — the CLI fetches both) | `adset_schedule (dayparting) requires a lifetime budget; daily-budget ad sets can't use fixed daypart scheduling` | v0.1.15 (create) / v0.1.17 (update + CBO parent) |
 | **Dayparting windows must fit the flight** | Any `timezone_type=ADVERTISER` window's recurring slot never intersects `start_time → end_time` (e.g. lifetime $350 with windows past `--end-time …T10:00`). Skipped for flights ≥ 7 days. | `N daypart window(s) fall entirely outside the flight (… .. …) and will never deliver: HH:MM-HH:MM, …` | v0.1.20 |
+| **Placement preset conflict** | `--placements <preset>` on `adset create` / `adset update-targeting` when the operator's `--targeting` JSON already contains `publisher_platforms` / `facebook_positions` / `instagram_positions` | `--placements reels conflicts with --targeting.publisher_platforms (operator set X, preset wants Y). Remove one of them.` | v0.2.0 |
 
 All guards are deterministic and best-effort: `USER`-timezone windows, parse failures on times, and lookup failures (e.g. parent campaign GET errors) **pass through** rather than block — Meta stays the final authority. No false positives by design.
 

@@ -1,6 +1,6 @@
 # `apb targeting` — Command Reference
 
-9 commands. Auto-generated from the apb binary on 2026-05-27.
+9 commands. Auto-generated from the apb binary on 2026-05-28.
 
 ### `apb targeting behavior-search`
 

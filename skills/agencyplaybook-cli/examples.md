@@ -215,6 +215,101 @@ For full manual control, pass Meta's schedule JSON directly with `--adset-schedu
 
 ---
 
+## 17. Creative format auditor — catch unintended format expansion (v0.2.0)
+
+The Scandalous Coffee incident on 2026-05-23 surfaced a class of creative-spec failure: a single-image-intent creative whose `asset_feed_spec.ad_formats` carried `["CAROUSEL","COLLECTION"]` + `optimization_type: "FORMAT_AUTOMATION"` rendered as a carousel in delivery. The auditor (v0.2.0) catches this BEFORE any write.
+
+```bash
+# Inspect a spec without writing anything.
+apb creative create-image --name "Review" --spec-file ./ad.json --audit-only --json | jq '.format_audit'
+
+# Trap example: this spec lets Meta render the ad as carousel/collection.
+cat >/tmp/trap.json <<'JSON'
+{"object_story_spec":{"page_id":"P","link_data":{"image_hash":"H","link":"https://x"}},
+ "asset_feed_spec":{"ad_formats":["CAROUSEL","COLLECTION"],"optimization_type":"FORMAT_AUTOMATION"}}
+JSON
+
+# Dry-run surfaces 3 findings (exit 0).
+apb creative create-image --name "test" --spec-file /tmp/trap.json --json | \
+  jq '.format_audit.findings | map(.kind)'
+# → ["CarouselFormat", "CollectionFormat", "FormatAutomation"]
+
+# --execute blocks with actionable error (exit 2) naming each flag that would unblock.
+apb creative create-image --name "test" --spec-file /tmp/trap.json --execute
+# → Creative format audit failed: CAROUSEL, COLLECTION, FORMAT_AUTOMATION detected …
+#   Pass --allow-carousel --allow-collection --allow-format-automation to override.
+
+# CI: --strict-format upgrades dry-run findings to errors.
+apb creative create-image --name "ci" --spec-file ./ad.json --strict-format
+```
+
+## 18. Placement presets — Reels / Stories without hand-crafting JSON (v0.2.0)
+
+`adset create` + `adset update-targeting` accept `--placements <preset>` — expands into v25 `publisher_platforms` / `facebook_positions` / `instagram_positions`. Fail-loud on conflict with operator's `--targeting`.
+
+```bash
+# Reels placement, merges with geo + age.
+apb adset create --campaign 120... --name "Q2 reels" \
+  --optimization-goal LINK_CLICKS --billing-event IMPRESSIONS --lifetime-budget 50 \
+  --start-time 2026-06-01T00:00:00 --end-time 2026-06-08T00:00:00 \
+  --targeting '{"geo_locations":{"countries":["US"]},"age_min":25,"age_max":54}' \
+  --placements reels --advantage-audience 0 --execute
+
+# Stories. Advantage+ Placements. Feed. Combinations.
+apb adset create … --placements stories
+apb adset create … --placements advantage-plus
+apb adset create … --placements feed-stories-reels
+```
+
+## 19. Ergonomic creative builders — no JSON authoring (v0.2.0)
+
+```bash
+# Single image — image is hash or path (auto-uploaded).
+apb creative create-image-simple --name "Promo" --page-id PAGE \
+  --image ./hero.jpg --headline "Bold coffee" --body "Try Scandalous" \
+  --url https://scandalous.example --cta SHOP_NOW --execute
+
+# Lead-form ad — first lead_gen_form_id injection in the codebase.
+apb creative create-lead-form-ad --name "Lead Q2" --page-id PAGE --form-id FORM_999 \
+  --image ./hero.jpg --headline "Sign up" --body "Free coffee" --execute
+
+# Catalog creative — --format auto-wires matching auditor --allow-* flag.
+apb creative create-catalog-creative --name "DPA" --page-id PAGE \
+  --catalog-id 123 --product-set-id 456 --hero-image ./hero.jpg \
+  --format collection --execute
+```
+
+## 20. End-to-end leadgen ad-create (v0.2.0)
+
+One command validates everything + creates the creative + ad + reverse-pauses on partial failure:
+
+```bash
+apb leadgen ad-create --name "Lead Q2" --campaign 120... --adset 120... \
+  --form-id FORM_999 --image ./hero.jpg --headline "Sign up" --body "Free" \
+  --execute --json
+```
+
+Pre-flight order: form-read (Page-token check) → campaign objective is `OUTCOME_LEADS` → image upload → creative create → ad create. On ad-create failure, the orphan creative is paused.
+
+## 21. Built-in compose presets — full stacks from one command (v0.2.0)
+
+```bash
+# Lead-form stack (OUTCOME_LEADS + LEAD_GENERATION adset + form-attached creative).
+apb campaign compose-from-spec --preset lead-form \
+  --campaign-name "Lead Q2" --page-id PAGE --form-id FORM_999 --daily-budget 10
+
+# Catalog-sales — pixel switches optimization goal to OFFSITE_CONVERSIONS.
+apb campaign compose-from-spec --preset catalog-sales \
+  --campaign-name "DPA" --page-id PAGE --catalog-id CAT --product-set-id PS \
+  --pixel-id PX --daily-budget 50
+
+# Other built-ins: sales-video, sales-carousel, reels-video, stories-video.
+```
+
+Built-in preset names are reserved — if a user-saved preset shares the name, `compose-from-spec --preset <name>` exits 2 with a shadowing error.
+
+---
+
 ## Cross-references
 
 - Full per-command reference: `commands.md`

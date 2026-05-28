@@ -261,7 +261,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
 - `apb budget simulate`
 
-### `write:campaigns` (39 commands)
+### `write:campaigns` (45 commands)
 
 - `apb ad create`
 - `apb ad create-multi`
@@ -288,10 +288,16 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb campaign update`
 - `apb campaign update-status`
 - `apb creative create-carousel`
+- `apb creative create-catalog-creative`
 - `apb creative create-collection`
 - `apb creative create-dynamic`
 - `apb creative create-image`
+- `apb creative create-image-simple`
+- `apb creative create-lead-form-ad`
+- `apb creative create-reels-video-template`
+- `apb creative create-story-template`
 - `apb creative create-video`
+- `apb creative create-video-simple`
 - `apb creative update`
 - `apb creative upload-image`
 - `apb creative upload-video`
@@ -317,8 +323,9 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb custom-conversion delete`
 - `apb custom-conversion update`
 
-### `write:leadgen` (1 commands)
+### `write:leadgen` (2 commands)
 
+- `apb leadgen ad-create`
 - `apb leadgen create`
 
 ### `write:rules` (7 commands)

@@ -1,6 +1,6 @@
 # `apb coverage` — Command Reference
 
-1 commands. Auto-generated from the apb binary on 2026-05-27.
+1 commands. Auto-generated from the apb binary on 2026-05-28.
 
 ### `apb coverage audit`
 

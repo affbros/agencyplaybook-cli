@@ -1,7 +1,7 @@
 # `apb` CLI — Command Index
 
-Auto-generated from the apb binary on 2026-05-27. 
-229 commands across 34 domains. 
+Auto-generated from the apb binary on 2026-05-28. 
+236 commands across 34 domains. 
 Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain>.md` — open the file for the domain you need.
 
 | Domain | Commands | Reference |
@@ -19,13 +19,13 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | campaign | 15 | `reference/commands/campaign.md` |
 | catalog | 10 | `reference/commands/catalog.md` |
 | coverage | 1 | `reference/commands/coverage.md` |
-| creative | 12 | `reference/commands/creative.md` |
+| creative | 18 | `reference/commands/creative.md` |
 | custom-conversion | 5 | `reference/commands/custom-conversion.md` |
 | dataset | 18 | `reference/commands/dataset.md` |
 | doctor | 4 | `reference/commands/doctor.md` |
 | duplicate | 1 | `reference/commands/duplicate.md` |
 | growth | 1 | `reference/commands/growth.md` |
-| leadgen | 5 | `reference/commands/leadgen.md` |
+| leadgen | 6 | `reference/commands/leadgen.md` |
 | learning | 4 | `reference/commands/learning.md` |
 | library | 1 | `reference/commands/library.md` |
 | meta | 2 | `reference/commands/meta.md` |

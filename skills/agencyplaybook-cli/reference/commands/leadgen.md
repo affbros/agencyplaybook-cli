@@ -1,6 +1,37 @@
 # `apb leadgen` — Command Reference
 
-5 commands. Auto-generated from the apb binary on 2026-05-27.
+6 commands. Auto-generated from the apb binary on 2026-05-28.
+
+### `apb leadgen ad-create`
+
+End-to-end lead-form ad creation (v0.2.0). Validates the campaign objective is `OUTCOME_LEADS`, validates the form belongs to the page, creates a lead-form creative referencing `lead_gen_form_id`, then creates the ad attaching the creative to the ad set. Reverse-pauses on partial failure
+
+**Scope:** `write:leadgen` · **Min tier:** agency · **Write op** (requires `--execute`)
+
+| Flag | Value | Description |
+|---|---|---|
+| `--name` | `<NAME>` |  |
+| `--campaign` | `<CAMPAIGN>` |  |
+| `--adset` | `<ADSET>` |  |
+| `--form-id` | `<FORM_ID>` |  |
+| `--page-id` | `<PAGE_ID>` | Override Page auto-discovery. Required when the user has multiple Pages |
+| `--image` | `<IMAGE>` | Hero image hash or local file path |
+| `--headline` | `<HEADLINE>` |  |
+| `--body` | `<BODY>` |  |
+| `--cta` | `<CTA>` | [default: SIGN_UP] |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb leadgen ad-create --execute --name <NAME> --campaign <CAMPAIGN>
+```
 
 ### `apb leadgen create`
 

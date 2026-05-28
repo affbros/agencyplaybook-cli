@@ -1,6 +1,6 @@
 # `apb plan` — Command Reference
 
-9 commands. Auto-generated from the apb binary on 2026-05-27.
+9 commands. Auto-generated from the apb binary on 2026-05-28.
 
 ### `apb plan approve-batch`
 
