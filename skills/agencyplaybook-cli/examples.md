@@ -308,6 +308,24 @@ apb campaign compose-from-spec --preset catalog-sales \
 
 Built-in preset names are reserved — if a user-saved preset shares the name, `compose-from-spec --preset <name>` exits 2 with a shadowing error.
 
+## 22. Naming uploaded assets (v0.2.2)
+
+Uploads default the asset name to the file's basename; override per asset:
+
+```bash
+# Standalone uploads — explicit asset name + (video) display title.
+apb creative upload-image --path ./hero.jpg --name "Q2 Hero" --execute
+apb creative upload-video --path ./promo.mp4 --name "Q2 Promo" --title "Watch now" --execute
+
+# Builders — per-asset name flags (distinct from --name, which is the creative name).
+apb creative create-video-simple --name "Promo creative" --page-id PAGE \
+  --video ./promo.mp4 --video-name "Q2 Promo" \
+  --thumbnail ./thumb.jpg --thumbnail-name "Q2 Promo thumb" \
+  --headline "Bold" --url https://x.example --cta LEARN_MORE --execute
+
+# Omit a *-name flag → the asset is named by the filename (e.g. promo.mp4).
+```
+
 ---
 
 ## Cross-references

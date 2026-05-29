@@ -1,6 +1,6 @@
 # `apb creative` — Command Reference
 
-18 commands. Auto-generated from the apb binary on 2026-05-28.
+18 commands. Auto-generated from the apb binary on 2026-05-29.
 
 ### `apb creative asset-audit`
 
@@ -71,6 +71,7 @@ Build a catalog / product-set-linked creative (v0.2.0). The `--format` flag auto
 | `--catalog-id` | `<CATALOG_ID>` |  |
 | `--product-set-id` | `<PRODUCT_SET_ID>` |  |
 | `--hero-image` | `<HERO_IMAGE>` | Hero image hash or local file path |
+| `--hero-image-name` | `<HERO_IMAGE_NAME>` | Name to store the uploaded hero image under (default: the file's basename) |
 | `--headline` | `<HEADLINE>` |  |
 | `--body` | `<BODY>` |  |
 | `--url` | `<URL>` |  |
@@ -206,6 +207,7 @@ Build an image creative from operator-friendly flags (v0.2.0). Generates the v25
 | `--name` | `<NAME>` |  |
 | `--page-id` | `<PAGE_ID>` |  |
 | `--image` | `<IMAGE>` | Image hash, or local file path (auto-uploaded under `--execute`) |
+| `--image-name` | `<IMAGE_NAME>` | Name to store the uploaded image under (default: the file's basename) |
 | `--headline` | `<HEADLINE>` |  |
 | `--body` | `<BODY>` |  |
 | `--description` | `<DESCRIPTION>` |  |
@@ -239,6 +241,7 @@ Build a lead-form ad creative (v0.2.0). FIRST `lead_gen_form_id` injection in th
 | `--page-id` | `<PAGE_ID>` |  |
 | `--form-id` | `<FORM_ID>` |  |
 | `--image` | `<IMAGE>` | Hero image hash or local file path |
+| `--image-name` | `<IMAGE_NAME>` | Name to store the uploaded image under (default: the file's basename) |
 | `--headline` | `<HEADLINE>` |  |
 | `--body` | `<BODY>` |  |
 | `--url` | `<URL>` |  |
@@ -268,7 +271,9 @@ Build a Reels-suitable video creative (v0.2.0). Emits Reels-format suitability a
 | `--name` | `<NAME>` |  |
 | `--page-id` | `<PAGE_ID>` |  |
 | `--video` | `<VIDEO>` |  |
+| `--video-name` | `<VIDEO_NAME>` | Name to store an uploaded video under (default: the file's basename) |
 | `--thumbnail` | `<THUMBNAIL>` |  |
+| `--thumbnail-name` | `<THUMBNAIL_NAME>` | Name to store the uploaded thumbnail under (default: the file's basename) |
 | `--headline` | `<HEADLINE>` |  |
 | `--body` | `<BODY>` |  |
 | `--url` | `<URL>` |  |
@@ -298,8 +303,11 @@ Build a Stories-suitable image or video creative (v0.2.0). Emits Stories-format 
 | `--name` | `<NAME>` |  |
 | `--page-id` | `<PAGE_ID>` |  |
 | `--image` | `<IMAGE>` | Image hash or path (mutually exclusive with `--video`) |
+| `--image-name` | `<IMAGE_NAME>` | Name to store an uploaded image under (default: the file's basename) |
 | `--video` | `<VIDEO>` | Video ID or path (mutually exclusive with `--image`) |
+| `--video-name` | `<VIDEO_NAME>` | Name to store an uploaded video under (default: the file's basename) |
 | `--thumbnail` | `<THUMBNAIL>` | Required when `--video` is used |
+| `--thumbnail-name` | `<THUMBNAIL_NAME>` | Name to store the uploaded thumbnail under (default: the file's basename) |
 | `--headline` | `<HEADLINE>` |  |
 | `--body` | `<BODY>` |  |
 | `--url` | `<URL>` |  |
@@ -364,7 +372,9 @@ Build a video creative from operator-friendly flags (v0.2.0). Same shape as `cre
 | `--name` | `<NAME>` |  |
 | `--page-id` | `<PAGE_ID>` |  |
 | `--video` | `<VIDEO>` | Video ID (pre-uploaded) or local file path (auto-uploaded under `--execute`) |
+| `--video-name` | `<VIDEO_NAME>` | Name to store an uploaded video under (default: the file's basename). Ignored when --video is a pre-uploaded video ID |
 | `--thumbnail` | `<THUMBNAIL>` | Thumbnail: image hash or local file path. Meta requires a thumbnail on every video creative; the builder injects it as `object_story_spec.video_data.image_hash` |
+| `--thumbnail-name` | `<THUMBNAIL_NAME>` | Name to store the uploaded thumbnail under (default: the file's basename) |
 | `--headline` | `<HEADLINE>` |  |
 | `--body` | `<BODY>` |  |
 | `--url` | `<URL>` |  |
@@ -503,7 +513,8 @@ Upload a video asset
 |---|---|---|
 | `--account` | `<ACCOUNT>` |  |
 | `--path` | `<PATH>` |  |
-| `--name` | `<NAME>` |  |
+| `--name` | `<NAME>` | Asset name stored in Meta's video library (default: the file's basename) |
+| `--title` | `<TITLE>` | Display title shown on the video (default: the asset name) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

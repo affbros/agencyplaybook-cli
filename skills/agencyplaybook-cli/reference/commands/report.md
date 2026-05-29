@@ -1,6 +1,6 @@
 # `apb report` — Command Reference
 
-12 commands. Auto-generated from the apb binary on 2026-05-28.
+12 commands. Auto-generated from the apb binary on 2026-05-29.
 
 ### `apb report breakdown`
 

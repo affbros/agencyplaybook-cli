@@ -1,6 +1,6 @@
 # `apb policy` — Command Reference
 
-2 commands. Auto-generated from the apb binary on 2026-05-28.
+2 commands. Auto-generated from the apb binary on 2026-05-29.
 
 ### `apb policy profile set`
 

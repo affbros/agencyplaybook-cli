@@ -1,6 +1,6 @@
 # `apb dataset` — Command Reference
 
-18 commands. Auto-generated from the apb binary on 2026-05-28.
+18 commands. Auto-generated from the apb binary on 2026-05-29.
 
 ### `apb dataset action-queue`
 

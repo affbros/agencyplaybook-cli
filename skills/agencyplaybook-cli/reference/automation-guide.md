@@ -5,6 +5,8 @@
 This guide covers **unattended execution**: CI/CD pipelines, cron jobs, AI-agent workflows (Claude Code, Codex, etc.), and shell scripts. For interactive use, run `apb --help` and explore subcommands directly.
 
 > **Tenant disable propagation:** When an admin disables a tenant via `/admin/tenants`, the CLI begins returning `403 tenant_inactive` within **30 seconds** (the local `~/.apb/tenant_context.json` cache TTL).
+>
+> **Account selection (CI/agents):** in unattended runs, set the target account explicitly — `--account act_…` per command, or `META_AD_ACCOUNT_ID` in the job's environment/`.env`. As of **v0.2.1**, `META_AD_ACCOUNT_ID` **takes precedence over** any persisted `~/.apb/config.json` `default_account` left on the runner, so a stale global default can't silently redirect a job to the wrong account. `apb` echoes `[apb] account: … (source: …)` to stderr for the audit trail.
 
 ---
 
@@ -96,7 +98,7 @@ API parity: every CLI command has a paired `POST /api/v1/creatives/...` (or `/ap
 
 ## Creative format auditor (v0.2.0, exit 2)
 
-Every `apb creative create-*` and `apb creative update` runs a pure-function auditor on the spec before any write. Detects 11 unintended Meta v25 format-expansion variants (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / `template_url` / `{{product.*}}` / etc. — the Scandalous Coffee class).
+Every creative `create-*` subcommand and `apb creative update` runs a pure-function auditor on the spec before any write. Detects 11 unintended Meta v25 format-expansion variants (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / `template_url` / `{{product.*}}` / etc. — the Scandalous Coffee class).
 
 For CI / unattended pipelines:
 - `--strict-format` upgrades dry-run findings to exit 2 (fail loud on any finding). Use this in pre-merge checks.

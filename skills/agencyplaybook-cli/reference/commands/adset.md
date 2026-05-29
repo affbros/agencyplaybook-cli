@@ -1,6 +1,6 @@
 # `apb adset` — Command Reference
 
-8 commands. Auto-generated from the apb binary on 2026-05-28.
+8 commands. Auto-generated from the apb binary on 2026-05-29.
 
 ### `apb adset create`
 

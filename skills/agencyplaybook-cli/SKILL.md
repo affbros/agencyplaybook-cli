@@ -8,7 +8,7 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-05-28 from the live binary — 236 commands across 34 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-05-29 from the live binary — 236 commands across 34 domains.
 
 ## Routing
 
@@ -64,6 +64,8 @@ The create/update result also carries a soft **`advisories[]`** array (v0.1.20, 
 8. **End-to-end leadgen ad-create** (v0.2.0). `apb leadgen ad-create --campaign --adset --form-id --page-id --image --headline --body --cta` validates the campaign objective is `OUTCOME_LEADS`, verifies the form belongs to the page, creates the lead-form creative + ad in sequence, and reverse-pauses on partial failure. The Page-token check fires FIRST so token failures surface before any creative-write attempt.
 
 9. **Built-in compose presets** (v0.2.0). `apb campaign compose-from-spec --preset <sales-video|sales-carousel|lead-form|catalog-sales|reels-video|stories-video>` produces full campaign + adset + creative + ad stacks from operator-friendly args (`--campaign-name`, `--page-id`, `--daily-budget`, plus per-preset extras). Built-in presets take precedence over user-saved presets; **collision = fail-loud** with a shadowing error (exit 2).
+
+10. **Name uploaded assets** (v0.2.2). Whenever the CLI uploads an image/video from a local file, the asset is named by the file's basename (filename + extension) by default. Override it: `creative upload-image --name`, `creative upload-video --name` (+ `--title` for the display title, which defaults to the name), and per-asset `--image-name` / `--video-name` / `--thumbnail-name` / `--hero-image-name` on the `create-*` builders — distinct from each builder's `--name`, which is the *creative* name. A hash or pre-uploaded ID passed instead of a file path is used as-is.
 
 The remaining Meta rejections are account-state rules the CLI can't pre-check (business verification, page permissions, pixel custom-event validity, etc.) — those still bounce on `--execute`.
 
