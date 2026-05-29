@@ -6,6 +6,24 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-05-29 (cli-account-switching + cli-flag-wiring)
+
+### Added — ergonomic account switching (cli-account-switching)
+Switch the active ad account by **name**, and — with a profile — switch its Meta token at the same time, so the "token can't reach this account" `(#200)` mismatch can't recur.
+- **`apb account use <profile|name|act_…|123456>`** — set the active account by profile name, account-name substring, `act_` id, or numeric id; a bare name is matched against the accounts the current token can reach; prints the resolved account + a reachability hint.
+- **`apb account profile add|list|remove`** — named profiles binding an account to its token. The token is referenced by the **name of an env var** (`--token-env SCANDALOUS_TOKEN`), never stored in plaintext. In `META_OAUTH=DISABLED` mode the active profile's `token_env` supplies the BYO Meta token (an explicit `META_ACCESS_TOKEN` still wins).
+- **`apb account current`** — shows the active account, its profile, and which accounts the token actually reaches — flagging a token/account mismatch before a command 403s.
+- Net **+5 CLI leaves (236 → 241)**; CLI-local (no new API endpoints). `~/.apb/config.json` gains `account_profiles` + `active_profile`, both back-compatible with older binaries.
+
+### Fixed — silently-dropped CLI flags (cli-flag-wiring)
+Three documented flags were parsed by clap and then absorbed by a `{ .. }` rest-pattern in dispatch before reaching the service — the same bug class as the v0.2.2 `--name` fix. Found by a static drift audit (`docs/tasks/cli-audit.md`). Metric math is covered by new `apb-core` unit tests; **live behavioral validation against a real ad account is deferred to the operator** (the audit ran read-only, no Meta calls).
+- **`metrics objective-pack --objective`** now returns the documented per-objective metric pack (sales / leadgen / engagement / awareness) instead of ignoring the flag; `--days` is honored (was hardcoded 30). With no `--objective`, the prior by-objective overview is preserved.
+- **`learning volume`** now scopes by `--campaign` / `--adset` and filters by `--event`, reporting weekly optimization-event volume vs learning-phase exit thresholds (was account-wide entity *counts*, ignoring every flag).
+- **`dataset scenario --budget`** now derives the projection multiplier from the target budget vs current daily spend (was a fixed 1.0/1.5/2.0× sweep that ignored `--budget`); adds the documented `--event` / `--creative-velocity` flags and emits risk flags + preconditions.
+
+### Added
+- **Flag-wiring CI lint** (`rust/scripts/check_flag_wiring.py`, wired into `cli-parity.yml`) fails CI on any *new* clap flag swallowed by a `{ .. }` dispatch pattern. Current known drops are grandfathered in `rust/tasks/ci/api-parity/flag-wiring-baseline.json` (51 arms) so the gate prevents regressions while the backlog is worked down.
+
 ## [0.2.2] — Unreleased (cli-asset-naming Sprint 1)
 
 **Added — name uploaded assets.** Every image/video upload path now accepts an explicit asset name; when omitted it defaults to the file's basename (filename + extension), which was already the de-facto default.
