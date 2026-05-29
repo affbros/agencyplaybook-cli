@@ -1,6 +1,28 @@
 # `apb account` — Command Reference
 
-7 commands. Auto-generated from the apb binary on 2026-05-29.
+12 commands. Auto-generated from the apb binary on 2026-05-29.
+
+### `apb account current`
+
+Show the active account, its profile, and which accounts the token reaches (flags a token/account mismatch before it 403s)
+
+**Scope:** `read:campaigns` · **Min tier:** starter
+
+| Flag | Value | Description |
+|---|---|---|
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb account current
+```
 
 ### `apb account info-detailed`
 
@@ -138,6 +160,73 @@ List account pages
 apb account pages
 ```
 
+### `apb account profile add`
+
+Save a profile binding an account to its token (by env-var NAME, not plaintext)
+
+**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
+
+| Flag | Value | Description |
+|---|---|---|
+| `--account` | `<ACCOUNT>` | Ad account id (e.g. act_535043909388877) |
+| `--token-env` | `<TOKEN_ENV>` | Name of the env var holding this account's Meta token (e.g. SCANDALOUS_TOKEN) |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb account profile add --execute --token-env <TOKEN_ENV>
+```
+
+### `apb account profile list`
+
+List saved profiles and which one is active
+
+**Scope:** `read:campaigns` · **Min tier:** starter
+
+| Flag | Value | Description |
+|---|---|---|
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb account profile list
+```
+
+### `apb account profile remove`
+
+Remove a saved profile
+
+**Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
+
+| Flag | Value | Description |
+|---|---|---|
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb account profile remove --execute
+```
+
 ### `apb account set-default`
 
 Set the default ad account for CLI commands
@@ -158,4 +247,26 @@ Set the default ad account for CLI commands
 
 ```bash
 apb account set-default --execute
+```
+
+### `apb account use`
+
+Switch the active ad account by profile name, account-name substring, `act_` id, or numeric id. With a profile, its matching token switches too
+
+**Scope:** `read:campaigns` · **Min tier:** starter
+
+| Flag | Value | Description |
+|---|---|---|
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb account use
 ```

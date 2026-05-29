@@ -88,6 +88,7 @@ Get recommended metrics for an objective
 | Flag | Value | Description |
 |---|---|---|
 | `--objective` | `<OBJECTIVE>` |  |
+| `--days` | `<DAYS>` | Lookback window in days (default 30) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -99,5 +100,5 @@ Get recommended metrics for an objective
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb metrics objective-pack --objective <OBJECTIVE>
+apb metrics objective-pack --objective <OBJECTIVE> --days <DAYS>
 ```

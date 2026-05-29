@@ -6,7 +6,7 @@ This guide covers **unattended execution**: CI/CD pipelines, cron jobs, AI-agent
 
 > **Tenant disable propagation:** When an admin disables a tenant via `/admin/tenants`, the CLI begins returning `403 tenant_inactive` within **30 seconds** (the local `~/.apb/tenant_context.json` cache TTL).
 >
-> **Account selection (CI/agents):** in unattended runs, set the target account explicitly — `--account act_…` per command, or `META_AD_ACCOUNT_ID` in the job's environment/`.env`. As of **v0.2.1**, `META_AD_ACCOUNT_ID` **takes precedence over** any persisted `~/.apb/config.json` `default_account` left on the runner, so a stale global default can't silently redirect a job to the wrong account. `apb` echoes `[apb] account: … (source: …)` to stderr for the audit trail.
+> **Account selection (CI/agents):** in unattended runs, set the target account explicitly — `--account act_…` per command, or `META_AD_ACCOUNT_ID` in the job's environment/`.env`. As of **v0.2.1**, `META_AD_ACCOUNT_ID` **takes precedence over** any persisted `~/.apb/config.json` `default_account` left on the runner, so a stale global default can't silently redirect a job to the wrong account. `apb` echoes `[apb] account: … (source: …)` to stderr for the audit trail. For interactive/multi-account operators, `apb account use <profile>` (after `apb account profile add … --token-env VAR`) switches the account **and** its token together; CI/agents should still pin `--account` / `META_AD_ACCOUNT_ID` explicitly rather than rely on a persisted active profile.
 
 ---
 

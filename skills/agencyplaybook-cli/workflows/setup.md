@@ -63,11 +63,17 @@ apb campaign list
 # Should list campaigns in your default account.
 ```
 
-## Set a default account (optional)
+## Set or switch the active account (optional)
 
 ```bash
+# Quick: persist a single default
 apb account set-default --account act_1234567890
-# Persists to ~/.apb/config.json so you don't have to pass --account every time.
+
+# Better for multiple accounts — save a profile (account + its token, by env-var NAME),
+# then switch account AND token together with one command:
+apb account profile add <name> --account act_535043909388877 --token-env SCANDALOUS_TOKEN
+apb account use <name>     # flips account + token
+apb account current            # shows the active account and whether the token reaches it
 ```
 
 ## Common setup failures

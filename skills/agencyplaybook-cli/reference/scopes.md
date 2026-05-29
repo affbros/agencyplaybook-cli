@@ -67,15 +67,20 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb audience list`
 - `apb audience overlap`
 
-### `read:campaigns` (33 commands)
+### `read:campaigns` (38 commands)
 
+- `apb account current`
 - `apb account info-detailed`
 - `apb account instagram-accounts`
 - `apb account instagram-media`
 - `apb account list`
 - `apb account overview`
 - `apb account pages`
+- `apb account profile add`
+- `apb account profile list`
+- `apb account profile remove`
 - `apb account set-default`
+- `apb account use`
 - `apb ad get`
 - `apb ad list`
 - `apb ad preview`

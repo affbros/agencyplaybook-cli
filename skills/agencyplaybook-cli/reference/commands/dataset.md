@@ -383,6 +383,8 @@ Run what-if scenario
 | `--campaign` | `<CAMPAIGN>` |  |
 | `--spec-file` | `<SPEC_FILE>` |  |
 | `--budget` | `<BUDGET>` |  |
+| `--event` | `<EVENT>` | Optimization event to model (e.g. purchase, lead, add_to_cart) |
+| `--creative-velocity` | `<CREATIVE_VELOCITY>` | New creatives shipped per week (informs the creative-fatigue risk flag) |
 | `--days` | `<DAYS>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
