@@ -6,6 +6,41 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.2.2] — Unreleased (cli-asset-naming Sprint 1)
+
+**Added — name uploaded assets.** Every image/video upload path now accepts an explicit asset name; when omitted it defaults to the file's basename (filename + extension), which was already the de-facto default.
+
+### Added
+- **Builders:** per-asset `--image-name` / `--video-name` / `--thumbnail-name` / `--hero-image-name` on `creative create-image-simple`, `create-video-simple`, `create-lead-form-ad`, `create-catalog-creative`, `create-story-template`, `create-reels-video-template` (distinct from the builders' `--name`, which is the *creative* name).
+- **`creative upload-video --title`** — display title, separate from the asset `--name`; defaults to the asset name.
+- **API:** `POST /api/v1/creatives/upload-image` and `/upload-video` accept an optional `name` multipart field (defaults to the uploaded filename).
+- Videos now set Meta's advideos `name` field (was only `title`).
+
+### Fixed
+- **`creative upload-image --name` was silently ignored** (the dispatch dropped it; images were always named by basename). It now sets the asset name.
+- **Robust image-upload hash extraction:** `resolve_image_input` now reads `result.hash`, else the `images.<name>.hash` envelope, else a single entry, and surfaces Meta's error message instead of a generic "no hash" — addressing the `upload_image returned no hash for <file>` failures on otherwise-valid images.
+
+### Changed
+- **`creative upload-video --name` now sets the asset name** (Meta advideos `name`) rather than the display title. Use `--title` for the display title. Behavior change.
+
+No new commands/endpoints/scopes (flags only; stays 236/236).
+
+Deferred (follow-up): explicit naming on raw `creative create-image`(DCO multi-image)/`create-video --thumbnail` and the single-image quick-create path — these keep the basename default for now (DCO needs a parallel name-list design).
+
+## [0.2.1] — Unreleased (cli-account-precedence Sprint 1)
+
+**Fixed — ad-account resolution precedence.** `META_AD_ACCOUNT_ID` (from the shell env or the `.env` the binary ran from) now **takes precedence over** the persisted global `~/.apb/config.json` `default_account`. Previously the hidden global file silently outranked the documented `.env`, so swapping the account in `.env` had no effect and commands kept targeting a stale default — often surfacing as a confusing `(#200) Ad account owner has NOT granted ads_management` when the token had no rights on the silently-chosen account.
+
+### Changed
+- **Account precedence is now:** `--account` flag → `META_AD_ACCOUNT_ID` (.env / env) → `~/.apb/config.json` `default_account` → SaaS tenant default → auto-discovery. (Was: flag → `~/.apb/config.json` → env.)
+- The env-derived account also passes the SaaS `can_access_account` gate — if a tenant isn't authorized for the `.env` account, the command returns `account_not_authorized` (surfacing intent) instead of silently substituting the global default.
+
+### Added
+- **Transparent account reporting:** each run prints `[apb] account: <act_id> (source: --account flag | env META_AD_ACCOUNT_ID | ~/.apb/config.json default)` to stderr (suppressed under `--json`).
+- **Override warning:** when `META_AD_ACCOUNT_ID` overrides a *differing* `~/.apb/config.json` default, `apb` prints a loud `note:` naming both accounts so the override is never silent.
+
+No new commands, endpoints, or scopes (stays 236/236). Pure CLI resolution change; `apb-api` unaffected.
+
 ## [0.2.0] — 2026-05-27
 
 **Agency-gaps-v2 workstream.** Four phases of the gap analysis at `docs/tasks/agency-gaps-may-26-v2.md` shipped together: creative format auditor, placement presets, ergonomic builders + leadgen ad-create, built-in compose presets. Net surface: **+7 CLI leaves, +7 API endpoints (229 → 236), zero new tier scopes, zero migrations.** 86 new unit tests pass.
