@@ -6,6 +6,37 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-05-29 (meta-v25-field-coverage)
+
+Single batched release of the 3-tier Meta Marketing API v25 write-field-coverage workstream (correctness → capability → ergonomics). `cli_leaf_count` 241 → 242 (new `audience share`). No new scopes.
+
+### Added — Meta v25 field coverage, Tier 1 (correctness) — `meta-v25-field-coverage`
+- **Ad set:** `--dynamic-creative` (enables DCO — the CLI previously hardcoded it off), `--destination-type` (WhatsApp/Messenger/app/on-platform objectives), `--attribution-spec` (+ rejects v25-invalid 7d/28d view-through windows, removed 2026-01-12), `--dsa-beneficiary`/`--dsa-payor` (EU DSA; advisory when targeting EU countries without them).
+- **Campaign:** `--special-ad-category-country` (Meta requires it when a special ad category is set — now fails loud locally instead of a Meta 400).
+- **Creative:** `--instagram-user-id` (top-level v25 field) on the image/video simple builders; `--instagram-actor-id` kept as a deprecated alias (Meta deprecated it 2025-09-09).
+- **CAPI:** per-field PII normalization in `hash_pii_fields` (phone→digits, US-5 zip, YYYYMMDD dob, city/state letters-only, gender f/m, ISO-2 country) — fixes silent match-rate (EMQ) loss from the prior generic lowercase.
+- **Audience:** `customer_file_source` defaults to `USER_PROVIDED_ONLY` for `CUSTOM` audiences (was a hard `(#100)` failure when omitted).
+
+### Added — Meta v25 field coverage, Tier 2 (capability) — `meta-v25-field-coverage`
+- **Ad set Advantage+ relaxation:** `--advantage-detailed-targeting` (sets `targeting_automation.advantage_audience=1`), `--advantage-lookalike` / `--advantage-custom-audience` (build `targeting.targeting_relaxation`).
+- **Ad set min-ROAS / bid caps:** `--bid-constraints` (raw JSON, e.g. `{"roas_average_floor":12000}`) with validation — `LOWEST_COST_WITH_MIN_ROAS` requires a positive floor; `COST_CAP`/`LOWEST_COST_WITH_BID_CAP` require `--bid-amount`.
+- **Creative enhancements (Advantage+):** `--enhancements standard|none|<csv>` on the image/video simple builders → per-feature `degrees_of_freedom_spec.creative_features_spec.*.enroll_status` (the dead `enable_standard_enhancements` bundle is never emitted). A deliberate opt-in is whitelisted in the creative auditor; the carousel/collection/FORMAT_AUTOMATION ("Scandalous") trap still blocks.
+- **Inline DCO completeness:** `creative create-dynamic` gains `--description`, `--video` (pre-uploaded IDs), and `--optimization-type` on the inline `asset_feed_spec` path.
+- **CAPI value optimization:** `pixel send-event` gains `--contents` (`custom_data.contents[]`), `--content-category`, `--predicted-ltv`, plus `--lead-id` / `--subscription-id` / `--fb-login-id` on `user_data` (unhashed IDs — closes the leadgen → offline-conversion loop).
+- **Value-based audiences:** `audience create --value-based` (sets `is_value_based=true`) + `LTV` / `VALUE` schema codes for `audience users-add` (numeric, sent unhashed) — value-based audiences are now buildable end-to-end.
+- **Leadgen quality:** `leadgen create` now pre-flights for a privacy policy (`privacy_policy{url,link_text}` or legacy `privacy_policy_url`) and fails loud without one. The example spec (`docs/examples/leadgen-form-spec.json`) gains `is_optimized_for_quality`, `context_card`, a qualifier question, structured `privacy_policy`, and `thank_you_page`.
+
+### Added — Meta v25 field coverage, Tier 3 (ergonomics) — `meta-v25-field-coverage`
+- **`--extra-fields` escape hatch** on `campaign create` + `adset create` — a raw JSON object shallow-merged into the request body for any Meta field apb doesn't expose as a flag. Bypasses validation (advisory) and **fails loud on a key collision** with an apb-managed field. Kills the "no full-body passthrough" gap class.
+- **Targeting builder** on `adset create` — build the `targeting` spec from flags instead of hand-authored JSON: `--countries`/`--regions`/`--cities`/`--exclude-countries`, `--age-min`/`--age-max`/`--genders`, `--interests` (name→ID via search) / `--behaviors`, `--exclude-interests`, `--custom-audiences`/`--exclude-custom-audiences`, `--locales`/`--device-platforms`/`--user-os`. Mutually exclusive with `--targeting`/`--spec-file` (fails loud).
+- **Campaign create/update parity:** `campaign create` gains `--spend-cap`, `--start-time`, `--stop-time`, `--promoted-object`; `--bid-strategy` is validated against the v25 enum on both campaign + ad set.
+- **CAPI breadth + LDU:** `pixel send-event` gains `--first-name`/`--last-name`/`--external-id` (hashed), `--client-ip`/`--client-user-agent`/`--fbc`/`--fbp` (unhashed match signals), and Limited Data Use `--ldu`/`--dpo-country`/`--dpo-state` (CCPA `data_processing_options`).
+- **Audience completeness:** `audience create` gains `--prefill`/`--opt-out-link`; `audience create-lookalike` gains `--starting-ratio` (range), `--lookalike-type`, `--is-financial-service`; new **`audience share`** subcommand shares a custom audience with another ad account (`POST /{id}/adaccounts`). One new CLI leaf (241 → **242**).
+
+### Fixed
+- **Compose** posted `special_ad_categories` as the literal string `"[]"` instead of a JSON array — migrated `ComposeSpecCampaign.special_ad_categories` to `Vec<String>`.
+- **`apb-api` had not compiled on `main` since v0.3.0** — the v0.3.0 `objective_pack`/`volume`/`scenario` signature changes were never propagated to the HTTP routes (CI built `apb-cli` + ran parity scripts but never compiled `apb-api`). Routes fixed, and **`cargo build -p apb-api` added to `cli-parity.yml`** so it can't recur.
+
 ## [0.3.0] — 2026-05-29 (cli-account-switching + cli-flag-wiring)
 
 ### Added — ergonomic account switching (cli-account-switching)
