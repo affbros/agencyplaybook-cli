@@ -5,6 +5,8 @@
 This guide covers **unattended execution**: CI/CD pipelines, cron jobs, AI-agent workflows (Claude Code, Codex, etc.), and shell scripts. For interactive use, run `apb --help` and explore subcommands directly.
 
 > **Tenant disable propagation:** When an admin disables a tenant via `/admin/tenants`, the CLI begins returning `403 tenant_inactive` within **30 seconds** (the local `~/.apb/tenant_context.json` cache TTL).
+>
+> **Account selection (CI/agents):** in unattended runs, set the target account explicitly — `--account act_…` per command, or `META_AD_ACCOUNT_ID` in the job's environment/`.env`. As of **v0.2.1**, `META_AD_ACCOUNT_ID` **takes precedence over** any persisted `~/.apb/config.json` `default_account` left on the runner, so a stale global default can't silently redirect a job to the wrong account. `apb` echoes `[apb] account: … (source: …)` to stderr for the audit trail. For interactive/multi-account operators, `apb account use <profile>` (after `apb account profile add … --token-env VAR`) switches the account **and** its token together; CI/agents should still pin `--account` / `META_AD_ACCOUNT_ID` explicitly rather than rely on a persisted active profile.
 
 ---
 
@@ -23,18 +25,18 @@ Read-only commands need none of these (other than optional `--json`):
 
 ```bash
 apb account list --json
-apb report run --account act_123 --since 30d --json
-apb playbook run frequency-fatigue --account act_123 --json
+apb report insights --account act_123 --days 30 --json
+apb playbook fatigue-index --account act_123 --json
 ```
 
-Mutations always require `--execute`; destructive ones additionally require `--confirm-destructive`. The CLI fails fast with exit code 4 if you forget either:
+Mutations always require `--execute` (without it the CLI dry-runs and exits 0); destructive ones additionally require `--confirm-destructive` (omitting it is a validation error, exit 2):
 
 ```bash
 apb campaign update-status --id @spring-sale --status PAUSED --execute --json
 apb campaign delete --id @old-test --execute --confirm-destructive --json
 ```
 
-**`--no-input` does not bypass any safety gate.** If a write needs `--execute`, `--no-input` does not supply it; the command still exits 4. The flag's only job is to forbid stdin reads — see *Safety Model* below.
+**`--no-input` does not bypass any safety gate.** If a write needs `--execute`, `--no-input` does not supply it; the command simply **dry-runs and exits 0** (it does not mutate). The flag's only job is to forbid stdin reads — see *Safety Model* below.
 
 ---
 
@@ -48,7 +50,7 @@ Every failure maps to a documented exit code. Scripts and CI runners can branch 
 | `1` | General / unmapped | I/O error, config parse failure, fall-through |
 | `2` | Validation / invalid input | clap parse error, missing required flag, malformed JSON, invalid `--url` |
 | `3` | Auth / permission | invalid `APB_API_KEY`, expired token, unauthorized account, missing scope, tier upgrade required |
-| `4` | Safety gate blocked | `--execute` provided on a mutation but env-gates (`READ_ONLY` / `ALLOW_WRITES` / `APB_ALLOW_MUTATIONS`) blocked the write; `--confirm-destructive` missing on a destructive op; `--no-input` set on a would-prompt path. **Without `--execute` the CLI dry-runs and exits 0** — see "Dry-run a campaign change" below. |
+| `4` | Safety gate blocked | `--execute` provided on a mutation but env-gates (`READ_ONLY` / `ALLOW_WRITES` / `APB_ALLOW_MUTATIONS`) blocked the write (`write_blocked`); or `--no-input` blocked a would-prompt path (`safety_gate_blocked`). **Without `--execute` the CLI dry-runs and exits 0; a missing `--confirm-destructive` is exit 2 (validation), not 4.** |
 | `5` | Network / rate-limit / 5xx | Meta API timeout, 429 throttle, 5xx response, connection refused |
 | `6` | Partial success | reserved for future batch operations |
 
@@ -59,10 +61,10 @@ When `--json` is set on a failing command, stdout emits a structured envelope. S
   "ok": false,
   "error": {
     "code": "write_blocked",
-    "message": "Write blocked: [\"--execute flag not provided\"]",
+    "message": "Write blocked: READ_ONLY != false",
     "exit_code": 4,
     "details": {
-      "reasons": ["--execute flag not provided", "READ_ONLY=true"]
+      "reasons": ["READ_ONLY != false", "ALLOW_WRITES != true"]
     }
   }
 }
@@ -78,6 +80,98 @@ Per-class `error.details` payloads:
 | Account not authorized | `account_not_authorized` | `account_id` |
 | Rate limited | `rate_limited` | `retry_after_ms` |
 
+Errors **not** in this table (e.g. `validation_error`, `auth_error`) emit a flat envelope — `code` + `message` + `exit_code`, with no `details` object.
+
+---
+
+## Ergonomic creative builders + leadgen ad-create (v0.2.0)
+
+Sprint 3 of agency-gaps-v2 added 7 new `apb` commands paired with 7 API endpoints — operator-friendly builders that generate v25 `AdCreative` JSON internally. CI patterns:
+
+- `apb creative create-image-simple` / `create-video-simple` — single-asset creatives. Image/video flags accept local paths (auto-upload under `--execute`) or Meta hashes/IDs.
+- `apb creative create-lead-form-ad` — injects `lead_gen_form_id` into `link_data.call_to_action.value`. Validates form exists pre-write.
+- `apb creative create-catalog-creative --format <single|carousel|collection|automatic>` — auto-wires the matching Sprint-1 `--allow-*` flag from the `--format` intent. Operators don't need to manually pass `--allow-collection` for a `--format collection` creative.
+- `apb creative create-story-template` / `create-reels-video-template` — emit `story_advisories` / `reels_advisories` arrays (9:16 reminder, safe-zone, video length limits).
+- `apb leadgen ad-create` — end-to-end orchestrator. Validates campaign objective is `OUTCOME_LEADS` + form belongs to page BEFORE any write. Reverse-pauses the creative if ad-create fails.
+
+API parity: every CLI command has a paired `POST /api/v1/creatives/...` (or `/api/v1/leadgen/ad-create`) endpoint accepting the same fields as a typed JSON body. See `rust/docs/API_REFERENCE.md` § v0.2.0 Ergonomic Builders.
+
+## Creative format auditor (v0.2.0, exit 2)
+
+Every creative `create-*` subcommand and `apb creative update` runs a pure-function auditor on the spec before any write. Detects 11 unintended Meta v25 format-expansion variants (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / `template_url` / `{{product.*}}` / etc. — the Scandalous Coffee class).
+
+For CI / unattended pipelines:
+- `--strict-format` upgrades dry-run findings to exit 2 (fail loud on any finding). Use this in pre-merge checks.
+- `--audit-only` runs the auditor and exits 0 without writing, regardless of `--execute`. Use for spec-review jobs that want to read the `format_audit.findings` array via `--json`.
+- When `--execute` is set and the audit detects unwhitelisted findings, the binary exits 2 BEFORE the write gate's exit 4 — so CI scripts that branch on exit code see the actionable auditor message, not the env complaint.
+- Whitelist matching findings explicitly with `--allow-carousel`, `--allow-collection`, `--allow-automatic-format`, `--allow-format-automation`, `--allow-catalog-template`.
+
+Full risk taxonomy + flag-by-flag reference at [`../rust/docs/CREATIVE_AUDITOR.md`](../rust/docs/CREATIVE_AUDITOR.md).
+
+```yaml
+# Example: GitHub Actions step that audits every committed creative spec.
+- name: Audit creative specs
+  run: |
+    for spec in specs/creative/*.json; do
+      apb creative create-image --name "ci-$(basename $spec .json)" --spec-file "$spec" --strict-format --json
+    done
+```
+
+---
+
+## Pre-flight Guards (`validation_error`, exit 2, during `--dry-run`)
+
+A growing set of Meta-side rejections are now caught **before any network call** — so they fail fast on `--dry-run`, not after `--execute`. All return exit `2` with `error.code = "validation_error"`. Agents can either branch on the exit code (already covered) or pattern-match the message excerpt.
+
+| Guard | Trigger | Message excerpt | Since |
+|---|---|---|---|
+| **Objective must be ODAX** | `campaign create` / `campaign compose-from-spec` with a non-`OUTCOME_*` objective (legacy `CONVERSIONS`, `LINK_CLICKS`, `POST_ENGAGEMENT`, …) | `objective 'CONVERSIONS' is not a valid Meta v25 objective … (CONVERSIONS → OUTCOME_SALES)` | v0.1.19 |
+| **Conversion goal needs `promoted_object`** | `adset create` / compose with `--optimization-goal OFFSITE_CONVERSIONS` or `VALUE` and no `--promoted-object` | `optimization-goal OFFSITE_CONVERSIONS … requires a promoted_object — pass --promoted-object '{"pixel_id":"<id>","custom_event_type":"PURCHASE"}'` | v0.1.19 |
+| **Dayparting needs a lifetime budget** | `--daypart-hours` / `--adset-schedule` + `--daily-budget` on create; or `adset update --adset-schedule` against a daily-budget ad set (or its CBO parent campaign — the CLI fetches both) | `adset_schedule (dayparting) requires a lifetime budget; daily-budget ad sets can't use fixed daypart scheduling` | v0.1.15 (create) / v0.1.17 (update + CBO parent) |
+| **Dayparting windows must fit the flight** | Any `timezone_type=ADVERTISER` window's recurring slot never intersects `start_time → end_time` (e.g. lifetime $350 with windows past `--end-time …T10:00`). Skipped for flights ≥ 7 days. | `N daypart window(s) fall entirely outside the flight (… .. …) and will never deliver: HH:MM-HH:MM, …` | v0.1.20 |
+| **Placement preset conflict** | `--placements <preset>` on `adset create` / `adset update-targeting` when the operator's `--targeting` JSON already contains `publisher_platforms` / `facebook_positions` / `instagram_positions` | `--placements reels conflicts with --targeting.publisher_platforms (operator set X, preset wants Y). Remove one of them.` | v0.2.0 |
+
+All guards are deterministic and best-effort: `USER`-timezone windows, parse failures on times, and lookup failures (e.g. parent campaign GET errors) **pass through** rather than block — Meta stays the final authority. No false positives by design.
+
+### Soft `advisories[]` (non-blocking, v0.1.20)
+
+The `adset create` / `adset update` result includes an `advisories[]` string array (top-level, alongside `id` or inside the dry-run envelope) for Meta-accepted setups that usually under-deliver:
+
+| Trigger | Sample message |
+|---|---|
+| Lifetime budget, flight < 24h | `Flight is only Xh — a lifetime budget paces poorly over <1 day; use a daily budget or a longer flight.` |
+| Lifetime budget, flight < 6 days | `Flight is ~Xd — Meta typically needs ≥6 days to exit the learning phase; short flights can under-deliver.` |
+| Lifetime / dayparted ad set with no `end_time` | `Lifetime budget / dayparting requires --end-time …` |
+
+Agents should surface advisories to the operator but **not** treat them as failures. The exit code stays `0` (dry-run) or `0` (execute success); `advisories` is omitted when empty.
+
+### Full-body dry-run preview (v0.1.20)
+
+`adset create --dry-run` returns a `would_create` object that contains the **complete** request body Meta would receive: `campaign_id`, `name`, `optimization_goal`, `billing_event`, `targeting` (with `targeting_automation.advantage_audience` injected), `daily_budget` / `lifetime_budget`, `bid_strategy`, `bid_amount`, `pacing_type`, `promoted_object`, `start_time`, `end_time`, `adset_schedule`, `status`. (`adset update` previews the full `changes` map.) Agents can verify budget/conversion/schedule wiring without `--execute`.
+
+```json
+{
+  "ok": true,
+  "dry_run": true,
+  "would_create": {
+    "campaign_id": "120…",
+    "name": "Evening Sales",
+    "optimization_goal": "OFFSITE_CONVERSIONS",
+    "billing_event": "IMPRESSIONS",
+    "lifetime_budget": "35000",
+    "pacing_type": ["day_parting"],
+    "promoted_object": {"pixel_id": "…", "custom_event_type": "ADD_TO_CART"},
+    "adset_schedule": [/* 6 windows */],
+    "start_time": "2026-06-01T00:00:00-0700",
+    "end_time": "2026-06-08T23:59:00-0700",
+    "status": "PAUSED",
+    "targeting": {/* … */}
+  },
+  "advisories": [],
+  "blocked_reasons": ["--execute flag not provided", "READ_ONLY != false", …]
+}
+```
+
 ---
 
 ## CI/CD Examples
@@ -89,12 +183,12 @@ apb doctor check --no-input --json
 # exit 0 = healthy; non-zero = config drift or expired credentials
 ```
 
-### Daily report run
+### Daily insights pull
 
 ```bash
-apb report run \
+apb report insights \
   --account act_123 \
-  --since 7d \
+  --days 7 \
   --no-input --json \
   > reports/$(date -I).json
 ```
@@ -152,7 +246,7 @@ Recommended invocation pattern for an agent (Claude Code, Codex, etc.) running `
 Minimal Claude-style invocation:
 
 ```bash
-apb playbook run frequency-fatigue \
+apb playbook fatigue-index \
   --account act_123 \
   --no-input --json
 ```
@@ -291,6 +385,23 @@ Each violation produces an exit-2 `Validation error` naming the missing field.
 
 ---
 
+## `--extra-fields` escape hatch (campaign / adset create)
+
+When Meta ships a field `apb` doesn't expose as a flag yet, `--extra-fields '<json-object>'` shallow-merges arbitrary keys into the create body so you don't have to wait for a release:
+
+```bash
+apb campaign create --name Q3 --objective OUTCOME_SALES \
+  --extra-fields '{"is_skadnetwork_attribution": true}' --dry-run --json
+```
+
+Contract for agents/CI:
+- **Bypasses apb validation** — the injected keys are sent to Meta as-is. The dry-run preview lists them in `advisories` ("…bypass apb validation…"); surface that to the operator.
+- **Fails loud on collision** — if a key duplicates one apb already manages (e.g. `objective`), the command exits 2 with `--extra-fields key '…' collides …`. Use the dedicated flag instead. This means `--extra-fields` can never silently override a validated field.
+- Must be a JSON **object** (not an array/scalar) or it exits 2.
+- Always preview with `--dry-run` first; the merged body appears under `would_create`.
+
+---
+
 ## Safety Model for Unattended Execution
 
 The CLI's safety contract is layered. Each layer must explicitly permit before a mutation runs.
@@ -300,7 +411,7 @@ The CLI's safety contract is layered. Each layer must explicitly permit before a
 3. **`--execute`** — explicit per-invocation flag.
 4. **`--confirm-destructive`** — required for DELETE / ARCHIVE / $0 budget / >200% budget moves.
 
-A failure at any layer aborts with exit code 4 and a JSON envelope naming the missing flag in `error.details.required_flags`.
+Env-gate and `--no-input`-prompt failures abort with **exit 4** — `write_blocked` (`error.details.reasons`) or `safety_gate_blocked` (`error.details.required_flags`). Note the other two layers differ: a missing `--execute` **dry-runs and exits 0** (no abort), and a missing `--confirm-destructive` is a **validation error (exit 2)**.
 
 **`--no-input` never implies approval.** It is a contract between the operator and the CLI that stdin will not be read; nothing more. If you pipe `apb` into a script, you must still satisfy every gate the operation requires. The CLI will refuse rather than guess.
 
@@ -308,7 +419,6 @@ A failure at any layer aborts with exit code 4 and a JSON envelope naming the mi
 
 ## See also
 
-- `ai/contracts/cli-ergonomics-001/sprint-001.md` — runtime contract authored 2026-04
-- `ai/contracts/cli-ergonomics-001/sprint-002.md` — inline DCO + this doc
-- `rust/docs/SAFETY_MODEL.md` — service-layer write-gate details
-- `rust/docs/CLI_REFERENCE.md` — full per-command flag inventory
+- `reference/exit-codes.md` — canonical exit-code table + agent decision tree (in this skill bundle)
+- `reference/scopes.md` — per-scope command list and tier requirements (in this skill bundle)
+- Full CLI reference & downloads: <https://agencyplaybook.io> (Developer → CLI Reference) and <https://github.com/affbros/agencyplaybook-cli>

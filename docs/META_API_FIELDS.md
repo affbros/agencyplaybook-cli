@@ -106,7 +106,8 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 | `budget_remaining` | string | Remaining budget in cents |
 | `bid_strategy` | string | LOWEST_COST_WITHOUT_CAP, COST_CAP, etc. |
 | `buying_type` | string | AUCTION, RESERVED |
-| `special_ad_categories` | array | HOUSING, CREDIT, EMPLOYMENT, etc. |
+| `special_ad_categories` | array | HOUSING, CREDIT, EMPLOYMENT, etc. (`--special-ad-categories`) |
+| `special_ad_category_country` | array | ISO codes scoping the categories (`--special-ad-category-country`; required when a category is set) |
 | `start_time` | datetime | Campaign start |
 | `stop_time` | datetime | Campaign end |
 | `created_time` | datetime | Creation timestamp |
@@ -118,7 +119,8 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 |-------|------|-------------|
 | `id` | string | Adset ID |
 | `name` | string | Adset name |
-| `status` | enum | ACTIVE, PAUSED, DELETED, ARCHIVED |
+| `status` | enum | Configured status: ACTIVE, PAUSED, DELETED, ARCHIVED |
+| `configured_status` | enum | Operator-set status (same domain as `status`) |
 | `effective_status` | enum | Computed delivery status |
 | `campaign_id` | string | Parent campaign |
 | `daily_budget` | string | Daily budget in cents |
@@ -128,10 +130,18 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 | `bid_strategy` | string | Bidding strategy |
 | `bid_amount` | string | Bid amount in cents |
 | `billing_event` | string | IMPRESSIONS, LINK_CLICKS, etc. |
+| `pacing_type` | array | Delivery pacing, e.g. `["standard"]` or `["day_parting"]` (required for ad scheduling) |
+| `adset_schedule` | array | Dayparting windows: `[{start_minute,end_minute,days:[0-6],timezone_type:USER\|ADVERTISER}]`. Requires a lifetime budget |
 | `targeting` | object | Full targeting specification |
 | `promoted_object` | object | Pixel ID, app, page, etc. |
-| `destination_type` | string | WEBSITE, APP, MESSENGER, etc. |
-| `attribution_spec` | array | Attribution settings |
+| `destination_type` | string | WEBSITE, APP, MESSENGER, etc. (writable via `--destination-type`) |
+| `attribution_spec` | array | Attribution windows (writable via `--attribution-spec`; v25 rejects 7d/28d view-through) |
+| `is_dynamic_creative` | bool | DCO flag (writable via `--dynamic-creative`) |
+| `dsa_beneficiary` | string | EU DSA beneficiary (`--dsa-beneficiary`) |
+| `dsa_payor` | string | EU DSA payor (`--dsa-payor`) |
+| `bid_constraints` | object | Bid/ROAS constraints, e.g. `{"roas_average_floor":12000}` (`--bid-constraints`). Required for `bid_strategy=LOWEST_COST_WITH_MIN_ROAS` |
+| `targeting.targeting_relaxation` | object | Advantage+ audience relaxation `{"lookalike":1,"custom_audience":1}` (`--advantage-lookalike` / `--advantage-custom-audience`) |
+| `targeting.targeting_automation.advantage_audience` | int (0\|1) | Advantage+ detailed-targeting / audience (`--advantage-audience` / `--advantage-detailed-targeting`) |
 | `start_time` | datetime | Delivery start |
 | `end_time` | datetime | Delivery end |
 | `created_time` | datetime | Creation timestamp |
@@ -166,7 +176,9 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 | `thumbnail_url` | string | Video thumbnail URL |
 | `object_type` | string | PHOTO, VIDEO, SHARE, etc. |
 | `object_story_spec` | object | Page post spec (page_id, link_data, video_data) |
-| `asset_feed_spec` | object | Dynamic creative assets |
+| `instagram_user_id` | string | Top-level IG actor for IG placements (`--instagram-user-id`; replaces the deprecated `instagram_actor_id`) |
+| `asset_feed_spec` | object | Dynamic creative assets: `images[]`, `videos[]` (`--video`), `titles[]`, `bodies[]`, `descriptions[]` (`--description`), `link_urls[]`, `call_to_action_types[]`, `optimization_type` (`--optimization-type`) |
+| `degrees_of_freedom_spec` | object | Advantage+ creative enhancements (`--enhancements`): `creative_features_spec.<feature>.enroll_status` = `OPT_IN`/`OPT_OUT`. **Note:** v25 uses per-feature `enroll_status`; the legacy `enable_standard_enhancements` boolean is removed |
 | `url_tags` | string | URL tracking parameters |
 
 ### Insights Fields
@@ -196,6 +208,54 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 | `video_p100_watched_actions` | array | Watched 100% |
 | `video_30_sec_watched_actions` | array | Watched 30+ seconds |
 | `video_thruplay_watched_actions` | array | Thruplays |
+
+### CAPI Server-Event Fields (Conversions API — `pixel send-event`)
+
+`user_data` (PII fields SHA-256 hashed locally; IDs sent unhashed):
+
+| Field | Hashed? | Description |
+|-------|---------|-------------|
+| `em`, `ph`, `fn`, `ln`, `db`, `ge`, `ct`, `st`, `zp`, `country` | yes | Per-field normalized then SHA-256 (`--email`/`--phone`; batch via `send-batch`) |
+| `external_id`, `client_ip_address`, `client_user_agent`, `fbc`, `fbp` | no | Match identifiers |
+| `lead_id` | no | Leadgen lead ID — offline-conversion loop (`--lead-id`) |
+| `subscription_id` | no | Subscription ID (`--subscription-id`) |
+| `fb_login_id` | no | Facebook login ID (`--fb-login-id`) |
+
+`custom_data`:
+
+| Field | Description |
+|-------|-------------|
+| `value`, `currency` | Transaction value (`--value` / `--currency`) |
+| `content_name`, `content_ids`, `content_type`, `order_id`, `num_items` | Standard content fields |
+| `contents` | `[{id,quantity,item_price,delivery_category}]` — itemized; drives value/ROAS/DPA (`--contents`) |
+| `content_category` | Page/product category (`--content-category`) |
+| `predicted_ltv` | Predicted lifetime value for value-based optimization (`--predicted-ltv`) |
+
+### Custom Audience Fields (`audience create` / `users-add` / `create-lookalike` / `share`)
+
+| Field | Description |
+|-------|-------------|
+| `subtype` | `CUSTOM`, `WEBSITE`, `ENGAGEMENT`, `LOOKALIKE` |
+| `customer_file_source` | Defaults `USER_PROVIDED_ONLY` for `CUSTOM` (Meta requires it) |
+| `is_value_based` | `--value-based` — enables a value-based lookalike source |
+| `prefill` | `--prefill` — backfill a WEBSITE/pixel audience from existing data |
+| `opt_out_link` | `--opt-out-link` — privacy opt-out URL |
+| `lookalike_spec.{type,ratio,starting_ratio,country,is_financial_service}` | `create-lookalike` `--lookalike-type`/`--ratio`/`--starting-ratio`/`--country`/`--is-financial-service` |
+| `POST /{id}/adaccounts` | `audience share --account act_…` (same Business Manager) |
+| upload schema codes | `EMAIL,PHONE,FN,LN,DOBY,DOBM,DOBD,GEN,CT,ST,ZIP,COUNTRY,MADID,EXTERN_ID` (hashed) + `LTV`,`VALUE` (numeric, unhashed) |
+
+### Ad-set `targeting` spec fields (built by the Tier-3 targeting builder)
+
+| Field | Builder flag |
+|-------|--------------|
+| `geo_locations.countries` / `.regions[{key}]` / `.cities[{key}]` | `--countries` / `--regions` / `--cities` |
+| `excluded_geo_locations.countries` | `--exclude-countries` |
+| `age_min` / `age_max` / `genders` | `--age-min` / `--age-max` / `--genders` |
+| `flexible_spec[0].interests[{id}]` / `.behaviors[{id}]` | `--interests` (name→ID) / `--behaviors` |
+| `exclusions.interests[{id}]` | `--exclude-interests` |
+| `custom_audiences[{id}]` / `excluded_custom_audiences[{id}]` | `--custom-audiences` / `--exclude-custom-audiences` |
+| `locales` / `device_platforms` / `user_os` | `--locales` / `--device-platforms` / `--user-os` |
+| `targeting_relaxation.{lookalike,custom_audience}` | `--advantage-lookalike` / `--advantage-custom-audience` |
 
 ---
 

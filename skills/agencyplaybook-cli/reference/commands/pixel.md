@@ -236,6 +236,22 @@ Send a single server-side event (CAPI)
 | `--test-event-code` | `<TEST_EVENT_CODE>` |  |
 | `--value` | `<VALUE>` | Purchase value |
 | `--currency` | `<CURRENCY>` | Currency code (e.g. USD) |
+| `--contents` | `<CONTENTS>` | `custom_data.contents[]` as a JSON array, e.g. `[{"id":"SKU1","quantity":2,"item_price":9.99}]`. Drives value/ROAS optimization |
+| `--content-category` | `<CONTENT_CATEGORY>` | `custom_data.content_category` |
+| `--predicted-ltv` | `<PREDICTED_LTV>` | `custom_data.predicted_ltv` — predicted lifetime value for value-based optimization |
+| `--lead-id` | `<LEAD_ID>` | `user_data.lead_id` — closes the leadgen → offline-conversion loop |
+| `--subscription-id` | `<SUBSCRIPTION_ID>` | `user_data.subscription_id` |
+| `--fb-login-id` | `<FB_LOGIN_ID>` | `user_data.fb_login_id` |
+| `--external-id` | `<EXTERNAL_ID>` | `user_data.external_id` — your own user/customer ID (sent as provided; Meta accepts it hashed or plain — pre-hash it yourself if desired) |
+| `--client-ip` | `<CLIENT_IP>` | `user_data.client_ip_address` (unhashed) |
+| `--client-user-agent` | `<CLIENT_USER_AGENT>` | `user_data.client_user_agent` (unhashed) |
+| `--fbc` | `<FBC>` | `user_data.fbc` click ID (unhashed) |
+| `--fbp` | `<FBP>` | `user_data.fbp` browser ID (unhashed) |
+| `--first-name` | `<FIRST_NAME>` | `user_data.fn` first name (hashed) |
+| `--last-name` | `<LAST_NAME>` | `user_data.ln` last name (hashed) |
+| `--ldu` |  | Limited Data Use (CCPA): sets `data_processing_options=["LDU"]` |
+| `--dpo-country` | `<DPO_COUNTRY>` | LDU country (`0` = auto-geolocate). Implies --ldu |
+| `--dpo-state` | `<DPO_STATE>` | LDU state (`0` = auto; `1000` = California). Implies --ldu |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

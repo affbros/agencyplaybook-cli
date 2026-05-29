@@ -30,16 +30,41 @@ Create a new ad set
 | `--daypart-hours` | `<DAYPART_HOURS>` | Dayparting builder: comma-separated hours 0-23 (e.g. "9,12,16,19,21"). Consecutive hours merge into windows; built into `adset_schedule` (requires a lifetime budget). Overridden by --adset-schedule |
 | `--daypart-days` | `<DAYPART_DAYS>` | Days for --daypart-hours: comma-separated 0-6 (0=Sunday). Default all 7 |
 | `--daypart-timezone` | `<DAYPART_TIMEZONE>` | Timezone for --daypart-hours: USER (viewer) or ADVERTISER. Default USER |
-| `--status` | `<STATUS>` |  |
-| `--placements` | `<PLACEMENTS>` | Placement preset (v0.2.0). Expands into v25 publisher_platforms / facebook_positions / instagram_positions, merged into --targeting / --spec-file. Fails loud (exit 2) when the targeting JSON already sets any of those three keys. See `rust/docs/USAGE_GUIDE.md` § "Reels/Stories placement preset" [possible values: feed, stories, reels, stories-reels, feed-stories-reels, advantage-plus] |
+| `--destination-type` | `<DESTINATION_TYPE>` | Conversion/traffic destination: WEBSITE, APP, MESSENGER, INSTAGRAM_DIRECT, WHATSAPP, ON_AD, ON_POST. Required for click-to-message / app objectives |
+| `--dynamic-creative` |  | Enable Dynamic Creative (DCO) — required for asset_feed_spec creatives |
+| `--attribution-spec` | `<ATTRIBUTION_SPEC>` | Per-ad-set attribution windows as inline JSON, e.g. `[{"event_type":"CLICK_THROUGH","window_days":7},{"event_type":"VIEW_THROUGH","window_days":1}]` |
+| `--dsa-beneficiary` | `<DSA_BENEFICIARY>` | EU DSA: beneficiary of the ads (required for EU-targeted delivery) |
+| `--dsa-payor` | `<DSA_PAYOR>` | EU DSA: payor for the ads (required for EU-targeted delivery) |
+| `--advantage-detailed-targeting` |  | Advantage+ detailed-targeting expansion (lets Meta expand beyond your detailed-targeting selections). Sets targeting_automation.advantage_audience=1 |
+| `--advantage-lookalike` |  | Advantage+ lookalike expansion → targeting.targeting_relaxation.lookalike=1 |
+| `--advantage-custom-audience` |  | Advantage+ custom-audience expansion → targeting.targeting_relaxation.custom_audience=1 |
+| `--bid-constraints` | `<BID_CONSTRAINTS>` | Bid/ROAS constraints JSON, e.g. `{"roas_average_floor":12000}`. Required when --bid-strategy is LOWEST_COST_WITH_MIN_ROAS |
+| `--countries` | `<COUNTRIES>` | Country codes (ISO-2), comma-separated, e.g. `US,CA` |
+| `--regions` | `<REGIONS>` | Region keys (from `apb targeting geo-search`), comma-separated |
+| `--cities` | `<CITIES>` | City keys (from `apb targeting geo-search`), comma-separated |
+| `--exclude-countries` | `<EXCLUDE_COUNTRIES>` | Excluded country codes, comma-separated |
+| `--age-min` | `<AGE_MIN>` |  |
+| `--age-max` | `<AGE_MAX>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
+| `--genders` | `<GENDERS>` | Genders: comma-separated `1` (male) / `2` (female). Omit for all |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--interests` | `<INTERESTS>` | Interest IDs or names (names resolved via interest search), comma-separated |
+| `--behaviors` | `<BEHAVIORS>` | Behavior IDs, comma-separated |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--exclude-interests` | `<EXCLUDE_INTERESTS>` | Excluded interest IDs, comma-separated |
+| `--custom-audiences` | `<CUSTOM_AUDIENCES>` | Custom-audience IDs to include, comma-separated |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--exclude-custom-audiences` | `<EXCLUDE_CUSTOM_AUDIENCES>` | Custom-audience IDs to exclude, comma-separated |
+| `--locales` | `<LOCALES>` | Locale IDs, comma-separated |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--device-platforms` | `<DEVICE_PLATFORMS>` | Device platforms: `mobile`,`desktop` |
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+| `--user-os` | `<USER_OS>` | User OS: `iOS`,`Android` |
+| `--extra-fields` | `<EXTRA_FIELDS>` | Escape hatch: raw JSON object merged into the create body for Meta fields apb doesn't expose. Bypasses validation; fails loud on collision |
+| `--status` | `<STATUS>` |  |
+| `--placements` | `<PLACEMENTS>` | Placement preset (v0.2.0). Expands into v25 publisher_platforms / facebook_positions / instagram_positions, merged into --targeting / --spec-file. Fails loud (exit 2) when the targeting JSON already sets any of those three keys. See `rust/docs/USAGE_GUIDE.md` § "Reels/Stories placement preset" [possible values: feed, stories, reels, stories-reels, feed-stories-reels, advantage-plus] |
 
 ```bash
 apb adset create --execute --campaign <CAMPAIGN> --name <NAME>

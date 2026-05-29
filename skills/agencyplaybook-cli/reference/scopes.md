@@ -249,8 +249,9 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb ask`
 - `apb search`
 
-### `write:audience-data` (2 commands)
+### `write:audience-data` (3 commands)
 
+- `apb audience share`
 - `apb audience users-add`
 - `apb audience users-remove`
 

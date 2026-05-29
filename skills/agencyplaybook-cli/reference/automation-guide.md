@@ -385,6 +385,23 @@ Each violation produces an exit-2 `Validation error` naming the missing field.
 
 ---
 
+## `--extra-fields` escape hatch (campaign / adset create)
+
+When Meta ships a field `apb` doesn't expose as a flag yet, `--extra-fields '<json-object>'` shallow-merges arbitrary keys into the create body so you don't have to wait for a release:
+
+```bash
+apb campaign create --name Q3 --objective OUTCOME_SALES \
+  --extra-fields '{"is_skadnetwork_attribution": true}' --dry-run --json
+```
+
+Contract for agents/CI:
+- **Bypasses apb validation** — the injected keys are sent to Meta as-is. The dry-run preview lists them in `advisories` ("…bypass apb validation…"); surface that to the operator.
+- **Fails loud on collision** — if a key duplicates one apb already manages (e.g. `objective`), the command exits 2 with `--extra-fields key '…' collides …`. Use the dedicated flag instead. This means `--extra-fields` can never silently override a validated field.
+- Must be a JSON **object** (not an array/scalar) or it exits 2.
+- Always preview with `--dry-run` first; the merged body appears under `would_create`.
+
+---
+
 ## Safety Model for Unattended Execution
 
 The CLI's safety contract is layered. Each layer must explicitly permit before a mutation runs.

@@ -1,8 +1,8 @@
 # CLI Reference
 
-Command reference for `apb` (Rust). **30 command domains, 226 leaf commands** (verified 2026-04-27 via `tasks/ci/api-parity/baseline.json`).
+Command reference for `apb` (Rust). **34 command domains, 241 leaf commands** (verified 2026-05-28 via `tasks/ci/api-parity/baseline.json`; mirrored to `public/data/cli-catalogue.json`).
 
-> **Doc currency**: Headline counts match the parity baseline. The per-command sections below were last fully audited prior to campaign-management-completion (S001–S008, 2026-04-25 → 2026-04-26), which added ~40 leaves across `catalog`, `product-set`, `custom-conversion`, `leadgen`, `audience users-add/users-remove`, `account instagram-accounts/instagram-media`, `creative create-collection`, plus generic `adset update` and the `--special-ad-categories` / `--objective` enum flags on campaign create. **Those new commands are NOT yet documented here** — see the workstream summary at `../ai/evals/campaign-management-completion/workstream-summary.md` for the full list. Run `apb --help` and `apb <domain> --help` for current authoritative usage.
+> **Doc currency**: Headline counts match the parity baseline. The per-command sections below were last fully audited prior to campaign-management-completion (S001–S008, 2026-04-25 → 2026-04-26), which added ~40 leaves across `catalog`, `product-set`, `custom-conversion`, `leadgen`, `audience users-add/users-remove`, `account instagram-accounts/instagram-media`, `creative create-collection`, plus generic `adset update` and the `--special-ad-categories` / `--objective` enum flags on campaign create. Subsequent releases added pre-flight guards (v0.1.15–v0.1.20): see SAFETY_MODEL.md ("Pre-flight guards on mutations") and the `adset create`/`update` sections. **Those new commands + guard semantics are NOT yet fully documented here** — see the workstream summary at `../ai/evals/campaign-management-completion/workstream-summary.md` and `../ai/evals/pacing-scheduling-alignment/sprint-001-eval.md` for the canonical lists. Run `apb --help` and `apb <domain> --help` for current authoritative usage.
 
 ---
 
@@ -20,6 +20,28 @@ These flags are available on every command. For unattended / CI / AI-agent usage
 | `--no-input` | bool | Promise that the CLI will never prompt. Required for CI/cron/agent execution. Does **not** imply approval — mutations still need `--execute`. |
 | `--debug` | bool | Enable debug-level tracing to stderr. Honors `RUST_LOG` if already set. Token / OAuth secrets are sanitized before logging. |
 | `--no-color` | bool | Disable ANSI color in output. Also honors `NO_COLOR=1` and `CLICOLOR=0` env vars. |
+
+### Account resolution precedence
+
+The ad account a command targets is resolved in this order (first non-empty wins). `apb` prints the chosen account and its source to stderr, e.g. `[apb] account: act_… (source: env META_AD_ACCOUNT_ID)`:
+
+1. **`--account act_…` flag** — explicit, per-invocation.
+2. **`META_AD_ACCOUNT_ID`** — from your shell env or the `.env` in the directory you ran `apb` from (or `~/.apb/.env`).
+3. **`~/.apb/config.json` `default_account`** — the persisted global default written by `apb account set-default` (a fallback only).
+4. **SaaS tenant default** — for `APB_API_KEY` users, the account on the resolved tenant.
+5. **Auto-discovery** — when exactly one ad account is reachable.
+
+> The explicit `.env` value (2) **overrides** the persisted global `~/.apb/config.json` (3). When they differ, `apb` prints a loud `note:` naming both, so the override is never silent. Change the global default with `apb account set-default --account act_…`. *(Precedence corrected in v0.2.1 — previously the hidden global config silently outranked `.env`.)*
+
+### Naming uploaded assets
+
+When the CLI uploads an image or video from a local file, Meta stores the asset under a name. By default that name is the file's **basename** (filename + extension). Override it explicitly:
+
+- **`creative upload-image --name <NAME>`** / **`creative upload-video --name <NAME>`** — the asset name. `upload-video` also takes **`--title <TITLE>`** (display title; defaults to the asset name).
+- **Builders** carry a per-asset name flag alongside each file input — distinct from the builder's `--name`, which is the *creative* name: `--image-name`, `--video-name`, `--thumbnail-name`, `--hero-image-name` on `create-image-simple` / `create-video-simple` / `create-lead-form-ad` / `create-catalog-creative` / `create-story-template` / `create-reels-video-template`.
+- A hash or pre-uploaded ID passed in place of a file path is used as-is (no upload; name flags ignored).
+
+HTTP equivalent: `POST /api/v1/creatives/upload-image` and `/upload-video` accept an optional `name` multipart field (default: the uploaded filename).
 
 ### Exit Codes
 
@@ -81,7 +103,7 @@ apb auth login --api-key <apb_live_...|apb_test_...> [--api-url <url>] [--json]
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--api-key` | string | required | API key (`apb_live_...` or `apb_test_...`) |
-| `--api-url` | string | `https://api.agencyplaybook.io` (release builds) or `http://localhost:3750` (local `cargo build`) | API server URL. Overridable via `APB_API_URL` env var. |
+| `--api-url` | string | `http://localhost:3000` | API server URL |
 
 ### `auth status`
 
@@ -260,7 +282,58 @@ apb account set-default --account <act_xxxxx> [--json]
 |------|------|-------------|
 | `--account` | string | Account ID (must include the `act_` prefix) |
 
-This is a local-only operation — no API call. Pair with `apb account list` to discover the right ID.
+This is a local-only operation — no API call. Pair with `apb account list` to discover the right ID. For name-based switching that also carries the token, prefer `account use` + profiles (below).
+
+### `account use` (cli-account-switching)
+
+Switch the active ad account by **name** — friendlier than `set-default`. Resolves, in order: a saved profile, an account-name substring, an `act_` id, or a bare numeric id (auto-prefixed `act_`). With a **profile**, the matching token switches too, so you never hit the "token can't reach this account" `(#200)`.
+
+```
+apb account use <profile|name|act_xxxxx|123456> [--json]
+```
+
+| Arg | Description |
+|-----|-------------|
+| `target` | Profile name, account-name substring, `act_…` id, or numeric id |
+
+Writes `~/.apb/config.json::default_account` (plus `active_profile` when a profile matched). A bare name is matched against the accounts your current token can reach (`me/adaccounts`); an unknown or ambiguous name errors cleanly.
+
+### `account current`
+
+Show the active account, its profile, and **which accounts the active token can actually reach** — surfacing a token/account mismatch *before* a command 403s.
+
+```
+apb account current [--json]
+```
+
+Prints a `⚠` line (with the fix) when the active token cannot reach the active account.
+
+### Account profiles — add / list / remove (cli-account-switching)
+
+Named profiles bind an account to **its** token, where the token is referenced by the **name of an env var** — never stored in plaintext. With a profile active, `apb account use <name>` makes the BYO Meta token resolve from that env var (in `META_OAUTH=DISABLED` mode), so account + token switch together.
+
+```
+apb account profile add <name> --account <act_xxxxx> [--token-env <ENV_VAR_NAME>]
+apb account profile list [--json]
+apb account profile remove <name>
+```
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `--account` | string | Account ID (`act_` prefix) bound to this profile |
+| `--token-env` | string | Name of the env var holding this account's Meta token (e.g. `SCANDALOUS_TOKEN`) — not the token itself |
+
+**Example — flip between two BYO accounts with one command each:**
+```
+export SCANDALOUS_TOKEN=EAAR...      # set in your shell/.env (instead of META_ACCESS_TOKEN)
+export ENGINESEO_TOKEN=EAAB...
+apb account profile add scandalous --account act_535043909388877 --token-env SCANDALOUS_TOKEN
+apb account profile add engineseo  --account act_1886644758637992 --token-env ENGINESEO_TOKEN
+apb account use scandalous          # account + token both switch
+apb campaign list                   # runs against Scandalous
+apb account use engineseo           # one command flips everything
+```
+An explicit `META_ACCESS_TOKEN` in your env always wins over a profile's `token_env` (least surprise).
 
 ### `account overview`
 
@@ -364,8 +437,10 @@ apb campaign get --id <campaign_id> [--json]
 ### `campaign create` (WRITE)
 
 ```
-apb campaign create --name <name> --objective <ODAX_ENUM> [--status PAUSED] [--daily-budget <usd>] [--lifetime-budget <usd>] [--bid-strategy <strategy>] [--buying-type <type>] [--special-ad-categories <CSV>] [--spec-file <campaign.json>] [--execute] [--json]
+apb campaign create --name <name> --objective <ODAX_ENUM> [--status PAUSED] [--daily-budget <usd>] [--lifetime-budget <usd>] [--bid-strategy <strategy>] [--buying-type <type>] [--special-ad-categories <CSV>] [--special-ad-category-country <CSV>] [--budget-sharing <bool>] [--spend-cap <usd>] [--start-time <ts>] [--stop-time <ts>] [--promoted-object <json>] [--extra-fields <json>] [--spec-file <campaign.json>] [--execute] [--json]
 ```
+
+> Tier 3 added `--spend-cap` (USD), `--start-time` / `--stop-time` (flight), `--promoted-object` (objective-specific campaigns), and `--extra-fields` (escape hatch — raw JSON merged into the body, bypasses validation, fails loud on collision). `--bid-strategy` is validated against the v25 enum.
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
@@ -377,7 +452,9 @@ apb campaign create --name <name> --objective <ODAX_ENUM> [--status PAUSED] [--d
 | `--bid-strategy` | string | — | Bid strategy (`LOWEST_COST_WITHOUT_CAP`, `COST_CAP`, `BID_CAP`) |
 | `--buying-type` | string | — | Buying type (`AUCTION` or `RESERVED`) |
 | `--special-ad-categories` | CSV | — | Required by Meta for housing/credit/employment/social-issue verticals. Comma-separated, e.g. `--special-ad-categories HOUSING,CREDIT`. Serialized as a JSON array to Meta. |
-| `--spec-file` | string | — | JSON spec file (CLI flags override spec values). `special_ad_categories` in the spec accepts both array and CSV-string form. |
+| `--special-ad-category-country` | CSV | — | ISO country codes scoping the categories, e.g. `--special-ad-category-country US`. **Required by Meta when a special ad category is set** — the CLI fails loud if categories are present without it. |
+| `--budget-sharing` | bool | auto | Maps to Meta's `is_adset_budget_sharing_enabled`. **Omit and the CLI sends `false` automatically for ABO campaigns** (no `--daily-budget`/`--lifetime-budget`), which Meta now requires (else error subcode 4834011). Pass `--budget-sharing true` to let ad sets share 20% of their budget. When a campaign budget is set, the field is omitted unless you pass it explicitly. |
+| `--spec-file` | string | — | JSON spec file (CLI flags override spec values). `special_ad_categories` in the spec accepts both array and CSV-string form; `is_adset_budget_sharing_enabled`/`budget_sharing` in the spec is honored. |
 
 DRY-RUN by default. Requires all 4 write gates open.
 
@@ -507,6 +584,40 @@ apb campaign preset delete --name <preset_name> [--json]
 
 ## 5. adset
 
+### Placement presets (v0.2.0, `adset create` + `adset update-targeting`)
+
+`--placements <PRESET>` expands one of six curated shapes into v25 `publisher_platforms` / `facebook_positions` / `instagram_positions` JSON, merged into the operator-supplied `--targeting` (`create`) / `--spec`-`--spec-file` (`update-targeting`).
+
+**Preset values** (kebab-case):
+
+| Preset | `publisher_platforms` | `facebook_positions` | `instagram_positions` |
+|---|---|---|---|
+| `feed` | facebook, instagram | feed | stream *(IG's feed is called `stream` in v25)* |
+| `stories` | facebook, instagram | story | story |
+| `reels` | facebook, instagram | facebook_reels | reels |
+| `stories-reels` | facebook, instagram | story, facebook_reels | story, reels |
+| `feed-stories-reels` | facebook, instagram | feed, story, facebook_reels | stream, story, reels |
+| `advantage-plus` | facebook, instagram, audience_network, messenger | *(not set — Meta auto-decides)* | *(not set)* |
+
+For bespoke placement shapes, pass `--targeting` / `--spec-file` with raw JSON directly (no preset needed).
+
+**Fail-loud on conflict:** if `--targeting` already contains `publisher_platforms` / `facebook_positions` / `instagram_positions`, the preset exits **2** with a message naming both sides (preset name + the conflicting key + operator's value + preset's value). Silent override is never performed.
+
+```bash
+# OK: preset merges with geo + age targeting
+apb adset create --campaign 120... --name "ig-reels" --optimization-goal LINK_CLICKS \
+  --billing-event IMPRESSIONS --lifetime-budget 50 \
+  --targeting '{"geo_locations":{"countries":["US"]},"age_min":25,"age_max":54}' \
+  --placements reels --advantage-audience 0
+
+# Exits 2: conflict
+apb adset create … --targeting '{"publisher_platforms":["audience_network"]}' --placements reels
+# error: --placements reels conflicts with --targeting.publisher_platforms
+#        (operator set ["audience_network"], preset wants ["facebook","instagram"]).
+```
+
+
+
 Ad set operations.
 
 ### `adset list`
@@ -602,7 +713,7 @@ apb adset update --id 120239538597430265 --optimization-goal OFFSITE_CONVERSIONS
 ### `adset create` (WRITE)
 
 ```
-apb adset create --campaign <id> --name <name> --optimization-goal <goal> [--billing-event IMPRESSIONS] [--daily-budget <usd>] [--lifetime-budget <usd>] [--bid-amount <usd>] [--bid-strategy <strategy>] [--pacing-type <type>] --targeting <json> [--start-time <ts>] [--end-time <ts>] [--promoted-object <json>] [--status PAUSED] [--execute] [--json]
+apb adset create --campaign <id> --name <name> --optimization-goal <goal> [--billing-event IMPRESSIONS] [--daily-budget <usd>] [--lifetime-budget <usd>] [--bid-amount <usd>] [--bid-strategy <strategy>] [--bid-constraints <json>] [--pacing-type <type>] (--targeting <json> | <targeting builder flags>) [--advantage-audience <0|1>] [--advantage-detailed-targeting] [--advantage-lookalike] [--advantage-custom-audience] [--start-time <ts>] [--end-time <ts>] [--promoted-object <json>] [--dynamic-creative] [--destination-type <type>] [--attribution-spec <json>] [--dsa-beneficiary <name>] [--dsa-payor <name>] [--extra-fields <json>] [--status PAUSED] [--execute] [--json]
 ```
 
 | Flag | Type | Default | Description |
@@ -614,10 +725,48 @@ apb adset create --campaign <id> --name <name> --optimization-goal <goal> [--bil
 | `--daily-budget` | f64 | — | Daily budget in USD (mutually exclusive with `--lifetime-budget`) |
 | `--lifetime-budget` | f64 | — | Lifetime budget in USD |
 | `--bid-amount` | f64 | — | Bid amount in USD |
-| `--bid-strategy` | string | — | `LOWEST_COST_WITHOUT_CAP`, `COST_CAP`, `BID_CAP` |
+| `--bid-strategy` | string | — | `LOWEST_COST_WITHOUT_CAP`, `COST_CAP`, `LOWEST_COST_WITH_BID_CAP`, `LOWEST_COST_WITH_MIN_ROAS` (validated pre-flight) |
+| `--bid-constraints` | string | — | Bid/ROAS constraints JSON, e.g. `{"roas_average_floor":12000}`. **Required** when `--bid-strategy LOWEST_COST_WITH_MIN_ROAS` (positive `roas_average_floor`); `COST_CAP`/`LOWEST_COST_WITH_BID_CAP` require `--bid-amount`. |
 | `--pacing-type` | string | — | Comma-separated pacing types (e.g. `standard`) |
-| `--targeting` | string | required | Targeting spec as inline JSON or path to file |
+| `--targeting` | string | required¹ | Targeting spec as inline JSON or path to file. ¹Required *unless* you use the targeting builder flags below (the two modes are mutually exclusive). |
+| `--extra-fields` | string | — | Escape hatch: a raw JSON object shallow-merged into the create body for Meta fields apb doesn't expose. **Bypasses validation**; fails loud on a key collision. |
+| `--advantage-audience` | int (0\|1) | `0` | Maps to `targeting_automation.advantage_audience`. Meta requires this on ad-set create. **Omit and the CLI sends `0` (off) automatically** (else error: "you need to enable or disable the Advantage audience feature"). Pass `1` to enable Advantage audience. Overrides any value in `--targeting`. |
+| `--advantage-detailed-targeting` | flag | off | Advantage+ detailed-targeting expansion. Sets `targeting_automation.advantage_audience=1` (unless `--advantage-audience` is given). |
+| `--advantage-lookalike` | flag | off | Adds `targeting.targeting_relaxation.lookalike=1` (let Meta expand beyond lookalikes). |
+| `--advantage-custom-audience` | flag | off | Adds `targeting.targeting_relaxation.custom_audience=1`. |
 | `--promoted-object` | string | — | Promoted object JSON (e.g. pixel_id + event) |
+| `--dynamic-creative` | flag | off | Enable Dynamic Creative (DCO) — required for `asset_feed_spec` creatives |
+| `--destination-type` | string | — | `WEBSITE`, `APP`, `MESSENGER`, `INSTAGRAM_DIRECT`, `WHATSAPP`, `ON_AD`, `ON_POST`. Required for click-to-message / app objectives |
+| `--attribution-spec` | string | — | Per-ad-set attribution windows (JSON array). v25 rejects 7d/28d `VIEW_THROUGH` (removed 2026-01-12) |
+| `--dsa-beneficiary` | string | — | EU Digital Services Act beneficiary (required for EU-targeted delivery) |
+| `--dsa-payor` | string | — | EU Digital Services Act payor (advisory fires when targeting EU countries without it) |
+| `--adset-schedule` | string | — | Dayparting: explicit Meta `adset_schedule` JSON array (inline or file path). Requires a lifetime budget. |
+| `--daypart-hours` | string | — | Dayparting builder: comma-separated hours 0-23 (e.g. `"9,12,16,19,21"`). Consecutive hours merge into windows. Built into `adset_schedule` (requires lifetime budget). Overridden by `--adset-schedule`. The CLI auto-sets `pacing_type=["day_parting"]`. |
+| `--daypart-days` | string | all 7 | Days for `--daypart-hours`: comma-separated 0-6 (0=Sunday). |
+| `--daypart-timezone` | string | `USER` | `USER` (viewer) or `ADVERTISER`. |
+
+> **Dayparting requires a lifetime budget.** `--daypart-hours`/`--adset-schedule` with `--daily-budget` fails fast: *"adset_schedule (dayparting) requires a lifetime budget…"*. Use `--lifetime-budget` (+ `--end-time`), or a campaign-level lifetime budget (CBO). The same daypart flags are available on `adset update`.
+
+#### Targeting builder flags (Tier 3) — flag-driven `targeting` (no JSON authoring)
+
+Build the `targeting` spec from flags instead of `--targeting`/`--spec-file` (the two modes are **mutually exclusive** — supplying both fails loud). Comma-separated where plural.
+
+| Flag | → Meta targeting key |
+|------|----------------------|
+| `--countries US,CA` | `geo_locations.countries` |
+| `--regions <key,…>` | `geo_locations.regions[{key}]` (keys from `apb targeting geo-search`) |
+| `--cities <key,…>` | `geo_locations.cities[{key}]` |
+| `--exclude-countries <cc,…>` | `excluded_geo_locations.countries` |
+| `--age-min` / `--age-max` | `age_min` / `age_max` |
+| `--genders 1,2` | `genders` (1=male, 2=female; omit for all) |
+| `--interests <id-or-name,…>` | `flexible_spec[0].interests[{id}]` (names resolved via interest search) |
+| `--behaviors <id,…>` | `flexible_spec[0].behaviors[{id}]` |
+| `--exclude-interests <id,…>` | `exclusions.interests[{id}]` |
+| `--custom-audiences <id,…>` | `custom_audiences[{id}]` |
+| `--exclude-custom-audiences <id,…>` | `excluded_custom_audiences[{id}]` |
+| `--locales <id,…>` | `locales` |
+| `--device-platforms mobile,desktop` | `device_platforms` |
+| `--user-os iOS,Android` | `user_os` |
 
 ---
 
@@ -705,6 +854,28 @@ Generate an ad preview URL for the specified format. Returns a preview iframe UR
 
 Creative management.
 
+### Creative format auditor (v0.2.0, all `create-*` + `update` commands)
+
+Every `creative create-*` and `creative update` command runs a format auditor before any write. The auditor traverses the spec and detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / product_set_id / etc.) — the failure mode that surfaced as the Scandalous Coffee incident on 2026-05-23. See [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md) for the full 11-variant risk taxonomy.
+
+Audit flags (flatten into all 6 commands below):
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `--allow-carousel` | false | Whitelist CAROUSEL / CAROUSEL_IMAGE / CAROUSEL_VIDEO in `asset_feed_spec.ad_formats` |
+| `--allow-collection` | false | Whitelist COLLECTION in `asset_feed_spec.ad_formats` |
+| `--allow-automatic-format` | false | Whitelist AUTOMATIC_FORMAT in `asset_feed_spec.ad_formats` |
+| `--allow-format-automation` | false | Whitelist FORMAT_AUTOMATION / `degrees_of_freedom_spec` / `contextual_multi_ads` |
+| `--allow-catalog-template` | false | Whitelist `product_set_id` / `template_url` / `{{product.*}}` syntax |
+| `--strict-format` | false | Upgrade dry-run findings to dry-run errors (exit 2). CI use. |
+| `--audit-only` | false | Audit + print findings, exit 0 without writing — regardless of `--execute`. Spec-review use. |
+| `--creative-format <kind>` | none | Declared format intent (informational in v0.2.0). Values: `single-image\|single-video\|carousel\|collection\|dynamic-creative\|catalog\|post\|automatic`. |
+
+**Default behaviour without flags:**
+- No `--execute`: auditor findings ride along in dry-run preview's `format_audit` field; exit 0.
+- `--execute` set, audit blocked: exit 2 with actionable error naming each detected risk and the `--allow-*` flag that whitelists it. Fires BEFORE the env-var write gate so the spec-fix message surfaces first.
+- `--execute` set, audit clean: proceeds to the 5-layer write gate.
+
 ### `creative list`
 
 ```
@@ -770,10 +941,18 @@ Spec must contain: `name`, `object_story_spec.page_id`, `object_story_spec.link_
 ### `creative create-video` (WRITE)
 
 ```
-apb creative create-video --spec-file <spec.json> [--execute] [--json]
+apb creative create-video --name <name> --spec-file <spec.json> [--thumbnail <path-or-hash>] [--execute] [--json]
 ```
 
-Requires a pre-uploaded `video_id` in the spec. Partially supported.
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--name` | string | required | Creative name |
+| `--spec` / `--spec-file` / `--path` | string | required | Inline JSON or path to a spec containing `object_story_spec.video_data.video_id` (pre-upload via `creative upload-video`) |
+| `--thumbnail` | string | — | Video thumbnail: a **local image path** (uploaded for you via `creative upload-image`) or an existing **Meta image hash**. Injected as `object_story_spec.video_data.image_hash`. Meta requires a thumbnail on every video creative (else error subcode 1443226). If omitted, the spec must already supply `video_data.image_hash` or `video_data.image_url` — otherwise the CLI fails fast with a clear validation error before any HTTP call. |
+
+Requires a pre-uploaded `video_id` in the spec. DRY-RUN by default (a `--thumbnail` path renders a placeholder hash in the preview); requires all 4 write gates open to execute.
+
+> **Meta Dev-Mode note:** even with a valid `video_id` + thumbnail, creating the creative mints a Page post, which Meta blocks while the app is in Development Mode (error subcode 1885183 — "must be in public"). Asset upload and campaign/ad-set creation are *not* affected by Dev Mode; only the creative/ad-post step is.
 
 ### `creative create-carousel` (WRITE)
 
@@ -826,6 +1005,9 @@ apb creative create-dynamic \
 | `--body` | string | ≥1 | inline | Repeatable. Body text. |
 | `--cta` | string | yes | inline | Call-to-action enum (e.g. `LEARN_MORE`, `SHOP_NOW`). |
 | `--url` | string | yes | inline | Click-through URL. Validated by `url::Url::parse` before any network call. |
+| `--description` | string | — | inline | Repeatable. `asset_feed_spec.descriptions[]` text. |
+| `--video` | string | — | inline | Repeatable. Pre-uploaded video ID → `asset_feed_spec.videos[]`. (Paths aren't auto-uploaded here — pre-upload via `creative upload-video`.) |
+| `--optimization-type` | string | — | inline | `asset_feed_spec.optimization_type` (e.g. `DEGREES_OF_FREEDOM`, `FORMAT_AUTOMATION`). `FORMAT_AUTOMATION` trips the auditor — pair with `--allow-format-automation`. |
 
 **Conflict rule:** Combining `--spec-file` (or `--spec`) with **any** inline DCO flag exits with code 2 and the error: `Cannot use --spec-file together with inline DCO flags. Use one input mode.`
 
@@ -834,6 +1016,82 @@ apb creative create-dynamic \
 **Important:** The ad set using this creative must have `is_dynamic_creative: true`.
 
 For agent / CI usage patterns including hash vs path resolution semantics, see [`docs/CLI_AUTOMATION.md`](../../docs/CLI_AUTOMATION.md#dynamic-creative-quick-experiments).
+
+### v0.2.0 Ergonomic Builders (agency-gaps-v2 Sprint 3)
+
+Operator-friendly builders that generate the equivalent v25 `AdCreative` spec internally — no JSON authoring. Each runs the Sprint 1 auditor; `create-catalog-creative --format <kind>` auto-wires matching `--allow-*` flags from the declared intent. All `--image` / `--video` / `--hero-image` / `--thumbnail` flags accept a Meta hash/ID or a local file path (auto-uploaded under `--execute`, placeholder under dry-run).
+
+#### `creative create-image-simple` (WRITE)
+
+```
+apb creative create-image-simple --name <name> --page-id <P> --image <hash-or-path> \
+  [--headline <H>] [--body <B>] [--description <D>] [--url <U>] [--cta <CTA>] \
+  [--instagram-user-id <IG>] [--instagram-actor-id <IG>] [--url-tags <tags>] \
+  [--enhancements standard|none|<csv>] [--execute] [--json]
+```
+
+`--enhancements` attaches a `degrees_of_freedom_spec` (Advantage+ creative enhancements): `standard` enrolls the v25 standard-enhancements bundle (per-feature `enroll_status=OPT_IN`), `none` omits it, or pass a CSV of feature keys (e.g. `text_improvements,image_brightness_and_contrast`). A deliberate opt-in is whitelisted by the auditor; carousel/collection format expansion still blocks. The dead `enable_standard_enhancements` boolean is never emitted.
+
+#### `creative create-video-simple` (WRITE)
+
+```
+apb creative create-video-simple --name <name> --page-id <P> --video <id-or-path> \
+  --thumbnail <hash-or-path> [--headline <H>] [--body <B>] [--url <U>] [--cta <CTA>] \
+  [--instagram-user-id <IG>] [--instagram-actor-id <IG>] [--url-tags <tags>] \
+  [--enhancements standard|none|<csv>] [--execute] [--json]
+```
+
+#### `creative create-lead-form-ad` (WRITE) — FIRST `lead_gen_form_id` injection
+
+```
+apb creative create-lead-form-ad --name <name> --page-id <P> --form-id <F> --image <hash-or-path> \
+  [--headline <H>] [--body <B>] [--url <U>] [--cta <CTA>] [--execute] [--json]
+```
+
+Builds `object_story_spec.link_data.call_to_action.value.lead_gen_form_id`. CTA defaults to `SIGN_UP`.
+
+#### `creative create-catalog-creative` (WRITE)
+
+```
+apb creative create-catalog-creative --name <name> --page-id <P> --catalog-id <C> \
+  --product-set-id <PS> --hero-image <hash-or-path> [--headline <H>] [--body <B>] \
+  [--url <U>] [--cta <CTA>] --format <single|carousel|collection|automatic> \
+  [--execute] [--json]
+```
+
+`--format` auto-wires matching auditor allows: `single` → no extra; `carousel` → `--allow-carousel`; `collection` → `--allow-collection`; `automatic` → both `--allow-format-automation` AND `--allow-automatic-format`. `--allow-catalog-template` is always auto-wired (catalog creatives reference `product_set_id`).
+
+#### `creative create-story-template` (WRITE)
+
+```
+apb creative create-story-template --name <name> --page-id <P> \
+  --image <hash-or-path> | --video <id-or-path> --thumbnail <hash-or-path> \
+  [--headline <H>] [--body <B>] [--url <U>] [--cta <CTA>] [--execute] [--json]
+```
+
+`--image` and `--video` are mutually exclusive (exactly one required). Emits `story_advisories` array on dry-run/result (9:16 reminder, safe-zone, ≤15s video).
+
+#### `creative create-reels-video-template` (WRITE)
+
+```
+apb creative create-reels-video-template --name <name> --page-id <P> \
+  --video <id-or-path> --thumbnail <hash-or-path> \
+  [--headline <H>] [--body <B>] [--url <U>] [--cta <CTA>] [--execute] [--json]
+```
+
+Emits `reels_advisories` array (9:16 reminder, ≤90s video, safe-zone).
+
+#### `leadgen ad-create` (WRITE) — end-to-end orchestrator
+
+```
+apb leadgen ad-create --name <name> --campaign <C> --adset <A> --form-id <F> \
+  --image <hash-or-path> --headline <H> --body <B> [--page-id <P>] [--cta <CTA>] \
+  [--execute] [--json]
+```
+
+Validates: form exists (page-token check fires here), form's page matches `--page-id` (defaults to form's page), campaign objective is `OUTCOME_LEADS`. Then creates lead-form creative + ad in sequence. On ad-create failure, the orphan creative is paused (reverse-pause rollback).
+
+---
 
 ### `creative create-collection` (WRITE — Sprint 003)
 
@@ -876,10 +1134,12 @@ Get details for a single custom audience.
 ### `audience create` (WRITE)
 
 ```
-apb audience create --name <name> --subtype <CUSTOM|WEBSITE|ENGAGEMENT|LOOKALIKE> [--description <desc>] [--customer-file-source <source>] [--rule <json>] [--retention-days <days>] [--engagement-source <type> --source-id <id>] [--execute] [--json]
+apb audience create --name <name> --subtype <CUSTOM|WEBSITE|ENGAGEMENT|LOOKALIKE> [--description <desc>] [--customer-file-source <source>] [--rule <json>] [--retention-days <days>] [--engagement-source <type> --source-id <id>] [--value-based] [--prefill] [--opt-out-link <url>] [--execute] [--json]
 ```
 
 Create a custom audience. Subtype determines the audience source.
+
+**Value-based audiences:** `--value-based` sets `is_value_based=true` so Meta can build a value-based lookalike from an uploaded value column. Upload the value with `audience users-add` using the `LTV` or `VALUE` schema code (numeric, sent unhashed) alongside an identifier column, e.g. `--schema EMAIL,LTV`.
 
 **Sprint 007 — Engagement-audience first-class flags**: when `--subtype ENGAGEMENT`, you can either:
 - **Pass `--rule <JSON>`** with the full Meta rule shape — for advanced filters like `video_view_percent >= 50`. Power-user path.
@@ -947,10 +1207,18 @@ Estimate overlap between two or more custom audiences. Requires at least 2 audie
 ### `audience create-lookalike` (WRITE)
 
 ```
-apb audience create-lookalike --source <audience_id> --country <CC> --ratio <0.01-0.20> [--name <name>] [--execute] [--json]
+apb audience create-lookalike --source <audience_id> --country <CC> --ratio <0.01-0.20> [--name <name>] [--starting-ratio <0.01>] [--lookalike-type similarity|reach] [--is-financial-service] [--execute] [--json]
 ```
 
-Create a lookalike audience from a source custom audience. Ratio controls similarity (lower = more similar, smaller audience).
+Create a lookalike audience from a source custom audience. Ratio controls similarity (lower = more similar, smaller audience). `--starting-ratio` makes it a *range* (lower bound) with `--ratio` as the upper bound. `--lookalike-type` is `similarity` (default) or `reach`. `--is-financial-service` flags regulated-finance lookalikes.
+
+### `audience share` (WRITE — Tier 3)
+
+```
+apb audience share --id <audience_id> --account <act_…|numeric> [--execute] [--json]
+```
+
+Share a custom audience with another ad account (`POST /{audience_id}/adaccounts`). Both accounts must be in the same Business Manager. Requires `write:audience-data` (Agency+). The `--account` value is normalized to `act_`-prefixed form.
 
 ### `audience users-add` (WRITE PII — Sprint 006)
 
@@ -965,7 +1233,7 @@ apb audience users-add --id <audience_id> --schema <CSV> --data-file <path> [--f
 | Flag | Type | Description |
 |------|------|-------------|
 | `--id` | string | Target audience ID (must be a customer-file-source audience created via `apb audience create --customer-file-source`) |
-| `--schema` | CSV | Meta field codes — one per data column. Valid: `EMAIL`, `PHONE`, `FN`, `LN`, `DOBY`, `DOBM`, `DOBD`, `GEN`, `CT`, `ST`, `ZIP`, `COUNTRY`, `MADID`, `EXTERN_ID` |
+| `--schema` | CSV | Meta field codes — one per data column. Valid: `EMAIL`, `PHONE`, `FN`, `LN`, `DOBY`, `DOBM`, `DOBD`, `GEN`, `CT`, `ST`, `ZIP`, `COUNTRY`, `MADID`, `EXTERN_ID`, `LTV`, `VALUE` (value-based — numeric, sent unhashed) |
 | `--data-file` | path | CSV (default — RFC 4180) or JSON (array of arrays) |
 | `--format` | string | `csv` (default) or `json` |
 | `--skip-header` | bool | Skip the first row of CSV. Auto-detected when first row matches schema codes |
@@ -976,6 +1244,7 @@ apb audience users-add --id <audience_id> --schema <CSV> --data-file <path> [--f
 - `DOBY`: 4-digit year, zero-padded
 - `DOBM`, `DOBD`: 2-digit month/day, zero-padded
 - `GEN`: first lowercase character (`m` or `f`)
+- `LTV`, `VALUE`: **not hashed** — numeric value passed through verbatim (paired with an identifier column for value-based audiences)
 
 **Batching**: files >10,000 rows split into multiple POSTs (Meta's documented batch limit).
 
@@ -1055,16 +1324,26 @@ apb targeting demographic-search [--demographic-type education|work|life_events|
 ### `targeting geo-search`
 
 ```
-apb targeting geo-search --query "New York" [--location-types country,region,city,zip] [--limit N] [--json]
+apb targeting geo-search --query "New York" [--location-types country,region,city,zip] [--geo-type adgeolocation|adcountry|adzipcode] [--limit N] [--json]
 ```
+
+Returns geo entries each with a numeric `key` — use that key in a targeting spec's `geo_locations.regions`/`cities` (Meta targets by key, not name). To find U.S. states, filter with `--location-types region`. Note: `region`/`city`/`zip` are **location-type filters** (pass them via `--location-types`); `--geo-type` is for Meta's dedicated search types (`adcountry`, `adzipcode`, …) and defaults to the combined `adgeolocation` search.
+
+### `targeting geo-resolve`
+
+```
+apb targeting geo-resolve --regions "Connecticut,Indiana,Washington" [--cities "Austin,Denver"] [--json]
+```
+
+Batch-resolves region/city **names → Meta keys** in one call (wraps `geo-search`, preferring an exact US match). Emits a ready-to-paste `geo_locations` fragment plus `resolved`/`unresolved` lists, e.g. `{"geo_locations":{"regions":[{"key":"3849"},…]}}`. Use it to build a targeting spec without hand-running a search per state.
 
 ### `targeting estimate`
 
 ```
-apb targeting estimate --spec-file <targeting.json> [--json]
+apb targeting estimate (--spec <json> | --spec-file <targeting.json>) [--json]
 ```
 
-Read-only delivery estimate. Returns `estimate_dau`, `estimate_mau`, `daily_outcomes_curve`.
+Read-only reach estimate. `--spec` takes inline JSON; `--spec-file` reads a JSON file. The targeting spec must be an object; `regions`/`cities` entries need a Meta `key` (from `geo-search`), e.g. `{"geo_locations":{"regions":[{"key":"3847"}]}}`.
 
 ### `targeting delivery-estimate`
 
@@ -1811,9 +2090,9 @@ Unshare pixel from an ad account.
 #### Conversions API (CAPI) Operations (require --execute)
 
 ```
-pixel send-event --pixel-id <id> --event-name Purchase [--action-source website] [--email user@example.com] [--phone 1234567890] [--event-id evt_123] [--event-source-url https://...] [--value 99.99] [--currency USD] [--test-event-code TEST123] --execute
+pixel send-event --pixel-id <id> --event-name Purchase [--action-source website] [--email user@example.com] [--phone 1234567890] [--first-name <fn>] [--last-name <ln>] [--external-id <id>] [--client-ip <ip>] [--client-user-agent <ua>] [--fbc <fbc>] [--fbp <fbp>] [--event-id evt_123] [--event-source-url https://...] [--value 99.99] [--currency USD] [--contents '[{"id":"SKU1","quantity":2,"item_price":9.99}]'] [--content-category coffee] [--predicted-ltv 250.00] [--lead-id <id>] [--subscription-id <id>] [--fb-login-id <id>] [--ldu] [--dpo-country 0] [--dpo-state 0] [--test-event-code TEST123] --execute
 ```
-Send a single server-side event. PII fields (email, phone) are automatically SHA-256 hashed before sending.
+Send a single server-side event. **Hashed PII:** `--email`/`--phone`/`--first-name`/`--last-name` are normalized + SHA-256 hashed locally before sending. **Sent as-is:** `--external-id` (Meta accepts it hashed or plain — pre-hash yourself if you want), `--client-ip`/`--client-user-agent`/`--fbc`/`--fbp` (match signals, never hashed). **Value optimization:** `--contents` (`custom_data.contents[]`), `--content-category`, `--predicted-ltv` feed ROAS/value-based optimization and dynamic ads. **Offline-conversion loop:** `--lead-id`/`--subscription-id`/`--fb-login-id` (unhashed IDs). **Limited Data Use (CCPA):** `--ldu` sets `data_processing_options=["LDU"]`; `--dpo-country`/`--dpo-state` (`0`=auto-geolocate, state `1000`=California) imply `--ldu`. Invalid `--contents` JSON fails loud. The `--dry-run` preview echoes the full `would_send` body with PII already hashed.
 **API:** `POST /{pixel_id}/events`
 
 ```

@@ -107,7 +107,13 @@ Create a new campaign
 | `--bid-strategy` | `<BID_STRATEGY>` |  |
 | `--buying-type` | `<BUYING_TYPE>` |  |
 | `--special-ad-categories` | `<SPECIAL_AD_CATEGORIES>` | Required by Meta for housing/credit/employment/social-issue verticals. Pass as comma-separated values, e.g. `--special-ad-categories HOUSING,CREDIT` |
+| `--special-ad-category-country` | `<SPECIAL_AD_CATEGORY_COUNTRY>` | ISO country codes (CSV) scoping the special ad categories, e.g. `--special-ad-category-country US`. Meta requires this when a special ad category is set |
 | `--budget-sharing` | `<BUDGET_SHARING>` | Meta's `is_adset_budget_sharing_enabled`. Omit and the CLI sends `false` automatically for ABO campaigns (no `--daily-budget` / `--lifetime-budget`), which Meta now requires. Pass `--budget-sharing true` to let ad sets share 20% of their budget [possible values: true, false] |
+| `--spend-cap` | `<SPEND_CAP>` | Campaign spend cap in USD (Meta `spend_cap`) |
+| `--start-time` | `<START_TIME>` |  |
+| `--stop-time` | `<STOP_TIME>` |  |
+| `--promoted-object` | `<PROMOTED_OBJECT>` | Campaign-level promoted object JSON (rare; objective-specific campaigns) |
+| `--extra-fields` | `<EXTRA_FIELDS>` | Escape hatch: raw JSON object merged into the create body. Bypasses validation; fails loud on a key collision |
 | `--spec-file` | `<SPEC_FILE>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |

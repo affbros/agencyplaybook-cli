@@ -138,8 +138,11 @@ Create a dynamic creative with asset_feed_spec (Meta optimizes across multiple a
 | `--image` | `<IMAGE>` | Inline image hash or path. Repeat for multiple variants. Mutually exclusive with --spec-file/--spec |
 | `--title` | `<TITLE>` | Inline title text. Repeat for multiple variants. Mutually exclusive with --spec-file/--spec |
 | `--body` | `<BODY>` | Inline body text. Repeat for multiple variants. Mutually exclusive with --spec-file/--spec |
+| `--description` | `<DESCRIPTION>` | Inline description text (asset_feed_spec.descriptions[]). Repeat for multiple variants |
+| `--video` | `<VIDEO>` | Inline pre-uploaded video ID (asset_feed_spec.videos[]). Repeat for multiple variants. (Paths aren't auto-uploaded here — pre-upload via `creative upload-video`.) |
 | `--cta` | `<CTA>` | Call-to-action button (e.g. LEARN_MORE, SHOP_NOW). Used with inline DCO flags |
 | `--url` | `<URL>` | Click-through URL. Used with inline DCO flags |
+| `--optimization-type` | `<OPTIMIZATION_TYPE>` | asset_feed_spec.optimization_type, e.g. DEGREES_OF_FREEDOM or FORMAT_AUTOMATION (the latter trips the auditor — pair with --allow-format-automation) |
 | `--creative-format` | `<CREATIVE_FORMAT>` | Declared creative format intent (informational; sharpens auditor messages) [possible values: single_image, single_video, carousel, collection, dynamic_creative, catalog, post, automatic] |
 | `--allow-carousel` |  | Whitelist CAROUSEL / CAROUSEL_IMAGE / CAROUSEL_VIDEO in asset_feed_spec.ad_formats |
 | `--allow-collection` |  | Whitelist COLLECTION in asset_feed_spec.ad_formats |
@@ -213,8 +216,10 @@ Build an image creative from operator-friendly flags (v0.2.0). Generates the v25
 | `--description` | `<DESCRIPTION>` |  |
 | `--url` | `<URL>` |  |
 | `--cta` | `<CTA>` | CTA enum (e.g. `SHOP_NOW`, `LEARN_MORE`) |
-| `--instagram-actor-id` | `<INSTAGRAM_ACTOR_ID>` |  |
+| `--instagram-actor-id` | `<INSTAGRAM_ACTOR_ID>` | (deprecated) Use --instagram-user-id. Sets object_story_spec.instagram_actor_id |
+| `--instagram-user-id` | `<INSTAGRAM_USER_ID>` | Top-level `instagram_user_id` (v25). Preferred over --instagram-actor-id (deprecated 2025-09-09) for IG-placement creatives |
 | `--url-tags` | `<URL_TAGS>` |  |
+| `--enhancements` | `<ENHANCEMENTS>` | Advantage+ creative enhancements → degrees_of_freedom_spec. `standard` (the v25 standard-enhancements bundle), `none`, or a CSV of per-feature keys (e.g. `text_improvements,image_brightness_and_contrast`) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -379,8 +384,10 @@ Build a video creative from operator-friendly flags (v0.2.0). Same shape as `cre
 | `--body` | `<BODY>` |  |
 | `--url` | `<URL>` |  |
 | `--cta` | `<CTA>` |  |
-| `--instagram-actor-id` | `<INSTAGRAM_ACTOR_ID>` |  |
+| `--instagram-actor-id` | `<INSTAGRAM_ACTOR_ID>` | (deprecated) Use --instagram-user-id. Sets object_story_spec.instagram_actor_id |
+| `--instagram-user-id` | `<INSTAGRAM_USER_ID>` | Top-level `instagram_user_id` (v25). Preferred over --instagram-actor-id (deprecated 2025-09-09) for IG-placement creatives |
 | `--url-tags` | `<URL_TAGS>` |  |
+| `--enhancements` | `<ENHANCEMENTS>` | Advantage+ creative enhancements → degrees_of_freedom_spec. `standard`, `none`, or a CSV of per-feature keys |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

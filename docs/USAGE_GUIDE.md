@@ -3,6 +3,12 @@
 Practical guide for using `apb` (Rust) to manage Meta Marketing API campaigns. Covers setup, common workflows, and real-world examples.
 
 > **Tenant disable propagation:** When an admin disables a tenant via `/admin/tenants`, the CLI begins returning `403 tenant_inactive` within **30 seconds** (the local `~/.apb/tenant_context.json` cache TTL).
+>
+> **Active ad account:** a command targets `--account` if given, else `META_AD_ACCOUNT_ID` from the `.env`/env where you ran `apb`, else the persisted global default in `~/.apb/config.json` (set via `apb account set-default --account act_…`). **The `.env` value wins over the global default (v0.2.1+)** — if they differ, `apb` prints a loud `note:`. Every run prints `[apb] account: … (source: …)` so the active account is never a mystery. Full precedence: CLI_REFERENCE.md → "Account resolution precedence".
+>
+> **Switching accounts the easy way (cli-account-switching):** save a profile once — `apb account profile add scandalous --account act_… --token-env SCANDALOUS_TOKEN` — then `apb account use scandalous` flips the account **and** its token together in one command. `apb account current` shows the active account and whether your token can actually reach it (catching a mismatch before it 403s).
+>
+> **Naming uploaded assets (v0.2.2+):** image/video uploads accept an explicit name — `--name` on `creative upload-image`/`upload-video`, and per-asset `--image-name`/`--video-name`/`--thumbnail-name`/`--hero-image-name` on the `create-*` builders. Omit it and the asset is named by the file's basename. See CLI_REFERENCE.md → "Naming uploaded assets".
 
 ---
 
@@ -172,12 +178,149 @@ apb creative asset-audit --json
 # Upload an image
 apb creative upload-image --path ./ad-image.jpg --json
 
+# Upload a video, then build a video creative WITH a thumbnail.
+# --thumbnail accepts a local path (uploaded for you) or an existing image hash.
+# Meta requires a thumbnail on every video creative; the CLI injects it as
+# object_story_spec.video_data.image_hash and fails fast if none is supplied.
+apb creative upload-video --path ./ad.mp4 --name "Spring Promo" --execute --json   # → video_id
+apb creative create-video --name "Spring Promo Creative" \
+  --spec '{"object_story_spec":{"page_id":"123","video_data":{"video_id":"<VIDEO_ID>","message":"..."}}}' \
+  --thumbnail ./thumb.jpg --execute --json
+
 # Check creative quality metrics
 apb metrics creative-quality --days 30 --json
 
 # Creative lifecycle pipeline
 apb dataset creative-pipeline --days 30 --json
 ```
+
+### Workflow 5a: Format audit guard (v0.2.0)
+
+Every `creative create-*` and `creative update` runs a format auditor before any write — detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / etc.) that can cause Meta to render an ad in a format the operator never intended. This is the Scandalous Coffee fix (incident 2026-05-23). Full taxonomy at [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md).
+
+```bash
+# Inspect a spec without writing (audit-only)
+apb creative create-image --name "review" --spec-file ./ad.json --audit-only --json | jq '.format_audit'
+
+# Trap a creative spec with unintended formats (Scandalous-style trap)
+cat >/tmp/trap.json <<JSON
+{"object_story_spec":{"page_id":"P","link_data":{"image_hash":"H","link":"https://x"}},
+ "asset_feed_spec":{"ad_formats":["CAROUSEL","COLLECTION"],"optimization_type":"FORMAT_AUTOMATION"}}
+JSON
+
+# Dry-run surfaces 3 findings (exit 0; advisory)
+apb creative create-image --name "test" --spec-file /tmp/trap.json --json
+
+# --execute → blocked with actionable error naming each finding + the flag that whitelists it (exit 2)
+apb creative create-image --name "test" --spec-file /tmp/trap.json --execute
+# error: Creative format audit failed: CAROUSEL, COLLECTION, FORMAT_AUTOMATION detected …
+#        Pass --allow-carousel --allow-collection --allow-format-automation to override.
+
+# Operator confirms intent with the three whitelisting flags
+apb creative create-image --name "test" --spec-file /tmp/trap.json --execute \
+  --allow-carousel --allow-collection --allow-format-automation
+
+# In CI: upgrade dry-run findings to errors (fail loud on any finding)
+apb creative create-image --name "ci" --spec-file ./ad.json --strict-format
+```
+
+### Workflow 5b: Reels / Stories placement preset (v0.2.0)
+
+`adset create` and `adset update-targeting` accept `--placements <PRESET>` to expand a curated placement shape into v25 `publisher_platforms` / `facebook_positions` / `instagram_positions`. Six presets: `feed`, `stories`, `reels`, `stories-reels`, `feed-stories-reels`, `advantage-plus`. Full reference at [`CLI_REFERENCE.md`](./CLI_REFERENCE.md#5-adset).
+
+```bash
+# Reels-only ad set, US + age 25-54. Preset merges cleanly with geo + age targeting.
+apb adset create --campaign 120... --name "Q2 reels" \
+  --optimization-goal LINK_CLICKS --billing-event IMPRESSIONS \
+  --lifetime-budget 50 --start-time "2026-06-01T00:00:00-0700" --end-time "2026-06-08T00:00:00-0700" \
+  --targeting '{"geo_locations":{"countries":["US"]},"age_min":25,"age_max":54}' \
+  --placements reels --advantage-audience 0
+
+# Switch an existing ad set to Stories placements only.
+apb adset update-targeting --id 120... \
+  --spec '{"geo_locations":{"countries":["US"]}}' --placements stories --execute
+
+# Advantage+ Placements (Meta auto-decides across FB/IG/AN/Messenger).
+apb adset create … --placements advantage-plus
+
+# Conflict: operator already supplied publisher_platforms. Exit 2 with both sides named.
+apb adset create … --targeting '{"publisher_platforms":["audience_network"]}' --placements reels
+# error: --placements reels conflicts with --targeting.publisher_platforms (operator set
+#        ["audience_network"], preset wants ["facebook","instagram"]). Remove one of them.
+```
+
+**Important quirk:** Instagram's "feed" equivalent in Meta v25 is called `stream`, not `feed`. The preset handles this for you — operators only need to remember the preset name.
+
+### Workflow 5c: Ergonomic creative builders + leadgen ad-create (v0.2.0)
+
+Six ergonomic builders that take flags and generate the v25 `AdCreative` spec internally, plus an end-to-end `leadgen ad-create` orchestrator. Full reference at [`CLI_REFERENCE.md`](./CLI_REFERENCE.md#7-creative). Every builder runs the Sprint 1 auditor; the catalog builder auto-wires matching allows from `--format` intent.
+
+```bash
+# Single-image creative — no JSON authoring needed.
+apb creative create-image-simple --name "Q2 promo" --page-id PAGE \
+  --image ./hero.jpg --headline "Bold coffee" --body "Try Scandalous" \
+  --url https://scandalous.example --cta SHOP_NOW --execute
+
+# Video creative with thumbnail (both auto-uploaded if paths).
+apb creative create-video-simple --name "Q2 video" --page-id PAGE \
+  --video ./ad.mp4 --thumbnail ./thumb.jpg --headline "Watch" --body "..." \
+  --url https://x.example --cta LEARN_MORE --execute
+
+# Lead-form ad — first lead_gen_form_id injection in the CLI.
+apb creative create-lead-form-ad --name "Lead capture" --page-id PAGE \
+  --form-id 999 --image ./hero.jpg --headline "Sign up" --body "Free coffee" \
+  --url https://x.example --cta SIGN_UP --execute
+
+# Catalog creative — auto-wires --allow-collection from --format intent.
+apb creative create-catalog-creative --name "DPA" --page-id PAGE \
+  --catalog-id 123 --product-set-id 456 --hero-image ./hero.jpg \
+  --headline "Shop" --format collection --execute
+# (Without the builder you'd need to hand-pass --allow-collection AND --allow-catalog-template.)
+
+# Stories-suitable creative — emits 9:16 / safe-zone advisories on result.
+apb creative create-story-template --name "Story" --page-id PAGE \
+  --image ./vertical-1080x1920.jpg --headline "Try us" --execute
+
+# Reels-suitable video — emits ≤90s + safe-zone advisories.
+apb creative create-reels-video-template --name "Reel" --page-id PAGE \
+  --video ./reel.mp4 --thumbnail ./thumb.jpg --headline "Bold" --execute
+
+# End-to-end lead-form ad: validates campaign objective + form/page link,
+# creates lead-form creative + ad, reverse-pauses on partial failure.
+apb leadgen ad-create --name "Lead Q2" --campaign 120... --adset 120... \
+  --form-id 999 --image ./hero.jpg --headline "Sign up" --body "Free coffee" --execute
+```
+
+### Workflow 5d: Built-in compose presets (v0.2.0)
+
+`compose-from-spec` accepts 6 built-in `--preset` names that produce full campaign + adset + creative + ad stacks from just operator-friendly args. Built-in presets take precedence over user-saved presets; collision = fail-loud.
+
+```bash
+# Sales video stack — OUTCOME_SALES + LINK_CLICKS adset + video creative shell.
+apb campaign compose-from-spec --preset sales-video \
+  --campaign-name "Q2 Sales" --page-id PAGE_ID --pixel-id PX_ID --daily-budget 25
+
+# Lead-form stack — OUTCOME_LEADS + LEAD_GENERATION adset + lead-form creative
+# (reuses Sprint 3's lead_gen_form_id CTA shape).
+apb campaign compose-from-spec --preset lead-form \
+  --campaign-name "Lead capture Q2" --page-id PAGE --form-id FORM_999 --daily-budget 10
+
+# Catalog-sales stack — auto-uses OFFSITE_CONVERSIONS when --pixel-id given,
+# otherwise falls back to LINK_CLICKS.
+apb campaign compose-from-spec --preset catalog-sales \
+  --campaign-name "DPA" --page-id PAGE --catalog-id CAT_1 --product-set-id PS_42 \
+  --pixel-id PX_1 --daily-budget 50
+
+# Reels stack — Sprint 2's reels placement preset shape baked into the adset.
+apb campaign compose-from-spec --preset reels-video \
+  --campaign-name "Reels promo" --page-id PAGE --daily-budget 15
+
+# Other built-ins: sales-carousel, stories-video
+```
+
+**Precedence rule:** if you've saved a user preset with the same name as a built-in (e.g. `apb campaign preset save --name sales-video ...`), `compose-from-spec --preset sales-video` exits 2 with a shadowing error. Rename one. Built-in names are reserved.
+
+**Required args per preset** — see `apb campaign compose-from-spec --help`. Common requirements: `--campaign-name`, `--page-id`, `--daily-budget`. Lead-form additionally needs `--form-id`; catalog-sales needs `--catalog-id` + `--product-set-id`.
 
 ### Workflow 6: Safe Campaign Update (Plan Lifecycle)
 
@@ -497,6 +640,56 @@ curl -X DELETE \
 5 (CRITICAL) and dispatches to `graph_delete` instead of `graph_post` at
 execute time.
 
+### Workflow 20: Dayparting / ad scheduling (lifetime-budget required)
+
+Meta's `adset_schedule` (the dayparting / ad-scheduling feature) only works on
+**lifetime-budget** ad sets, and the budget *type* is frozen at create. The
+right move is to build a **new** lifetime-budget campaign/ad set; you can't
+retrofit a daily-budget one.
+
+```bash
+# Campaign with no budget (ABO — budget lives on the ad set):
+apb campaign create --name "Evening Sales" --objective OUTCOME_SALES \
+  --status PAUSED --budget-sharing false --execute
+
+# Ad set: lifetime budget + start/end window + dayparting builder.
+# `--daypart-hours` merges consecutive hours into windows; the CLI sets
+# `pacing_type=["day_parting"]` automatically when a schedule is present.
+apb adset create --campaign <campaign_id> \
+  --optimization-goal OFFSITE_CONVERSIONS \
+  --bid-strategy LOWEST_COST_WITHOUT_CAP \
+  --lifetime-budget 350 \
+  --start-time 2026-06-01T00:00:00 --end-time 2026-06-08T23:59:00 \
+  --daypart-hours "9,12,16,19,21" --daypart-timezone ADVERTISER \
+  --promoted-object '{"pixel_id":"<pixel>","custom_event_type":"ADD_TO_CART"}' \
+  --status PAUSED --execute
+```
+
+**Pre-flight guards (all fire during `--dry-run` with exit 2, before any network
+call) — no false positives, lookup failures and `USER`-timezone windows pass
+through:**
+
+| Guard | Triggers when | Since |
+|---|---|---|
+| **Schedule needs lifetime budget** | `--daypart-hours` / `--adset-schedule` + `--daily-budget` on create; or `adset update --adset-schedule` on a daily-budget ad set (or its CBO parent campaign) | v0.1.15 / v0.1.17 |
+| **Windows must fit the flight** | Any `timezone_type=ADVERTISER` window's recurring slot never intersects `start_time → end_time` (e.g. a 10-hour flight with windows past `end_time`). Skipped for flights ≥ 7 days (every weekday + interior days run full windows). | v0.1.20 |
+| **Conversion goal needs `promoted_object`** | `--optimization-goal OFFSITE_CONVERSIONS` or `VALUE` and no `--promoted-object` | v0.1.19 |
+| **Objective must be ODAX** | `campaign create` (or `compose-from-spec`) with a non-`OUTCOME_*` objective (legacy CONVERSIONS / LINK_CLICKS / …); error includes the mapping hint | v0.1.19 |
+
+**Pacing advisories** (soft, non-blocking) — the create/update result includes
+an `advisories[]` array when Meta would accept the setup but it's likely to
+under-deliver: flight < 24h, flight < 6 days (Meta's learning phase), or a
+lifetime / dayparted ad set with no `--end-time`. Surface these to the
+operator; don't treat them as errors.
+
+The dry-run preview's `would_create` (v0.1.20) echoes the full request body —
+budget, targeting, `promoted_object`, `pacing_type`, schedule, flight — so the
+wiring can be verified before `--execute`. `adset list` rows also include
+`pacing_type` alongside the boolean `dayparting` flag.
+
+For full manual control, pass Meta's schedule JSON directly with
+`--adset-schedule '<json|file>'` (it overrides `--daypart-hours`).
+
 ---
 
 ## Unattended Execution
@@ -587,6 +780,30 @@ apb campaign update-status --id 123 --status PAUSED --execute --json
 # When done, close the gate
 unset META_CTL_ALLOW_MUTATIONS
 ```
+
+---
+
+## Building ad-set targeting from flags (no JSON)
+
+Instead of hand-authoring `--targeting '{…}'`, build the spec from flags (Tier 3). The two modes are mutually exclusive — passing both fails loud.
+
+```bash
+# Women 25–54 in US/CA, interested in interest 6003107902433, on mobile, excluding a CA
+apb adset create --campaign 120... --name "TB demo" \
+  --optimization-goal LINK_CLICKS --billing-event LINK_CLICKS --daily-budget 50 \
+  --countries US,CA --age-min 25 --age-max 54 --genders 2 \
+  --interests 6003107902433 --device-platforms mobile \
+  --exclude-custom-audiences 99887 \
+  --dry-run --json
+```
+
+- `--interests` accepts IDs **or names** (a name resolves to the top interest-search match); `--behaviors` and `--custom-audiences` take IDs (find them via `apb targeting interest-search` / `behavior-search`).
+- `--regions`/`--cities` take Meta location **keys** from `apb targeting geo-search`.
+- Anything the builder doesn't cover: drop to `--targeting` JSON, or inject via `--extra-fields`.
+
+## Escape hatch: `--extra-fields`
+
+`campaign create` and `adset create` accept `--extra-fields '<json-object>'` — keys are merged into the body for Meta fields apb doesn't flag yet. It **bypasses validation** (advisory in the dry-run) and **fails loud** if a key collides with one apb manages. Always `--dry-run` first.
 
 ---
 
