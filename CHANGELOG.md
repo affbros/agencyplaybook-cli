@@ -6,6 +6,20 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.4.1] — 2026-05-29 (EngineSEO live-test fixes)
+
+Fixes surfaced by an end-to-end live validation of the v0.4.0 write surface against a real Meta ad account (image + video DCO campaigns, paused). No new commands or scopes (`cli_leaf_count` stays 242).
+
+### Fixed
+- **Targeting builder `--interests` / `--exclude-interests` never resolved a NAME** — `resolve_interest_ids` indexed a `{"data":[…]}` envelope, but `interest_search` returns a bare array, so every interest name failed with "no interest found matching …" (only numeric IDs worked). Now indexes the array directly.
+- **`creative upload-image` rejected an extensionless `--name`** — the asset name was used as the multipart filename with a hardcoded `application/octet-stream` MIME, so Meta returned `(#100) The type of file is not supported` for e.g. `--name "my-logo"`. Now sniffs the image magic bytes to set an accurate content-type and guarantees the multipart filename carries the right extension (png/jpg/gif/webp/bmp).
+- **`adset get` couldn't read back several v0.4.0 write fields** — added `is_dynamic_creative`, `dsa_beneficiary`, `dsa_payor`, and `bid_constraints` to the requested field set so a created ad set's DCO/DSA/min-ROAS settings actually appear on read-back.
+- **`--enhancements standard` broke creative-create** — Meta removed the umbrella `standard_enhancements` opt-in (now rejected with "… has been deprecated. Please choose to set individual features instead."). `standard` is now a no-op (with a deprecation note); CSV feature keys are upper-cased to match Meta's `creative_features_spec` enum (e.g. `IMAGE_ANIMATION`, `TEXT_OVERLAY_TRANSLATION`).
+- **Inline DCO (`creative create-dynamic`) with `--video` failed** — the inline `asset_feed_spec` never set `ad_formats` and always emitted a separate `images` array, so combining `--image` + `--video` hit Meta "an asset feed can have exactly one ad format". Now derives exactly one format: a video feed is `SINGLE_VIDEO` (image hashes become per-video `thumbnail_hash`), an image-only feed is `SINGLE_IMAGE`.
+
+### Internal
+- Made `cli_resolver_cache_test` deterministic — its four tests mutate the process-global `HOME`, so they now serialize on an in-test async lock instead of relying on `--test-threads=1` (which `cargo test --workspace` doesn't pass), keeping the binding test gate green under default threading.
+
 ## [0.4.0] — 2026-05-29 (meta-v25-field-coverage)
 
 Single batched release of the 3-tier Meta Marketing API v25 write-field-coverage workstream (correctness → capability → ergonomics). `cli_leaf_count` 241 → 242 (new `audience share`). No new scopes.
