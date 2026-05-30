@@ -597,7 +597,7 @@ apb campaign preset delete --name <preset_name> [--json]
 | `reels` | facebook, instagram | facebook_reels | reels |
 | `stories-reels` | facebook, instagram | story, facebook_reels | story, reels |
 | `feed-stories-reels` | facebook, instagram | feed, story, facebook_reels | stream, story, reels |
-| `advantage-plus` | facebook, instagram, audience_network, messenger | *(not set — Meta auto-decides)* | *(not set)* |
+| `advantage-plus` | facebook, instagram, audience_network, messenger, threads | *(not set — Meta auto-decides)* | *(not set)* |
 
 For bespoke placement shapes, pass `--targeting` / `--spec-file` with raw JSON directly (no preset needed).
 
