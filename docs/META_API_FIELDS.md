@@ -177,8 +177,8 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 | `object_type` | string | PHOTO, VIDEO, SHARE, etc. |
 | `object_story_spec` | object | Page post spec (page_id, link_data, video_data) |
 | `instagram_user_id` | string | Top-level IG actor for IG placements (`--instagram-user-id`; replaces the deprecated `instagram_actor_id`) |
-| `asset_feed_spec` | object | Dynamic creative assets: `images[]`, `videos[]` (`--video`), `titles[]`, `bodies[]`, `descriptions[]` (`--description`), `link_urls[]`, `call_to_action_types[]`, `optimization_type` (`--optimization-type`) |
-| `degrees_of_freedom_spec` | object | Advantage+ creative enhancements (`--enhancements`): `creative_features_spec.<feature>.enroll_status` = `OPT_IN`/`OPT_OUT`. **Note:** v25 uses per-feature `enroll_status`; the legacy `enable_standard_enhancements` boolean is removed |
+| `asset_feed_spec` | object | Dynamic creative assets: `ad_formats[]` (exactly one — `SINGLE_VIDEO` or `SINGLE_IMAGE`, derived from the media), `images[]`, `videos[]` (`--video`; `thumbnail_hash` from `--image`), `titles[]`, `bodies[]`, `descriptions[]` (`--description`), `link_urls[]`, `call_to_action_types[]`, `optimization_type` (`--optimization-type`) |
+| `degrees_of_freedom_spec` | object | Advantage+ creative enhancements (`--enhancements`): `creative_features_spec.<FEATURE>.enroll_status` = `OPT_IN`/`OPT_OUT`. **Note:** v25 **deprecated the umbrella `standard_enhancements` opt-in** (Meta rejects it: "… has been deprecated. Please choose to set individual features instead.") — pass individual UPPERCASE feature keys via `--enhancements <KEY,KEY>` (e.g. `IMAGE_ANIMATION`, `TEXT_OVERLAY_TRANSLATION`). The legacy `enable_standard_enhancements` boolean is never emitted |
 | `url_tags` | string | URL tracking parameters |
 
 ### Insights Fields

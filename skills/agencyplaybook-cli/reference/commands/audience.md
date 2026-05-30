@@ -1,6 +1,6 @@
 # `apb audience` — Command Reference
 
-8 commands. Auto-generated from the apb binary on 2026-05-29.
+8 commands. Auto-generated from the apb binary on 2026-05-30.
 
 ### `apb audience create`
 

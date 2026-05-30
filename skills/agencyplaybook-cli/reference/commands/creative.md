@@ -1,6 +1,6 @@
 # `apb creative` — Command Reference
 
-18 commands. Auto-generated from the apb binary on 2026-05-29.
+18 commands. Auto-generated from the apb binary on 2026-05-30.
 
 ### `apb creative asset-audit`
 
@@ -219,7 +219,7 @@ Build an image creative from operator-friendly flags (v0.2.0). Generates the v25
 | `--instagram-actor-id` | `<INSTAGRAM_ACTOR_ID>` | (deprecated) Use --instagram-user-id. Sets object_story_spec.instagram_actor_id |
 | `--instagram-user-id` | `<INSTAGRAM_USER_ID>` | Top-level `instagram_user_id` (v25). Preferred over --instagram-actor-id (deprecated 2025-09-09) for IG-placement creatives |
 | `--url-tags` | `<URL_TAGS>` |  |
-| `--enhancements` | `<ENHANCEMENTS>` | Advantage+ creative enhancements → degrees_of_freedom_spec. `standard` (the v25 standard-enhancements bundle), `none`, or a CSV of per-feature keys (e.g. `text_improvements,image_brightness_and_contrast`) |
+| `--enhancements` | `<ENHANCEMENTS>` | Advantage+ creative enhancements → degrees_of_freedom_spec. `none` (default), or a CSV of UPPERCASE per-feature keys (e.g. `IMAGE_ANIMATION,TEXT_OVERLAY_TRANSLATION`). NOTE: `standard` is deprecated by Meta (the standard_enhancements bundle was removed) → no-op |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -387,7 +387,7 @@ Build a video creative from operator-friendly flags (v0.2.0). Same shape as `cre
 | `--instagram-actor-id` | `<INSTAGRAM_ACTOR_ID>` | (deprecated) Use --instagram-user-id. Sets object_story_spec.instagram_actor_id |
 | `--instagram-user-id` | `<INSTAGRAM_USER_ID>` | Top-level `instagram_user_id` (v25). Preferred over --instagram-actor-id (deprecated 2025-09-09) for IG-placement creatives |
 | `--url-tags` | `<URL_TAGS>` |  |
-| `--enhancements` | `<ENHANCEMENTS>` | Advantage+ creative enhancements → degrees_of_freedom_spec. `standard`, `none`, or a CSV of per-feature keys |
+| `--enhancements` | `<ENHANCEMENTS>` | Advantage+ creative enhancements → degrees_of_freedom_spec. `none` (default) or a CSV of UPPERCASE feature keys. `standard` is deprecated by Meta (removed) → no-op |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

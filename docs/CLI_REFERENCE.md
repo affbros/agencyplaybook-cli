@@ -1,6 +1,6 @@
 # CLI Reference
 
-Command reference for `apb` (Rust). **34 command domains, 241 leaf commands** (verified 2026-05-28 via `tasks/ci/api-parity/baseline.json`; mirrored to `public/data/cli-catalogue.json`).
+Command reference for `apb` (Rust). **34 command domains, 242 leaf commands** (verified 2026-05-29 via `tasks/ci/api-parity/baseline.json`; mirrored to `public/data/cli-catalogue.json`).
 
 > **Doc currency**: Headline counts match the parity baseline. The per-command sections below were last fully audited prior to campaign-management-completion (S001–S008, 2026-04-25 → 2026-04-26), which added ~40 leaves across `catalog`, `product-set`, `custom-conversion`, `leadgen`, `audience users-add/users-remove`, `account instagram-accounts/instagram-media`, `creative create-collection`, plus generic `adset update` and the `--special-ad-categories` / `--objective` enum flags on campaign create. Subsequent releases added pre-flight guards (v0.1.15–v0.1.20): see SAFETY_MODEL.md ("Pre-flight guards on mutations") and the `adset create`/`update` sections. **Those new commands + guard semantics are NOT yet fully documented here** — see the workstream summary at `../ai/evals/campaign-management-completion/workstream-summary.md` and `../ai/evals/pacing-scheduling-alignment/sprint-001-eval.md` for the canonical lists. Run `apb --help` and `apb <domain> --help` for current authoritative usage.
 
@@ -1015,6 +1015,8 @@ apb creative create-dynamic \
 
 **Important:** The ad set using this creative must have `is_dynamic_creative: true`.
 
+**Ad format (v0.4.1):** the inline builder derives exactly one `asset_feed_spec.ad_formats` — a `--video` feed becomes `SINGLE_VIDEO` (each `--image` hash is used as the video `thumbnail_hash`, not a separate image asset), an image-only feed becomes `SINGLE_IMAGE`. This is why `--image` + `--video` together now work (Meta rejects a feed that mixes formats with "an asset feed can have exactly one ad format").
+
 For agent / CI usage patterns including hash vs path resolution semantics, see [`docs/CLI_AUTOMATION.md`](../../docs/CLI_AUTOMATION.md#dynamic-creative-quick-experiments).
 
 ### v0.2.0 Ergonomic Builders (agency-gaps-v2 Sprint 3)
@@ -1030,7 +1032,7 @@ apb creative create-image-simple --name <name> --page-id <P> --image <hash-or-pa
   [--enhancements standard|none|<csv>] [--execute] [--json]
 ```
 
-`--enhancements` attaches a `degrees_of_freedom_spec` (Advantage+ creative enhancements): `standard` enrolls the v25 standard-enhancements bundle (per-feature `enroll_status=OPT_IN`), `none` omits it, or pass a CSV of feature keys (e.g. `text_improvements,image_brightness_and_contrast`). A deliberate opt-in is whitelisted by the auditor; carousel/collection format expansion still blocks. The dead `enable_standard_enhancements` boolean is never emitted.
+`--enhancements` attaches a `degrees_of_freedom_spec` (Advantage+ creative enhancements). **`standard` is a no-op as of v0.4.1** — Meta removed the umbrella `standard_enhancements` opt-in (it now rejects the creative with `(#100) … has been deprecated. Please choose to set individual features instead.`); passing `standard` prints a deprecation note and emits nothing. `none` (default) omits the spec. To opt into individual features, pass a CSV of **uppercase** feature keys matching Meta's `creative_features_spec` enum, e.g. `IMAGE_ANIMATION,TEXT_OVERLAY_TRANSLATION` (valid keys are a narrow set: `IMAGE_ANIMATION`, `TEXT_OVERLAY_TRANSLATION`, `IG_VIDEO_NATIVE_SUBTITLE`, `PRODUCT_BROWSING`, `PRODUCT_METADATA_AUTOMATION`, `PROFILE_CARD`, `STANDARD_ENHANCEMENTS_CATALOG`). A deliberate CSV opt-in is whitelisted by the auditor; carousel/collection/FORMAT_AUTOMATION format expansion still blocks. The dead `enable_standard_enhancements` boolean is never emitted.
 
 #### `creative create-video-simple` (WRITE)
 
