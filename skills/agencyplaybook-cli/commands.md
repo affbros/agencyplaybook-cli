@@ -1,7 +1,7 @@
 # `apb` CLI — Command Index
 
 Auto-generated from the apb binary on 2026-05-30. 
-242 commands across 34 domains. 
+246 commands across 35 domains. 
 Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain>.md` — open the file for the domain you need.
 
 | Domain | Commands | Reference |
@@ -40,3 +40,4 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | split-test | 4 | `reference/commands/split-test.md` |
 | sync | 2 | `reference/commands/sync.md` |
 | targeting | 9 | `reference/commands/targeting.md` |
+| value-rule | 4 | `reference/commands/value-rule.md` |

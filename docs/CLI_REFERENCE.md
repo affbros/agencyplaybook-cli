@@ -1,6 +1,6 @@
 # CLI Reference
 
-Command reference for `apb` (Rust). **34 command domains, 242 leaf commands** (verified 2026-05-29 via `tasks/ci/api-parity/baseline.json`; mirrored to `public/data/cli-catalogue.json`).
+Command reference for `apb` (Rust). **34 command domains, 246 leaf commands** (verified 2026-05-30 via `tasks/ci/api-parity/baseline.json`; mirrored to `public/data/cli-catalogue.json`).
 
 > **Doc currency**: Headline counts match the parity baseline. The per-command sections below were last fully audited prior to campaign-management-completion (S001–S008, 2026-04-25 → 2026-04-26), which added ~40 leaves across `catalog`, `product-set`, `custom-conversion`, `leadgen`, `audience users-add/users-remove`, `account instagram-accounts/instagram-media`, `creative create-collection`, plus generic `adset update` and the `--special-ad-categories` / `--objective` enum flags on campaign create. Subsequent releases added pre-flight guards (v0.1.15–v0.1.20): see SAFETY_MODEL.md ("Pre-flight guards on mutations") and the `adset create`/`update` sections. **Those new commands + guard semantics are NOT yet fully documented here** — see the workstream summary at `../ai/evals/campaign-management-completion/workstream-summary.md` and `../ai/evals/pacing-scheduling-alignment/sprint-001-eval.md` for the canonical lists. Run `apb --help` and `apb <domain> --help` for current authoritative usage.
 
@@ -3014,3 +3014,75 @@ apb leadgen leads-export --form-id 12345 \
 apb leadgen leads-export --form-id 12345 \
     --since 2026-04-19 --format json | jq '.[].field_data'
 ```
+
+## 34. value-rule
+
+Value Rules (bid multipliers) — raise or lower the bid for users matching specific criteria (e.g. "bid +20% for iOS users"). A `value_rule_set` is an **account-level** object holding up to 10 rules; each rule applies an `INCREASE`/`DECREASE` of N% to users matching its criteria. Sets attach to an ad set via `adset create --value-rule-set-ids` (Meta's write-only `value_rule_set_ids` param). Limits: ≤10 rules/set, ≤6 sets/account, ≤2 criteria/rule; range +1000% / −90%; first matching rule wins.
+
+**Required scope**: `read:campaigns` for list/show; `write:campaigns` (Agency+) for create/delete.
+
+> **Deletion note:** Meta does not support deleting a value rule set through this API path on all accounts/tokens (returns *"Unsupported delete request"*). `apb value-rule delete` surfaces that error verbatim — if the API rejects it, delete the set in Ads Manager.
+
+### `value-rule list`
+
+```
+apb value-rule list [--limit <n>] [--account <act>] [--json]
+```
+
+Array of `{id, name, rules}` for the connected ad account.
+
+### `value-rule show`
+
+```
+apb value-rule show --id <value_rule_set_id> [--json]
+```
+
+A single rule set with its rules expanded.
+
+### `value-rule create` (WRITE)
+
+Build a single rule from flags, or pass a full multi-rule array via `--spec-file`:
+
+```
+apb value-rule create --name <set-name> \
+  --adjust INCREASE|DECREASE --adjust-value <pct> \
+  --criteria-type <TYPE> [--operator CONTAINS|DOES_NOT_CONTAIN] \
+  --values <v1,v2> [--value-types <t1,t2>] [--rule-name <name>] \
+  [--execute] [--json]
+```
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `--name` | string | Required. Rule set name. |
+| `--spec-file` | path/JSON | Full `rules` array (inline or file). Mutually exclusive with the single-rule flags. |
+| `--adjust` | enum | Single-rule: `INCREASE` or `DECREASE`. |
+| `--adjust-value` | number | Single-rule: magnitude as a percent (e.g. `20`; Meta caps +1000% / −90%). |
+| `--criteria-type` | enum | `OS_TYPE`, `LOCATION`, `AGE`, `GENDER`, `PLACEMENT`, `DEVICE_PLATFORM`, `CONVERSION_LOCATION`, `OMNI_CHANNEL`, `URL`, `AUDIENCE_LABEL`. |
+| `--operator` | enum | `CONTAINS` (default) or `DOES_NOT_CONTAIN`. |
+| `--values` | CSV | Criteria values. **OS_TYPE uses UPPERCASE `IOS`/`ANDROID`**; LOCATION uses `US`, etc. |
+| `--value-types` | CSV | Parallel to `--values`: `LOCATION_COUNTRY`/`_REGION`/`_CITY`/`_DMA`/`_COMSCORE_MARKET` or `NONE` (default). |
+| `--rule-name` | string | Optional name for the single rule. |
+
+**Example — bid +20% for iOS users, attach to a new ad set:**
+```
+VRS=$(apb value-rule create --name "iOS Boost" --adjust INCREASE --adjust-value 20 \
+        --criteria-type OS_TYPE --values IOS --execute --json | jq -r .id)
+apb adset create --campaign <CID> --name "iOS-boosted" --optimization-goal LINK_CLICKS \
+    --bid-strategy LOWEST_COST_WITHOUT_CAP --daily-budget 20 --countries US \
+    --value-rule-set-ids "$VRS" --status PAUSED --execute
+```
+
+`--spec-file` rules-array shape (multi-rule / multi-criteria):
+```json
+[{"name":"iOS +20%","adjust_sign":"INCREASE","adjust_value":20,
+  "criterias":[{"criteria_type":"OS_TYPE","operator":"CONTAINS",
+                "criteria_values":["IOS"],"criteria_value_types":["NONE"]}]}]
+```
+
+### `value-rule delete` (WRITE)
+
+```
+apb value-rule delete --id <value_rule_set_id> --execute --confirm-destructive [--json]
+```
+
+Destructive — requires `--confirm-destructive`. See the deletion note above (Meta may reject API deletion on some accounts).

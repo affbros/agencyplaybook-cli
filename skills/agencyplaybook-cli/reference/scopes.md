@@ -67,7 +67,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb audience list`
 - `apb audience overlap`
 
-### `read:campaigns` (38 commands)
+### `read:campaigns` (40 commands)
 
 - `apb account current`
 - `apb account info-detailed`
@@ -107,6 +107,8 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb targeting interest-search`
 - `apb targeting interest-suggest`
 - `apb targeting interest-validate`
+- `apb value-rule list`
+- `apb value-rule show`
 
 ### `read:catalogs` (5 commands)
 
@@ -267,7 +269,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
 - `apb budget simulate`
 
-### `write:campaigns` (45 commands)
+### `write:campaigns` (47 commands)
 
 - `apb ad create`
 - `apb ad create-multi`
@@ -314,6 +316,8 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb plan execute-safe`
 - `apb plan review-batch`
 - `apb plan validate`
+- `apb value-rule create`
+- `apb value-rule delete`
 
 ### `write:catalogs` (5 commands)
 

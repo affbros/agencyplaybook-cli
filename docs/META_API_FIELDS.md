@@ -135,7 +135,8 @@ Complete reference of all Meta Graph API fields, endpoints, and parameters used 
 | `targeting` | object | Full targeting specification |
 | `promoted_object` | object | Pixel ID, app, page, etc. |
 | `destination_type` | string | WEBSITE, APP, MESSENGER, etc. (writable via `--destination-type`) |
-| `attribution_spec` | array | Attribution windows (writable via `--attribution-spec`; v25 rejects 7d/28d view-through) |
+| `attribution_spec` | array | Attribution windows (writable via `--attribution-spec`; v25 rejects 7d/28d view-through). NOTE: v25 has no separate "attribution model" field — `attribution_spec` is the only lever; "Standard" = the default. |
+| `value_rule_set_ids` | array | Value Rules (bid multipliers) to attach (`--value-rule-set-ids`). **Write-only** — accepted on POST but not returned by `adset get`. Manage the sets via `apb value-rule`. |
 | `is_dynamic_creative` | bool | DCO flag (writable via `--dynamic-creative`) |
 | `dsa_beneficiary` | string | EU DSA beneficiary (`--dsa-beneficiary`) |
 | `dsa_payor` | string | EU DSA payor (`--dsa-payor`) |
