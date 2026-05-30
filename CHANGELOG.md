@@ -6,6 +6,22 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.4.2] — 2026-05-30 (Value Rules + targeting/upload fixes)
+
+`cli_leaf_count` 242 → 246 (new `value-rule` domain). No new scopes (value rules use `read:campaigns` / `write:campaigns`).
+
+### Added
+- **Value Rules (bid multipliers)** — new `value-rule create | list | show | delete` domain. A `value_rule_set` raises/lowers the bid for users matching criteria (e.g. bid +20% for iOS users). Build a single rule from flags (`--adjust`/`--adjust-value`/`--criteria-type`/`--values`) or pass a full multi-rule array via `--spec-file`. Criteria types: `GENDER`/`AGE`/`OS_TYPE`/`LOCATION`/`PLACEMENT`/`DEVICE_PLATFORM`/`CONVERSION_LOCATION`/`OMNI_CHANNEL`/`URL`/`AUDIENCE_LABEL`. Schema reverse-engineered + live-verified against Meta v25 (`POST /act_<id>/value_rule_set`). HTTP equivalent at `/api/v1/value-rules`.
+- **`adset create --value-rule-set-ids`** — attach value rule sets to an ad set (Meta's write-only `value_rule_set_ids` param; not read back via `adset get`).
+- **Docs:** documented that the v25 ad set has **no separate "attribution model" field** — `attribution_spec` (windows) is the only lever, "Standard" = the default. Traffic performance goals (`--optimization-goal LANDING_PAGE_VIEWS` / `LINK_CLICKS`) and the cost-per-result goal (`--bid-strategy COST_CAP --bid-amount`) were already supported.
+
+### Fixed
+- **`targeting interest-validate --ids`** validated by interest *name* (Meta's `interest_list` param) instead of by ID, so it reported every interest invalid. Now uses `interest_fbid_list` — returns real validity + names and flags deprecated interests.
+- **`creative upload-video` named every asset "Default"** — title/name were set in the resumable upload's `start` phase (which Meta ignores); moved to the `finish` phase. Now the asset name = `--name`, else the file basename.
+
+### Known limitation
+- Meta does not support deleting a `value_rule_set` through this API path on all accounts/tokens (returns "Unsupported delete request"); `value-rule delete` surfaces that error — delete in Ads Manager if rejected.
+
 ## [0.4.1] — 2026-05-29 (EngineSEO live-test fixes)
 
 Fixes surfaced by an end-to-end live validation of the v0.4.0 write surface against a real Meta ad account (image + video DCO campaigns, paused). No new commands or scopes (`cli_leaf_count` stays 242).
