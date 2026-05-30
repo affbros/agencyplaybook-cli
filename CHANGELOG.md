@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.4.3] — 2026-05-30 (advantage-plus placements include Threads)
+
+### Fixed
+- **`--placements advantage-plus`** now includes **Threads** — `publisher_platforms` is `facebook, instagram, audience_network, messenger, threads` (was 4 platforms, silently excluding Threads — narrower than Meta's true automatic/Advantage+ default). Live-verified Meta accepts + persists it. No command-surface change (246 leaves).
+
 ## [0.4.2] — 2026-05-30 (Value Rules + targeting/upload fixes)
 
 `cli_leaf_count` 242 → 246 (new `value-rule` domain). No new scopes (value rules use `read:campaigns` / `write:campaigns`).
