@@ -1,6 +1,6 @@
 # `apb account` — Command Reference
 
-12 commands. Auto-generated from the apb binary on 2026-05-30.
+12 commands. Auto-generated from the apb binary on 2026-05-31.
 
 ### `apb account current`
 

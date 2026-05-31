@@ -1,6 +1,6 @@
 # `apb creative` — Command Reference
 
-18 commands. Auto-generated from the apb binary on 2026-05-30.
+18 commands. Auto-generated from the apb binary on 2026-05-31.
 
 ### `apb creative asset-audit`
 

@@ -1,6 +1,6 @@
 # `apb ad` — Command Reference
 
-8 commands. Auto-generated from the apb binary on 2026-05-30.
+8 commands. Auto-generated from the apb binary on 2026-05-31.
 
 ### `apb ad create`
 

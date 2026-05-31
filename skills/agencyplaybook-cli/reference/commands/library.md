@@ -1,6 +1,6 @@
 # `apb library` — Command Reference
 
-1 commands. Auto-generated from the apb binary on 2026-05-30.
+1 commands. Auto-generated from the apb binary on 2026-05-31.
 
 ### `apb library search`
 

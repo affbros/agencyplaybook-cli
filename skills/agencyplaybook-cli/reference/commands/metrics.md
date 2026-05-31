@@ -1,6 +1,6 @@
 # `apb metrics` — Command Reference
 
-4 commands. Auto-generated from the apb binary on 2026-05-30.
+4 commands. Auto-generated from the apb binary on 2026-05-31.
 
 ### `apb metrics compute`
 

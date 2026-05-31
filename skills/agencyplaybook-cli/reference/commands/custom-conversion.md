@@ -1,6 +1,6 @@
 # `apb custom-conversion` — Command Reference
 
-5 commands. Auto-generated from the apb binary on 2026-05-30.
+5 commands. Auto-generated from the apb binary on 2026-05-31.
 
 ### `apb custom-conversion create`
 
