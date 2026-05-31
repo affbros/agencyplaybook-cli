@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.4.4] — 2026-05-31 (rate-limit UX: visible backoff + opt-in throttle)
+
+No command-surface change (still 246 leaves). Behavioral/UX only, with safe defaults — behavior is unchanged unless `APB_THROTTLE` is set or a 429/5xx is hit in human mode.
+
+### Added
+- **Live backoff feedback.** On a Meta 429/5xx the CLI now prints a one-line stderr notice before each retry — e.g. `⚠️  Meta rate limit — retrying in 8s (retry 1/3)` — instead of pausing silently. Suppressed under `--json` / `--no-input` so captured output stays clean.
+- **Actionable rate-limit error.** When retries are exhausted, the human-mode error appends guidance: how long to wait, that Meta's limit is an **ad-account-level rolling usage score (not a daily quota)**, `apb doctor quota` to check headroom, burst-reduction tips, the `APB_THROTTLE` opt-in, and the Ads-API-access-tier caveat. (`--json` already carried `retry_after_ms` in `error.details`.)
+- **Opt-in preemptive throttle (`APB_THROTTLE=1`).** Off by default. When enabled, the CLI persists per-account peak Meta usage to `~/.apb/throttle/<acct>.usage.json` (120s TTL) and pre-sleeps before requests once pressure crosses the soft/hard thresholds (`META_BACKPRESSURE_SOFT/HARD_PCT`, default 60/80 → 250/2000ms). Works **within a run** (in-memory reading) and **across rapid back-to-back invocations** (persisted snapshot) — bringing the SaaS server's 60/80 backpressure model to the CLI for high-fanout agent loops.
+
+### Notes
+- Complements the existing reactive protections (Retry-After-aware exponential backoff + the 10-minute cross-invocation cooldown after a 429). The API server path is untouched — notices are CLI-human-mode only.
+
 ## [0.4.3] — 2026-05-30 (advantage-plus placements include Threads)
 
 ### Fixed
