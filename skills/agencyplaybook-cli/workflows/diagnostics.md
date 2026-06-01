@@ -1,8 +1,8 @@
 # Diagnostic playbooks — which to run, when, and how
 
-`apb` ships 26 playbook subcommands — 24 diagnostics across 4 pillars (below), plus `evaluate` (generic rule eval) and `catalog` (lists the playbook catalog). Picking the right one matters more than running them all.
+`apb` ships 34 playbook subcommands — 32 diagnostics across 4 pillars (below), plus `evaluate` (generic rule eval) and `catalog` (lists the playbook catalog). Picking the right one matters more than running them all.
 
-> **Result envelope.** The 24 diagnostics return `{ grade, score, summary, findings, recommendations }`. `score` is `0–100`, or `null` with `grade: "N/A"` and `insufficient_data: true` when there was nothing to analyze — branch on `insufficient_data`, not on a `0` score or an `F` grade. `playbook catalog` is a *listing*, not a diagnostic, so it intentionally has **no** `grade`/`score`.
+> **Result envelope.** The 32 diagnostics return `{ grade, score, summary, findings, recommendations }`. `score` is `0–100`, or `null` with `grade: "N/A"` and `insufficient_data: true` when there was nothing to analyze — branch on `insufficient_data`, not on a `0` score or an `F` grade. `playbook catalog` is a *listing*, not a diagnostic, so it intentionally has **no** `grade`/`score`.
 
 ## Pillar routing
 
@@ -11,10 +11,14 @@
 | New campaign that won't exit learning | Learning | `apb playbook learning-accelerator` |
 | Performance dropped over the last 7-14 days | Turnaround | `apb playbook roas-recovery` |
 | Ads have been live a while; CTR sagging | Signal | `apb playbook fatigue-index` |
+| Not enough fresh creative / tests not producing winners | Signal | `apb playbook creative-velocity` |
+| Video ads underperforming | Signal | `apb playbook video-engagement` |
+| Conversions dropping somewhere in the funnel | Signal | `apb playbook funnel-leak` |
+| Ad sets won't spend their budget | Scaling | `apb playbook delivery-pacing` |
 | Want to scale spend safely | Scaling | `apb playbook scale-roadmap` |
 | "Tell me everything that's wrong" | Turnaround | `apb playbook health-score`, then `reset-rebuild-advisor` if score <60 |
 
-## The 24 diagnostic playbooks
+## The 32 diagnostic playbooks
 
 ### Learning (5)
 
@@ -24,7 +28,7 @@
 - **`no-touch-compliance`** — flag learning-phase adsets edited within last 7 days
 - **`consolidation-advisor`** — detect ad-set fragmentation, recommend merging
 
-### Signal (8)
+### Signal (13)
 
 - **`fatigue-index`** — per-ad creative fatigue 0–100
 - **`saturation`** — audience saturation + CPA inflation projection
@@ -34,8 +38,13 @@
 - **`broad-targeting-audit`** — narrow_score 0–5 per active adset
 - **`event-hierarchy-audit`** — TOF/MOF/BOF naming vs optimization_goal alignment
 - **`capi-dual-signal`** — pixel CAPI coverage check
+- **`creative-velocity`** — fresh-creative cadence, win-rate, single-creative dependency, refresh runway (default 30d)
+- **`video-engagement`** — hook vs payoff diagnosis per video (hook/hold rate + retention cliff; default 14d)
+- **`funnel-leak`** — leakiest funnel stage (CTR→LPV→ATC→IC→Purchase) + attribution (default 14d)
+- **`signal-quality`** — measurement quality (standard-event coverage, CAPI split, advanced-matching, match rate); quality sibling of capi-dual-signal
+- **`segment-performance`** — per-segment (device/placement/age/gender) waste audit + value-rule bid-down specs (default 30d)
 
-### Scaling (7)
+### Scaling (10)
 
 - **`waste-audit`** — wasted spend with $ savings projection
 - **`rebalance`** — top vs bottom quartile budget swap
@@ -44,6 +53,9 @@
 - **`scale-roadmap`** — incremental (+20%/+30%) and duplication (1.5x/2x/3x) tier projections
 - **`cbo-vs-abo-audit`** — flag ABO campaigns with high CPA dispersion
 - **`retargeting-compression`** — compress retention windows >30d to 7-14d
+- **`delivery-pacing`** — under-delivery cause (budget-capped / learning-limited / bid-audience); adset-budget only (default 7d)
+- **`bid-strategy`** — bid strategy vs realized CPA/ROAS (COST_CAP throttling, uncapped scaled spend, MIN_ROAS miss; default 30d)
+- **`advantage-adoption`** — Advantage+ structure adoption + manual-sales migration candidates (advisory; default 30d)
 
 ### Turnaround (4)
 

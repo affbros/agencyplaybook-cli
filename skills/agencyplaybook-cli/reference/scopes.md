@@ -188,20 +188,25 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb playbook waste-audit`
 - `apb playbook weekly-digest`
 
-### `read:playbooks:full` (21 commands)
+### `read:playbooks:full` (29 commands)
 
+- `apb playbook advantage-adoption`
 - `apb playbook anomaly-detect`
+- `apb playbook bid-strategy`
 - `apb playbook broad-targeting-audit`
 - `apb playbook capi-dual-signal`
 - `apb playbook catalog`
 - `apb playbook cbo-vs-abo-audit`
 - `apb playbook consolidation-advisor`
 - `apb playbook creative-mix`
+- `apb playbook creative-velocity`
 - `apb playbook daypart`
+- `apb playbook delivery-pacing`
 - `apb playbook duplicate-detect`
 - `apb playbook evaluate`
 - `apb playbook event-downgrade-ladder`
 - `apb playbook event-hierarchy-audit`
+- `apb playbook funnel-leak`
 - `apb playbook learning-accelerator`
 - `apb playbook no-touch-compliance`
 - `apb playbook placement-audit`
@@ -211,6 +216,9 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb playbook roas-recovery`
 - `apb playbook saturation`
 - `apb playbook scale-roadmap`
+- `apb playbook segment-performance`
+- `apb playbook signal-quality`
+- `apb playbook video-engagement`
 
 ### `read:reports` (20 commands)
 

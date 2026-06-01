@@ -4,7 +4,7 @@ A [Claude Code](https://claude.com/claude-code) / Claude Agent skill for driving
 
 ## `agencyplaybook-cli`
 
-Packages working knowledge of every `apb` command — 229 commands across 34 domains — so Claude can write correct, dry-run-first automation for Meta (Facebook/Instagram) ad campaigns: campaign/adset/ad/creative CRUD, diagnostic playbooks, multi-entity plans with rollback, audiences, targeting, pixels/CAPI, rules, split-tests, catalogs, custom conversions, and leadgen.
+Packages working knowledge of every `apb` command — 254 commands across 35 domains — so Claude can write correct, dry-run-first automation for Meta (Facebook/Instagram) ad campaigns: campaign/adset/ad/creative CRUD, diagnostic playbooks, multi-entity plans with rollback, audiences, targeting, pixels/CAPI, rules, split-tests, catalogs, custom conversions, and leadgen.
 
 | | |
 |---|---|

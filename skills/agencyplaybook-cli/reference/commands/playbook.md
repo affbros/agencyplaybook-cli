@@ -1,6 +1,30 @@
 # `apb playbook` — Command Reference
 
-26 commands. Auto-generated from the apb binary on 2026-06-01.
+34 commands. Auto-generated from the apb binary on 2026-06-01.
+
+### `apb playbook advantage-adoption`
+
+Audit adoption of Meta's Advantage+ structure (smart_promotion_type + Advantage+ Audience) and list manual sales campaigns to migrate — advisory
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 30] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 30d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook advantage-adoption --days <DAYS> --since <SINCE>
+```
 
 ### `apb playbook anomaly-detect`
 
@@ -25,6 +49,30 @@ Flag cost anomalies vs trailing baseline
 
 ```bash
 apb playbook anomaly-detect --days <DAYS> --since <SINCE>
+```
+
+### `apb playbook bid-strategy`
+
+Audit bid strategy vs realized CPA/ROAS — flags COST_CAP throttling, uncapped scaled spend, and MIN_ROAS floor misses
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 30] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 30d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook bid-strategy --days <DAYS> --since <SINCE>
 ```
 
 ### `apb playbook broad-targeting-audit`
@@ -163,6 +211,30 @@ Creative format diversity audit (structural — inspects current creatives, no t
 apb playbook creative-mix
 ```
 
+### `apb playbook creative-velocity`
+
+Measure creative refresh velocity: net-new ads/week, fresh-spend share, single-creative dependency, win-rate, and refresh runway
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 30] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 30d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook creative-velocity --days <DAYS> --since <SINCE>
+```
+
 ### `apb playbook daypart`
 
 Hourly performance heatmap
@@ -185,6 +257,30 @@ Hourly performance heatmap
 
 ```bash
 apb playbook daypart --days <DAYS> --since <SINCE>
+```
+
+### `apb playbook delivery-pacing`
+
+Diagnose under-delivery per ad set and classify the cause (budget-capped vs learning-limited vs bid/audience constrained)
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 7] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 7d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook delivery-pacing --days <DAYS> --since <SINCE>
 ```
 
 ### `apb playbook duplicate-detect`
@@ -305,6 +401,30 @@ Score each ad's creative fatigue (0-100)
 
 ```bash
 apb playbook fatigue-index --days <DAYS> --since <SINCE>
+```
+
+### `apb playbook funnel-leak`
+
+Locate the leakiest conversion-funnel stage (CTR → LPV → ATC → IC → Purchase) and attribute it to creative, landing page, offer, or checkout
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 14] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 14d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook funnel-leak --days <DAYS> --since <SINCE>
 ```
 
 ### `apb playbook health-score`
@@ -567,6 +687,76 @@ Budget scaling projections with diminishing returns
 
 ```bash
 apb playbook scale-roadmap --days <DAYS> --since <SINCE>
+```
+
+### `apb playbook segment-performance`
+
+Per-segment (device/placement/age/gender) waste audit with ready-to-attach value-rule bid-down specs for high-CPM segments
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 30] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 30d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook segment-performance --days <DAYS> --since <SINCE>
+```
+
+### `apb playbook signal-quality`
+
+Audit measurement quality — standard-event coverage, CAPI server/web split, advanced-matching breadth, match rate (structural — no window)
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook signal-quality
+```
+
+### `apb playbook video-engagement`
+
+Diagnose where video creative loses viewers — hook (play/hold rate) vs payoff (retention curve + CTA) — per video
+
+**Scope:** `read:playbooks:full` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | [default: 14] |
+| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 14d. Overrides --days when set |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb playbook video-engagement --days <DAYS> --since <SINCE>
 ```
 
 ### `apb playbook waste-audit`
