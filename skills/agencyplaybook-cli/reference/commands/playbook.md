@@ -143,14 +143,12 @@ apb playbook consolidation-advisor --days <DAYS> --since <SINCE>
 
 ### `apb playbook creative-mix`
 
-Creative format diversity audit
+Creative format diversity audit (structural — inspects current creatives, no time window)
 
 **Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
-| `--days` | `<DAYS>` | [default: 14] |
-| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 14d. Overrides --days when set |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -162,7 +160,7 @@ Creative format diversity audit
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb playbook creative-mix --days <DAYS> --since <SINCE>
+apb playbook creative-mix
 ```
 
 ### `apb playbook daypart`
@@ -335,14 +333,12 @@ apb playbook health-score --days <DAYS> --since <SINCE>
 
 ### `apb playbook launch-check`
 
-New account readiness checklist
+New account readiness checklist (structural — inspects current setup, no time window)
 
 **Scope:** `read:playbooks:core` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
-| `--days` | `<DAYS>` | [default: 7] |
-| `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 7d. Overrides --days when set |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -354,7 +350,7 @@ New account readiness checklist
 | `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
 
 ```bash
-apb playbook launch-check --days <DAYS> --since <SINCE>
+apb playbook launch-check
 ```
 
 ### `apb playbook learning-accelerator`
