@@ -1,6 +1,6 @@
 # `apb leadgen` — Command Reference
 
-6 commands. Auto-generated from the apb binary on 2026-05-31.
+6 commands. Auto-generated from the apb binary on 2026-06-01.
 
 ### `apb leadgen ad-create`
 

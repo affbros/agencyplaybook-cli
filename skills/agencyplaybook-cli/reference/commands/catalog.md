@@ -1,6 +1,6 @@
 # `apb catalog` — Command Reference
 
-10 commands. Auto-generated from the apb binary on 2026-05-31.
+10 commands. Auto-generated from the apb binary on 2026-06-01.
 
 ### `apb catalog create`
 

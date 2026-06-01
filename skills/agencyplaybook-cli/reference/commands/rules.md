@@ -1,6 +1,6 @@
 # `apb rules` — Command Reference
 
-11 commands. Auto-generated from the apb binary on 2026-05-31.
+11 commands. Auto-generated from the apb binary on 2026-06-01.
 
 ### `apb rules create`
 

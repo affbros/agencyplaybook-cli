@@ -128,7 +128,7 @@ esac
 
 ## 11. Handling 429s gracefully
 
-The CLI honors Meta's `Retry-After` header automatically. For shell scripts, just retry on exit 5 (network/rate-limit):
+The CLI honors Meta's `Retry-After` header automatically (Retry-After-aware backoff + a 10-minute cross-invocation cooldown). For shell scripts, the simplest pattern is to retry on **exit 5** (network/rate-limit):
 
 ```bash
 for i in 1 2 3; do
@@ -137,6 +137,22 @@ for i in 1 2 3; do
   break
 done
 ```
+
+Want a tighter loop? On a rate-limit failure the `--json` envelope carries `error.code = "rate_limited"` and a concrete wait in `error.details.retry_after_ms` — wait exactly that long instead of guessing:
+
+```bash
+for i in 1 2 3; do
+  out=$(apb report insights --days 30 --no-input --json) && { echo "$out"; break; }
+  code=$(jq -r '.error.code // ""' <<<"$out")
+  if [ "$code" = "rate_limited" ]; then
+    ms=$(jq -r '.error.details.retry_after_ms // 0' <<<"$out")
+    sleep "$(awk "BEGIN{print ($ms/1000)+1}")" && continue
+  fi
+  break   # non-rate-limit failure — don't spin
+done
+```
+
+To pre-empt throttling entirely on high-fanout agent loops, opt into the preemptive throttle: `export APB_THROTTLE=1`.
 
 ## 12. Catalog product set CRUD (DPA / Advantage+ Shopping)
 

@@ -8,7 +8,7 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-05-31 from the live binary — 246 commands across 35 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-06-01 from the live binary — 246 commands across 35 domains.
 
 ## Routing
 

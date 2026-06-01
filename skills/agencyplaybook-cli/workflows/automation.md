@@ -133,3 +133,5 @@ esac
 ```
 
 Full table: `reference/exit-codes.md`.
+
+Exit `5` covers timeouts, 5xx, and rate limits alike. To single out a throttle, read the `--json` envelope: a rate-limit failure sets `error.code = "rate_limited"` and `error.details.retry_after_ms` (the exact wait), so a CI runner can sleep precisely instead of guessing. See `examples.md` §11.
