@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-06-01 (CBO / campaign-budget awareness for delivery-pacing + bid-strategy)
+
+No new commands (still **254 leaves / 248 endpoints**). Makes the two scaling playbooks useful on **CBO** accounts (budget set at the campaign level — the common agency setup), closing the v0.5.0 follow-up. Patch bump — behavior-only enrichment, no surface or breaking changes.
+
+### Changed
+- **`apb playbook delivery-pacing` now assesses CBO campaigns at the campaign level.** It previously read ad-set-level budgets only, so on CBO accounts (budget on the campaign, not the ad set) it returned `insufficient_data`. It now rolls each CBO campaign's ad-set spend up to the campaign budget and scores an "assessable unit" = an adset-budgeted (ABO) ad set **or** a campaign-budgeted (CBO) campaign. Findings gain a `campaigns[]` array (per-CBO-campaign pace + cause) alongside the existing `adsets[]`; `LEARNING_LIMITED` is rolled up from child ad sets into the campaign verdict. ABO accounts are unaffected.
+- **`apb playbook bid-strategy` is now CBO-aware.** The "uncapped on a scaled budget" check uses the parent **campaign** budget as the basis when the ad set has none (CBO), and the effective bid strategy falls back to the campaign's when the ad set inherits it — so CBO ad sets report their real strategy + budget basis instead of `UNSET`/$0. The `COST_CAP` / `MIN_ROAS` per-ad-set verdicts are unchanged.
+
+### Notes
+- Supersedes the v0.5.0 note that `delivery-pacing` returns `insufficient_data` on CBO — it now produces a real campaign-level score. `insufficient_data` remains only when there is genuinely no adset-level or campaign-level budget on the active ad sets.
+- Read-only; no writes. The bid-strategy "uncapped on a scaled budget" flag fires at a ≥ $100 budget basis (now reachable on CBO).
+
 ## [0.5.0] — 2026-06-01 (playbook intelligence expansion: +8 diagnostic playbooks, 24→32)
 
 Eight new **read-only** diagnostic playbooks across the signal and scaling pillars, taking the catalog from **24 → 32**. All require `read:playbooks:full` (Agency+); the core (Professional) set is unchanged at 5. CLI grows **246 → 254 leaves**; the HTTP API grows **240 → 248 endpoints** and `POST /api/v1/playbooks/batch` now covers all 32. Minor version bump — meaningful additive feature batch, no breaking changes.
