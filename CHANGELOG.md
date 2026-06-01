@@ -6,6 +6,22 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-06-01 (CLI account resolution: SaaS re-rank + cache de-poisoning)
+
+No new commands (still **254 leaves / 248 endpoints**). Fixes a stale machine-global `default_account` mis-targeting a SaaS key, and de-poisons account discovery. Patch bump — behavior fix + one new flag, no breaking changes.
+
+### Fixed
+- **A stale global `default_account` no longer mis-targets a SaaS key.** In SaaS mode (`APB_API_KEY` set), account resolution now follows `--account` → `META_AD_ACCOUNT_ID` → tenant default → token auto-discovery; the machine-global `~/.apb/config.json` `default_account` is consulted **only in legacy/BYO mode**. Previously a default set under one key outranked another key's identity and pointed it at an account it couldn't read — surfacing as a confusing Meta permission error on `apb campaign list`. Legacy/BYO precedence (`--account` → `.env` → global) is unchanged.
+- **Account discovery is no longer cross-token-poisoned.** `me/adaccounts` (and other account-less endpoints) are namespaced in the response cache by a per-token fingerprint instead of a shared `__default__`, so switching API keys can't serve a stale account-discovery result.
+
+### Changed
+- **`apb` auto-uses your ad account only when there's exactly one.** When no account is specified and the token can reach a single account, it's used automatically; when it can reach several, `apb` lists them and asks you to choose (`--account` or set a default) instead of silently using the first.
+
+### Added
+- **`apb account set-default --clear`** removes the persisted global default (`--account` is now optional — required only when setting).
+- **`apb meta cache --clear`** now also clears the cached tenant context (`~/.apb/tenant_context.json`), forcing a clean token + account re-resolve.
+- On an account-access error for an *implicitly*-resolved account, `apb` prints a stderr hint naming where the account came from and how to override it.
+
 ## [0.5.1] — 2026-06-01 (CBO / campaign-budget awareness for delivery-pacing + bid-strategy)
 
 No new commands (still **254 leaves / 248 endpoints**). Makes the two scaling playbooks useful on **CBO** accounts (budget set at the campaign level — the common agency setup), closing the v0.5.0 follow-up. Patch bump — behavior-only enrichment, no surface or breaking changes.
