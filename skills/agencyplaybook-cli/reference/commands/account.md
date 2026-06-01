@@ -229,13 +229,14 @@ apb account profile remove --execute
 
 ### `apb account set-default`
 
-Set the default ad account for CLI commands
+Set (or clear) the persisted global default ad account for CLI commands. In SaaS mode (APB_API_KEY set) the key's tenant/accounts govern, so this global default is a legacy/BYO fallback — a stale one no longer mis-targets a SaaS key (cli-account-precedence sprint-002). Use --clear to remove it
 
 **Scope:** `read:campaigns` · **Min tier:** starter · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` |  |
+| `--account` | `<ACCOUNT>` | The ad account to persist as default (e.g. act_123456) |
+| `--clear` |  | Remove the persisted global default account instead of setting one |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

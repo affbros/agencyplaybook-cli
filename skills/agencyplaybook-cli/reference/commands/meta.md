@@ -8,7 +8,7 @@ Manage the CLI's filesystem cache + cooldown state under $APB_HOME (default ~/.a
 
 | Flag | Value | Description |
 |---|---|---|
-| `--clear` |  | Remove all cached responses and cooldown markers |
+| `--clear` |  | Remove all cached responses, cooldown markers, and the cached tenant context (forces a clean token + account re-resolve next run) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
