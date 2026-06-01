@@ -6,6 +6,13 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.4.5] — 2026-05-31 (rate-limit errors serialize as `rate_limited` in `--json`)
+
+No command-surface change (still 246 leaves). Error-shape fix only; exit codes and HTTP statuses are unchanged.
+
+### Fixed
+- **Terminal Meta rate-limit errors now serialize as `code: "rate_limited"` (was `"api_error"`) in `--json`**, with the wait window surfaced as `error.details.retry_after_ms`. Previously the retry loops and backpressure-cooldown short-circuits in the Meta client returned a generic `Api{error_class: RateLimit}` error, so `--json` consumers saw `"api_error"` with no retry window — indistinguishable from an ordinary API failure. They now return the first-class `RateLimit` variant, so agents/CI scripts can branch on `rate_limited` and read `retry_after_ms` directly. As a side effect, the human-mode error gains the **"Wait ~Ns, then retry."** bullet (driven by the same `retry_after_ms`). Exit code stays `5` (network class) and the HTTP API stays `429` — only the JSON `code` token and `details` changed.
+
 ## [0.4.4] — 2026-05-31 (rate-limit UX: visible backoff + opt-in throttle)
 
 No command-surface change (still 246 leaves). Behavioral/UX only, with safe defaults — behavior is unchanged unless `APB_THROTTLE` is set or a 429/5xx is hit in human mode.
