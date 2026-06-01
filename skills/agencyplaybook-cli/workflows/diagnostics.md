@@ -53,8 +53,8 @@
 - **`scale-roadmap`** — incremental (+20%/+30%) and duplication (1.5x/2x/3x) tier projections
 - **`cbo-vs-abo-audit`** — flag ABO campaigns with high CPA dispersion
 - **`retargeting-compression`** — compress retention windows >30d to 7-14d
-- **`delivery-pacing`** — under-delivery cause (budget-capped / learning-limited / bid-audience); adset-budget only (default 7d)
-- **`bid-strategy`** — bid strategy vs realized CPA/ROAS (COST_CAP throttling, uncapped scaled spend, MIN_ROAS miss; default 30d)
+- **`delivery-pacing`** — under-delivery cause (budget-capped / learning-limited / bid-audience); assesses ABO ad sets **and** CBO campaigns at the campaign level (default 7d)
+- **`bid-strategy`** — bid strategy vs realized CPA/ROAS (COST_CAP throttling, uncapped scaled spend, MIN_ROAS miss); CBO-aware — uses the parent-campaign budget + inherited strategy (default 30d)
 - **`advantage-adoption`** — Advantage+ structure adoption + manual-sales migration candidates (advisory; default 30d)
 
 ### Turnaround (4)
