@@ -6,6 +6,26 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-06-01 (playbook intelligence expansion: +8 diagnostic playbooks, 24→32)
+
+Eight new **read-only** diagnostic playbooks across the signal and scaling pillars, taking the catalog from **24 → 32**. All require `read:playbooks:full` (Agency+); the core (Professional) set is unchanged at 5. CLI grows **246 → 254 leaves**; the HTTP API grows **240 → 248 endpoints** and `POST /api/v1/playbooks/batch` now covers all 32. Minor version bump — meaningful additive feature batch, no breaking changes.
+
+### Added
+- **`apb playbook creative-velocity`** (signal, 30d) — fresh-creative cadence: net-new ads/week, % spend on creative <30d old, single-creative dependency, creative win-rate vs account-median CPA, and refresh-runway weeks. Flags accounts "starving for fresh creative."
+- **`apb playbook video-engagement`** (signal, 14d) — per-video hook-vs-payoff diagnosis: hook rate (plays÷impressions), hold rate (thruplay÷plays), the p25→p100 retention curve, and which third of the video leaks.
+- **`apb playbook funnel-leak`** (signal, 14d) — locates the leakiest conversion-funnel stage (CTR → LPV → ATC → IC → Purchase) and attributes it (creative / landing page / offer / checkout).
+- **`apb playbook signal-quality`** (signal, structural) — measurement-quality sibling of `capi-dual-signal`: standard-event coverage, CAPI server/web split, advanced-matching breadth, and `match_rate_approx` when Meta returns it (graceful proxy when gated).
+- **`apb playbook delivery-pacing`** (scaling, 7d) — per-ad-set under-delivery cause classification: budget-capped vs learning-limited vs bid/audience-constrained.
+- **`apb playbook bid-strategy`** (scaling, 30d) — bid strategy vs realized CPA/ROAS: COST_CAP throttling, uncapped scaled spend, MIN_ROAS floor misses.
+- **`apb playbook segment-performance`** (signal, 30d) — per-segment (device / placement / age / gender) waste audit with ready-to-attach `value_rule` bid-down specs; honors the iOS conversion-breakdown limit (age/gender = delivery-efficiency only).
+- **`apb playbook advantage-adoption`** (scaling, 30d) — advisory audit of Advantage+ structure adoption (`smart_promotion_type` + Advantage+ Audience) with manual-sales migration candidates. Never writes (ASC creation was removed in Marketing API v25).
+
+All eight return the standard `{ grade, score, summary, findings, recommendations }` envelope (or `insufficient_data` when there's nothing to analyze) and are read-only.
+
+### Notes
+- `delivery-pacing` / `bid-strategy` assess **ad-set-level** budgets; on CBO (campaign-budget) accounts `delivery-pacing` returns `insufficient_data` rather than a misleading score — campaign-level pacing is a planned follow-up.
+- `signal-quality` uses an advanced-matching-breadth + coverage + CAPI proxy when Meta gates `match_rate_approx` (EMQ), and surfaces the real value automatically when a token has Dataset Quality access.
+
 ## [0.4.6] — 2026-05-31 (playbook metadata correction: all 24 valid & consistent)
 
 No new commands (still 246 leaves). Corrects playbook metadata drift across the catalog, CLI, API, and frontend, and makes `/playbooks/batch` cover all 24. Most changes are metadata/docs with **zero behavior change**; the batch + scope items are API-side (additive, fail-closed).
