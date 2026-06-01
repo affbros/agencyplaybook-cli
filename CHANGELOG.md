@@ -6,7 +6,23 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
-## [0.4.5] — 2026-05-31 (rate-limit errors serialize as `rate_limited` in `--json`)
+## [0.4.6] — 2026-05-31 (playbook metadata correction: all 24 valid & consistent)
+
+No new commands (still 246 leaves). Corrects playbook metadata drift across the catalog, CLI, API, and frontend, and makes `/playbooks/batch` cover all 24. Most changes are metadata/docs with **zero behavior change**; the batch + scope items are API-side (additive, fail-closed).
+
+### Fixed
+- **`apb playbook catalog` default windows now match what actually runs.** The catalog advertised longer default lookbacks (e.g. fatigue-index 30d) than the CLI/API/UI actually use (28d). Lowered the catalog's `default_days` for 9 playbooks to the real runtime defaults — the displayed window now equals the executed window. (The CLI/API/UI defaults were already correct; only the catalog metadata was stale.)
+- **`creative-mix` / `launch-check` no longer accept a `--days`/`--since` flag the engine silently ignored.** Both are structural audits (they inspect current creative/setup config, not a time window), so the no-op flags were removed and the phantom `default_days` dropped from the catalog for all 6 structural playbooks (also broad-targeting-audit, event-hierarchy-audit, capi-dual-signal, retargeting-compression).
+- **Rate-limit cooldown test** updated to the v0.4.5 `MetaError::RateLimit` contract (a masked break — the cooldown short-circuit now returns the first-class variant; the test still asserted the old `Api{RateLimit}` shape and was skipped by the `--lib` test gate).
+
+### Changed (API — server rebuild, no client impact)
+- **`POST /api/v1/playbooks/batch` now runs all 24 playbooks** (was 10). Added the 14 missing dispatch arms + per-slug scope mappings (5 core / 19 agency, fail-closed on unknown slugs) and raised the per-request cap to 24.
+- **`GET /api/v1/playbooks/catalog` is no longer agency-gated.** The static directory is now readable by any authenticated tenant (drives the upgrade/upsell UI); `summary` stays at the lowest playbook tier. Previously both fell through to the agency-only `read:playbooks:full` scope (a Professional-tier 403).
+
+### Docs / internal
+- `playbook evaluate` reference rewritten to the real 5-play model (SCALE / FATIGUE_RESET / CREATIVE_REFRESH / WAIT_FOR_SIGNAL / MAINTAIN) — the previous "9 triggers" never existed in code.
+- Removed dead `apb-cli` `commands/playbook.rs::evaluate()` orphan; fixed the stale "Learning pillar (4)→(5)" comment and "15 playbooks" doc counts.
+- New `check_playbook_parity.py` CI guard + committed `playbook-catalog.fixture.json` + strengthened frontend test — assert pillar / default_days / scope parity across catalog ↔ API ↔ frontend so this drift can't silently recur.
 
 No command-surface change (still 246 leaves). Error-shape fix only; exit codes and HTTP statuses are unchanged.
 
