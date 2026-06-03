@@ -6,6 +6,15 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.3] — 2026-06-03 (security: per-tenant API state isolation)
+
+No new commands (still **254 leaves / 248 endpoints**); **CLI behavior unchanged**. Server-side security hardening compiled into `apb-core`, so the CLI binary is re-released for parity. Patch bump.
+
+### Security
+- **Per-tenant isolation of file-backed state on the multi-tenant API server.** Plans, sync snapshots, and policy profiles are namespaced per tenant (`state/tenants/<id>/`) with `Plan` ownership stamping — closing a cross-tenant disclosure + approval-tampering gap on `/plans`, `/sync`, and `/policy` (SEC-C2 / SEC-H1). The CLI keeps its single-user flat layout, so local plans/policy are unaffected.
+- **Internal 500 responses no longer echo raw database error text** to API clients (SEC-M2).
+- **The API server refuses to start without `DATABASE_URL`** unless `APB_ALLOW_DEV_AUTH=true`, preventing an accidental full-access dev-auth fallback in production (SEC-L6).
+
 ## [0.5.2] — 2026-06-01 (CLI account resolution: SaaS re-rank + cache de-poisoning)
 
 No new commands (still **254 leaves / 248 endpoints**). Fixes a stale machine-global `default_account` mis-targeting a SaaS key, and de-poisons account discovery. Patch bump — behavior fix + one new flag, no breaking changes.
