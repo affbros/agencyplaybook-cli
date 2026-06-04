@@ -6,6 +6,15 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.4] — 2026-06-03 (security: hardening tail)
+
+No new commands (still **254 leaves / 248 endpoints**); **CLI behavior unchanged**. Server-side hardening compiled into `apb-core`, so the CLI binary is re-released for parity. Patch bump.
+
+### Security
+- **Binding an ad account now verifies it's reachable by the connection's Meta token** (`me/adaccounts`) before it's stored — fail-closed (SEC-M4). Previously the per-key account allowlist could name accounts the token couldn't actually use.
+- **The unauthenticated OAuth device-status endpoint no longer echoes raw Meta error text** to the caller (status-only), and its 500 path is scrubbed (SEC-L4).
+- Cosmetic: `docs/template.env` Stripe placeholder no longer looks like a real `pk_live_` key (SEC-L7).
+
 ## [0.5.3] — 2026-06-03 (security: per-tenant API state isolation)
 
 No new commands (still **254 leaves / 248 endpoints**); **CLI behavior unchanged**. Server-side security hardening compiled into `apb-core`, so the CLI binary is re-released for parity. Patch bump.
