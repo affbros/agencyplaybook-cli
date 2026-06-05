@@ -22,6 +22,7 @@ This skill packages working knowledge of every `apb` command. Generated on 2026-
 - **User script needs exit-code branching** → read `reference/exit-codes.md` (the canonical table + decision tree).
 - **User wants the full CI/CD + AI-agent automation guide** (debugging, log sanitization, plain output) → read `reference/automation-guide.md`.
 - **User asks whether a field can be changed / is updatable / "did that update stick?"** ("can I change a campaign's budget type?", "is `value_rule_set_ids` readable back?", "can I delete a value rule set?") → read `reference/meta-docs-capability-index.json` (what Meta *documents*) **and** `reference/meta-verified-mutability-index.json` (what we *observed*), then answer per the "Capability reasoning" doctrine below. Never answer mutability from memory alone.
+- **CLI targets the wrong account, results look stale, or you just connected / switched accounts** ("apb is on the wrong account", "I reconnected Meta", "data doesn't match Ads Manager") → refresh the CLI cache: `apb meta cache --clear` (drops cached responses + post-429 cooldown markers + the cached tenant context under `~/.apb`, forcing a clean token + account re-resolve next run), then verify with `apb account current` and `apb meta status`. This is the first thing to try for any wrong-account / stale-data symptom.
 
 ## Quick start (always check this first)
 

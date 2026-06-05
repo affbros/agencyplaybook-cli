@@ -65,13 +65,35 @@
     {
       "object_name": "custom-conversion",
       "apb_domain": "custom-conversion",
-      "field": "rule / custom_event_type / event_source_id",
-      "observed_result": "unknown",
-      "verification_notes": "Documented as frozen at create (mutable fields are name/description/default_conversion_value). NOT yet live-verified by a real write+readback — treat as documented-only until tested; to change a frozen field, delete and recreate.",
-      "evidence": "CLI_REFERENCE custom-conversion notes",
-      "apb_command_example": "apb custom-conversion update <id> --name 'New name' --execute   # name OK; rule change untested",
+      "field": "custom_event_type / rule (frozen at create)",
+      "observed_result": "accepted_unverified",
+      "verification_notes": "LIVE-VERIFIED 2026-06-05 on a throwaway cc (Scandalous, unused pixel, then deleted): a POST updating custom_event_type (CONTENT_VIEW->LEAD) and a POST updating rule BOTH return {\"success\":true} / HTTP 200 — but a fields readback proves BOTH values are UNCHANGED. Meta SILENTLY IGNORES updates to these frozen fields. The mutable control (name) DID persist in the same test. Textbook 'API success != persisted' — always read back. To change a frozen field: delete + recreate.",
+      "evidence": "live test 2026-06-05 (Scandalous cc create->update->readback->delete)",
+      "apb_command_example": "apb custom-conversion update <id> --name 'New name' --execute   # name persists; custom_event_type/rule cannot be changed (silent no-op at Meta)",
       "graph_api_version": "v25.0",
-      "last_verified_at": null
+      "last_verified_at": "2026-06-05"
+    },
+    {
+      "object_name": "custom-conversion",
+      "apb_domain": "custom-conversion",
+      "field": "event_source_id",
+      "observed_result": "accepted_unverified",
+      "verification_notes": "LIVE-VERIFIED 2026-06-05: event_source_id is write-only — accepted at create but NOT returned by GET /<cc_id>?fields=event_source_id (Meta #100 'nonexisting field'). Like value_rule_set_ids: set-on-create, not read-back-able. Frozen + unreadable.",
+      "evidence": "live test 2026-06-05 (Scandalous)",
+      "apb_command_example": "apb custom-conversion create ... (event_source_id set once at create)",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-06-05"
+    },
+    {
+      "object_name": "custom-conversion",
+      "apb_domain": "custom-conversion",
+      "operation": "delete",
+      "observed_result": "verified_applied",
+      "verification_notes": "LIVE-VERIFIED 2026-06-05: DELETE /<cc_id> works (returns {\"success\":true}; a re-delete then errors 'Custom Conversion Already Deleted', confirming removal). QUIRK: deleted ccs remain enumerated in GET /act_<id>/customconversions as tombstones (hidden in Ads Manager UI, not editable/usable). Unlike value_rule_set, cc DELETE is genuinely supported.",
+      "evidence": "live test 2026-06-05 (Scandalous)",
+      "apb_command_example": "apb custom-conversion delete --id <id> --execute --confirm-destructive",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-06-05"
     },
     {
       "object_name": "ad-campaign",
