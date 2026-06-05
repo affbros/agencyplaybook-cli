@@ -8,7 +8,7 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-06-01 from the live binary — 254 commands across 35 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-06-05 from the live binary — 254 commands across 35 domains.
 
 ## Routing
 
@@ -21,6 +21,7 @@ This skill packages working knowledge of every `apb` command. Generated on 2026-
 - **User hits a 403** ("insufficient_scope on X") → read `reference/scopes.md` and explain tier gap.
 - **User script needs exit-code branching** → read `reference/exit-codes.md` (the canonical table + decision tree).
 - **User wants the full CI/CD + AI-agent automation guide** (debugging, log sanitization, plain output) → read `reference/automation-guide.md`.
+- **User asks whether a field can be changed / is updatable / "did that update stick?"** ("can I change a campaign's budget type?", "is `value_rule_set_ids` readable back?", "can I delete a value rule set?") → read `reference/meta-docs-capability-index.json` (what Meta *documents*) **and** `reference/meta-verified-mutability-index.json` (what we *observed*), then answer per the "Capability reasoning" doctrine below. Never answer mutability from memory alone.
 
 ## Quick start (always check this first)
 
@@ -43,6 +44,21 @@ apb campaign list                                          # first real call
 4. **Use `--no-input` for CI/CD and AI-agent execution.** Combine with `--json` for machine-parseable output.
 5. **Never `--no-input --execute` a destructive op without `--confirm-destructive` already in the command line.** The CLI will refuse to proceed.
 6. **Plans over ad-hoc writes.** For anything spanning 2+ entities, use `apb plan create … validate … execute` so the rollback blueprint exists on disk.
+
+## Capability reasoning (documented → attemptable → verified)
+
+Meta's docs and a `200`/exit-0 are **not** proof a field is live-mutable. Some documented-updatable fields are silently dropped, write-only, or rejected at runtime. Before asserting any field can be changed, layer two reference files — never skip straight to a confident claim:
+
+1. **Layer 1 — `reference/meta-docs-capability-index.json` (what Meta DOCUMENTS).** Join on `(object_name, field)`; it carries `supports_{read,create,update,delete}`, `documented_update_fields[]`, and `documented_warnings[]` for Graph v25.0.
+   - `supports_update: true` ⇒ Meta documents it ⇒ **attemptable**, *not proven*.
+   - `supports_update: false` ⇒ don't attempt; tell the user it's create-frozen.
+   - `"unknown"` / absent ⇒ the scrape couldn't classify it (e.g. truncated page) or it isn't indexed yet ⇒ **attemptable-with-caution**. Say "Meta's docs don't clearly state this — we'd have to test it." Never report `unknown` as supported *or* unsupported. Also weigh `extraction_method`/`extraction_confidence`: a `webfetch_assisted`/`partial` entry is a weaker signal than `deterministic_html`/`high`.
+2. **Layer 2 — `reference/meta-verified-mutability-index.json` (what we OBSERVED).** Same join key. `observed_result ∈ {meta_rejected, accepted_unverified, verified_applied, conditional, unknown}`. **Layer 2 OVERRIDES Layer 1 on conflict** — a doc-says-yes field we observed `meta_rejected` (e.g. budget-type conversion) is reported as rejected, citing the `evidence` token. Absence of a Layer-2 entry means *untested*, not "works."
+3. **Always surface `documented_warnings[]`** (EU DSA, attribution-window limits, character limits, etc.) before the user runs a write.
+4. **Never claim a write persisted from a `200`/exit-0 alone.** Meta accepts some fields without returning them (`accepted_unverified`, e.g. `value_rule_set_ids`). Persistence is proven only by a **readback** — the CLI already does this for ad-set schedules (the `verification` block in the result). When a write target is `accepted_unverified` or `unknown`, run a follow-up `apb <entity> get` and compare the field to the intended value; report `verified` vs "accepted but not confirmable." This *extends* the dry-run-first / exit-code doctrine above — it does not replace it.
+5. **Feed observations back.** When you (or the user) empirically confirm a field's behavior, propose appending a Layer-2 record `{object_name, field, observed_result, graph_api_version: "v25.0", evidence}`. Layer 2 is **append-only** — never rewrite or delete prior observations.
+
+`reference/meta-node-manifest.json` maps every apb domain to its Meta node (or marks it apb-internal) so you know whether an object even *has* a Meta reference page to reason about.
 
 ## Meta platform constraints (what the CLI catches before Meta does)
 

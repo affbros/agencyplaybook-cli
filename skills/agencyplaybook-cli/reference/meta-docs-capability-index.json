@@ -1,0 +1,2564 @@
+{
+  "schema_version": "1.0",
+  "layer": "documented",
+  "source": "Meta Marketing API reference (official docs)",
+  "graph_api_version": "v25.0",
+  "generated_at": "2026-06-04",
+  "disclaimer": "Layer 1 = what Meta DOCUMENTS. Documented != live-mutable. Cross-check Layer 2 (meta-verified-mutability-index.json) and confirm by readback before asserting a field is changeable.",
+  "objects": [
+    {
+      "object_name": "ad-account",
+      "display_name": "Ad Account",
+      "graph_node": "AdAccount",
+      "apb_domain": "account",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "agency_client_declaration",
+          "type": "dictionary { string : <string> }",
+          "notes": "Details of the agency advertising on behalf of this client account, if applicable. Requires Business Manager Admin privileges."
+        },
+        {
+          "field": "attribution_spec",
+          "type": "list<Object>",
+          "notes": "Deprecated due to iOS 14 changes. Please visit the changelog for more information. event_type enum {CLICK_THROUGH, VIEW_THROUGH, ENGAGED_VIDEO_VIEW} window_days int64"
+        },
+        {
+          "field": "business_info",
+          "type": "dictionary { string : <string> }",
+          "notes": "Business Info"
+        },
+        {
+          "field": "custom_audience_info",
+          "type": "JSON object",
+          "notes": "Custom audience info for Automated Shopping Ads. new_customer_tag string Label value for new customer in Automated Shoppings Ad's custom audience type URL parameter. existing_customer_tag string Label"
+        },
+        {
+          "field": "default_dsa_beneficiary",
+          "type": "string",
+          "notes": "This is the default value for creating L2 targeting EU's beneficiary."
+        },
+        {
+          "field": "default_dsa_payor",
+          "type": "string",
+          "notes": "This is the default value for creating L2 targeting EU's payor."
+        },
+        {
+          "field": "end_advertiser",
+          "type": "string",
+          "notes": "The entity the ads will target. Must be a Facebook Page Alias, Facebook Page ID or an Facebook App ID."
+        },
+        {
+          "field": "is_notifications_enabled",
+          "type": "boolean",
+          "notes": "If notifications are enabled or not for this account"
+        },
+        {
+          "field": "media_agency",
+          "type": "string",
+          "notes": "The ID of a Facebook Page or Facebook App. Once it is set to any values other than NONE or UNFOUND , it cannot be modified any more"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The name of the ad account"
+        },
+        {
+          "field": "partner",
+          "type": "string",
+          "notes": "The ID of a Facebook Page or Facebook App. Once it is set to any values other than NONE or UNFOUND , it cannot be modified any more"
+        },
+        {
+          "field": "spend_cap",
+          "type": "float",
+          "notes": "The total amount that this account can spend, after which all campaigns will be paused, based on amount_spent . A value of 0 signifies no spending-cap and setting a new spend cap only applies to spend"
+        },
+        {
+          "field": "spend_cap_action",
+          "type": "string",
+          "notes": "Setting this parameter to reset sets the amount_spent back to 0. Setting it to delete removes the spend_cap from the account."
+        },
+        {
+          "field": "tasks",
+          "type": "array<enum {MANAGE, ADVERTISE, ANALYZE, DRAFT, AA_ANALYZE}>",
+          "notes": "AdAccount permission tasks to assign this user"
+        },
+        {
+          "field": "user",
+          "type": "UID",
+          "notes": "Business user id or system user id"
+        }
+      ],
+      "documented_create_fields": [
+        {
+          "field": "associated_audience_id",
+          "type": "int64",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "creation_params",
+          "type": "dictionary { string : <string> }",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "description",
+          "type": "string",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "enable_fetch_or_create",
+          "type": "boolean",
+          "notes": "enable_fetch_or_create"
+        },
+        {
+          "field": "event_sources",
+          "type": "array<JSON object>",
+          "notes": "event_sources id int64 id type enum {APP, OFFLINE_EVENTS, PAGE, PIXEL} type"
+        },
+        {
+          "field": "exclusions",
+          "type": "list<Object>",
+          "notes": "SELF_EXPLANATORY booking_window Object min_seconds int64 max_seconds int64 count Object event string type enum {CUSTOM, PRIMARY, WEBSITE, APP, OFFLINE_CONVERSION, CLAIM, MANAGED, PARTNER, VIDEO, LOOKA"
+        },
+        {
+          "field": "inclusions",
+          "type": "list<Object>",
+          "notes": "SELF_EXPLANATORY booking_window Object min_seconds int64 max_seconds int64 count Object event string type enum {CUSTOM, PRIMARY, WEBSITE, APP, OFFLINE_CONVERSION, CLAIM, MANAGED, PARTNER, VIDEO, LOOKA"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "opt_out_link",
+          "type": "string",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "parent_audience_id",
+          "type": "int64",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "product_set_id",
+          "type": "numeric string or integer",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "subtype",
+          "type": "enum {CUSTOM, PRIMARY, WEBSITE, APP, OFFLINE_CONVERSION, CLA",
+          "notes": "SELF_EXPLANATORY"
+        },
+        {
+          "field": "adaccounts",
+          "type": "list<numeric string>",
+          "notes": "Array of new ad account IDs to receive access to the custom audience"
+        },
+        {
+          "field": "permissions",
+          "type": "string",
+          "notes": "targeting or targeting_and_insights . If targeting the recipient ad account can target the audience in ads. targeting_and_insights also allows recipient account to view the audience in Audience Insigh"
+        },
+        {
+          "field": "relationship_type",
+          "type": "array<string>",
+          "notes": "relationship_type"
+        },
+        {
+          "field": "replace",
+          "type": "boolean",
+          "notes": "true or false . If true the list of adaccounts provided in the call will replace the existing set of ad accounts this audience is shared with."
+        },
+        {
+          "field": "ad_account_created_from_bm_flag",
+          "type": "boolean",
+          "notes": "ad_account_created_from_bm_flag"
+        },
+        {
+          "field": "currency",
+          "type": "ISO 4217 Currency Code",
+          "notes": "The currency used for the account"
+        },
+        {
+          "field": "end_advertiser",
+          "notes": "The entity the ads will target. Must be a Facebook Page Alias, Facebook Page ID or an Facebook App ID. In absence of one, you can use NONE or UNFOUND . Note that once a value other than NONE or UNFOUN"
+        },
+        {
+          "field": "funding_id",
+          "type": "numeric string or integer",
+          "notes": "ID of the payment method . If the account does not have a payment method it will still be possible to create ads but these ads will get no delivery."
+        },
+        {
+          "field": "invoice",
+          "type": "boolean",
+          "notes": "If business manager has Business Manager Owned Normal Credit Line on file on the FB CRM, it will attach the ad account to that credit line."
+        },
+        {
+          "field": "invoice_group_id",
+          "type": "numeric string",
+          "notes": "The ID of the invoice group this adaccount should be enrolled in"
+        },
+        {
+          "field": "invoicing_emails",
+          "type": "array<string>",
+          "notes": "Emails addressed where invoices will be sent."
+        },
+        {
+          "field": "io",
+          "type": "boolean",
+          "notes": "If corporate channel is direct sales."
+        },
+        {
+          "field": "media_agency",
+          "type": "string",
+          "notes": "The agency, this could be your own business. Must be a Facebook Page Alias, Facebook Page ID or an Facebook App ID. In absence of one, you can use NONE or UNFOUND"
+        },
+        {
+          "field": "partner",
+          "type": "string",
+          "notes": "The advertising partner for this account, if there is one. Must be a Facebook Page Alias, Facebook Page ID or an Facebook App ID. In absence of one, you can use NONE or UNFOUND ."
+        },
+        {
+          "field": "po_number",
+          "type": "string",
+          "notes": "Purchase order number"
+        },
+        {
+          "field": "timezone_id",
+          "type": "unsigned int32",
+          "notes": "ID for the timezone. See here ."
+        },
+        {
+          "field": "adaccount_id",
+          "type": "string",
+          "notes": "Ad account ID."
+        }
+      ],
+      "documented_warnings": [
+        "In response to Apple\u2019s new policy, we are announcing breaking changes that will affect SDKAdNetwork, Marketing API and Ads Insights API endpoints. To learn more about how Apple\u2019s iOS 14.5 requirements will impact Facebook advertising, visit our Business Help Center aricles and changelog: Facebook SDK for iOS, App Events API and Mobile Measurement Partners Updates for Apple\u2019s iOS 14 Requirements Facebook Pixel Updates for Apple\u2019s iOS 14 Requirements January 19, 2021 - Breaking Changes",
+        "The agency_client_declaration field requires Admin privileges for all operations starting with v10.0 and will be required for all versions on May 25, 2021.",
+        "Ad Limit Per Page enforcement begins for when a Page reaches its ad limit enforcement date. Enforcement date can be queried here . When a Page is at its ad limit: New ads (or ads scheduled to begin at that time) do not publish successfully. Actions on existing ads are limited to pausing and archiving until the number of ads running or in review is below the ad limit.",
+        "Maximum number of ad accounts per person: 25",
+        "Maximum number of people with access, per ad account: 25",
+        "Maximum number of ads per regular ad account: 6,000 non-archived non-deleted ads",
+        "Maximum number of ads per bulk ad account: 50,000 non-archived non-deleted ads",
+        "Maximum number of archived ads per ad account: 100,000 archived ads",
+        "Maximum number of ad sets per regular ad account: 6,000 non-archived non-deleted ad sets",
+        "Maximum number of ad sets per bulk ad account: 10,000 non-archived non-deleted ad sets",
+        "Maximum number of archived ad sets per ad account: 100,000 archived ad sets",
+        "Maximum number of ad campaigns per regular ad account: 6,000 non-archived non-deleted ad campaigns"
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-account.html",
+        "byte_len": 3473973,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 15,
+        "create_fields": 29
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "ad-account-targetingbrowse",
+      "display_name": "Targeting Browse/Validation",
+      "graph_node": "AdAccountTargetingBrowse",
+      "apb_domain": "targeting",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/targetingbrowse/",
+      "classification": "meta_read_edge",
+      "supports_read": true,
+      "supports_create": false,
+      "supports_update": false,
+      "supports_delete": false,
+      "documented_update_fields": [],
+      "documented_create_fields": [],
+      "documented_warnings": [],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-account-targetingbrowse.html",
+        "byte_len": 2765476,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 0
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "extraction_note": "Read-only edge \u2014 apb uses it for reads only; create/update/delete are N/A. Query parameters are not tabulated on this page."
+    },
+    {
+      "object_name": "ad-account-targetingsearch",
+      "display_name": "Targeting Search",
+      "graph_node": "AdAccountTargetingSearch",
+      "apb_domain": "search",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/targetingsearch/",
+      "classification": "meta_read_edge",
+      "supports_read": true,
+      "supports_create": false,
+      "supports_update": false,
+      "supports_delete": false,
+      "documented_update_fields": [],
+      "documented_create_fields": [],
+      "documented_warnings": [],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-account-targetingsearch.html",
+        "byte_len": 2778625,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 0
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "extraction_note": "Read-only edge \u2014 apb uses it for reads only; create/update/delete are N/A. Query parameters are not tabulated on this page."
+    },
+    {
+      "object_name": "ad-campaign",
+      "display_name": "Ad Set",
+      "graph_node": "AdSet",
+      "apb_domain": "adset",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-campaign/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [],
+      "documented_create_fields": [
+        {
+          "field": "dsa_payor",
+          "notes": "The payor of all ads in this ad set."
+        },
+        {
+          "field": "dsa_beneficiary",
+          "notes": "The beneficiary of all ads in this ad set."
+        },
+        {
+          "field": "campaign_id",
+          "type": "numeric string or integer",
+          "notes": "Single ID of a campaign to make parent of the copy. The copy inherits all campaign settings, such as budget from the parent.Ignore if you want to keep the copy under the original campaign parent."
+        },
+        {
+          "field": "deep_copy",
+          "type": "boolean",
+          "notes": "Default value: false Whether to copy all the child ads. Limits: the total number of children ads to copy should not exceed 3 for a synchronous call and 51 for an asynchronous call."
+        },
+        {
+          "field": "end_time",
+          "type": "datetime",
+          "notes": "The end time of the set, e.g. 2015-03-12 23:59:59-07:00 or 2015-03-12 23:59:59 PDT . UTC UNIX timestamp. When creating a set with a daily budget, specify end_time=0 to set the set to be ongoing withou"
+        },
+        {
+          "field": "rename_options",
+          "type": "JSON or object-like arrays",
+          "notes": "Rename options rename_strategy enum {DEEP_RENAME, ONLY_TOP_LEVEL_RENAME, NO_RENAME} Default value: ONLY_TOP_LEVEL_RENAME DEEP_RENAME : will change this object's name and children's names in the copied"
+        },
+        {
+          "field": "start_time",
+          "type": "datetime",
+          "notes": "The start time of the set, e.g. 2015-03-12 23:59:59-07:00 or 2015-03-12 23:59:59 PDT . UTC UNIX timestamp. If not set, the copied adset will inherit the start time from the original set"
+        },
+        {
+          "field": "status_option",
+          "type": "enum {ACTIVE, PAUSED, INHERITED_FROM_SOURCE}",
+          "notes": "Default value: PAUSED ACTIVE : the copied adset will have active status. PAUSED : the copied adset will have paused status. INHERITED_FROM_SOURCE : the copied adset will have the status from the origi"
+        },
+        {
+          "field": "adlabels",
+          "type": "list<Object>",
+          "notes": "Specifies list of labels to be associated with this object. This field is optional"
+        },
+        {
+          "field": "adset_schedule",
+          "type": "list<Object>",
+          "notes": "Ad set schedule, representing a delivery schedule for a single day start_minute int64 A 0 based minute of the day representing when the schedule starts end_minute int64 A 0 based minute of the day rep"
+        },
+        {
+          "field": "attribution_spec",
+          "type": "list<JSON object>",
+          "notes": "Conversion attribution spec used for attributing conversions for optimization. Supported window lengths differ by optimization goal and campaign objective. event_type enum {CLICK_THROUGH, VIEW_THROUGH"
+        },
+        {
+          "field": "automatic_manual_state",
+          "type": "enum{UNSET, AUTOMATIC, MANUAL}",
+          "notes": "automatic_manual_state"
+        },
+        {
+          "field": "bid_amount",
+          "type": "integer",
+          "notes": "Bid cap or target cost for this ad set. The bid cap used in a lowest cost bid strategy is defined as the maximum bid you want to pay for a result based on your optimization_goal . The target cost used"
+        },
+        {
+          "field": "bid_strategy",
+          "type": "enum{LOWEST_COST_WITHOUT_CAP, LOWEST_COST_WITH_BID_CAP, COST",
+          "notes": "Choose bid strategy for this ad set to suit your specific business goals. Each strategy has tradeoffs and may be available for certain optimization_goal s: LOWEST_COST_WITHOUT_CAP : Designed to get th"
+        },
+        {
+          "field": "billing_event",
+          "type": "enum{APP_INSTALLS, CLICKS, IMPRESSIONS, LINK_CLICKS, NONE, O",
+          "notes": "The billing event that this ad set is using: APP_INSTALLS: Pay when people install your app. CLICKS: Deprecated. IMPRESSIONS: Pay when the ads are shown to people. LINK_CLICKS: Pay when people click o"
+        },
+        {
+          "field": "budget_schedule_specs",
+          "type": "list<JSON or object-like arrays>",
+          "notes": "Initial high demand periods to be created with the ad set. Provide list of time_start , time_end , budget_value , and budget_value_type . For example, -F 'budget_schedule_specs=[{ \"time_start\":1699081"
+        },
+        {
+          "field": "budget_source",
+          "type": "enum{NONE, RMN}",
+          "notes": "budget_source"
+        },
+        {
+          "field": "budget_split_set_id",
+          "type": "numeric string or integer",
+          "notes": "budget_split_set_id"
+        },
+        {
+          "field": "campaign_attribution",
+          "type": "enum{}",
+          "notes": "campaign_attribution"
+        },
+        {
+          "field": "campaign_spec",
+          "type": "Campaign spec",
+          "notes": "Provide name , objective and buying_type for a campaign you want to create. Otherwise you need to provide campaign_id for an existing ad campaign. For example: -F 'campaign_spec={ \"name\": \"Inline crea"
+        },
+        {
+          "field": "contextual_bundling_spec",
+          "type": "Object",
+          "notes": "settings of Contextual Bundle to support ads serving in Facebook contextual surfaces status enum{OPT_OUT, OPT_IN}"
+        },
+        {
+          "field": "cost_bidding_mode",
+          "type": "enum{VOLUME_FOCUSED, BALANCED, COST_FOCUSED}",
+          "notes": "cost_bidding_mode"
+        },
+        {
+          "field": "creative_sequence",
+          "type": "list<numeric string or integer>",
+          "notes": "Order of the adgroup sequence to be shown to users"
+        },
+        {
+          "field": "daily_budget",
+          "type": "int64",
+          "notes": "The daily budget defined in your account currency , allowed only for ad sets with a duration (difference between end_time and start_time ) longer than 24 hours. Either daily_budget or lifetime_budget "
+        },
+        {
+          "field": "daily_imps",
+          "type": "int64",
+          "notes": "Daily impressions. Available only for campaigns with buying_type=FIXED_CPM"
+        },
+        {
+          "field": "daily_min_spend_target",
+          "type": "int64",
+          "notes": "Daily minimum spend target of the ad set defined in your account currency. To use this field, daily budget must be specified in the Campaign. This target is not a guarantee but our best effort."
+        },
+        {
+          "field": "daily_spend_cap",
+          "type": "int64",
+          "notes": "Daily spend cap of the ad set defined in your account currency. To use this field, daily budget must be specified in the Campaign. Set the value to 922337203685478 to remove the spend cap."
+        },
+        {
+          "field": "destination_type",
+          "type": "enum{WEBSITE, APP, MESSENGER, APPLINKS_AUTOMATIC, WHATSAPP, ",
+          "notes": "Destination of ads in this Ad Set. Options include: Website, App, Messenger, INSTAGRAM_DIRECT , INSTAGRAM_PROFILE ."
+        },
+        {
+          "field": "execution_options",
+          "type": "list<enum{validate_only, include_recommendations}>",
+          "notes": "Default value: Set An execution setting validate_only : when this option is specified, the API call will not perform the mutation but will run through the validation rules against values of each field"
+        },
+        {
+          "field": "existing_customer_budget_percentage",
+          "type": "int64",
+          "notes": "existing_customer_budget_percentage"
+        },
+        {
+          "field": "frequency_control_specs",
+          "type": "list<Object>",
+          "notes": "An array of frequency control specs for this ad set. Writes to this field are only available in ad sets where REACH and THRUPLAY are the performance goal. event enum{IMPRESSIONS, VIDEO_VIEWS, VIDEO_VI"
+        },
+        {
+          "field": "is_dc_follow_optimized",
+          "type": "boolean",
+          "notes": "is_dc_follow_optimized"
+        },
+        {
+          "field": "is_dynamic_creative",
+          "type": "boolean",
+          "notes": "Indicates the ad set must only be used for dynamic creatives. Dynamic creative ads can be created in this ad set. Defaults to false"
+        },
+        {
+          "field": "is_sac_cfca_terms_certified",
+          "type": "boolean",
+          "notes": "is_sac_cfca_terms_certified"
+        },
+        {
+          "field": "lifetime_budget",
+          "type": "int64",
+          "notes": "Lifetime budget, defined in your account currency . If specified, you must also specify an end_time . Either daily_budget or lifetime_budget must be greater than 0."
+        },
+        {
+          "field": "lifetime_imps",
+          "type": "int64",
+          "notes": "Lifetime impressions. Available only for campaigns with buying_type=FIXED_CPM"
+        },
+        {
+          "field": "lifetime_min_spend_target",
+          "type": "int64",
+          "notes": "Lifetime minimum spend target of the ad set defined in your account currency. To use this field, lifetime budget must be specified in the Campaign. This target is not a guarantee but our best effort."
+        },
+        {
+          "field": "lifetime_spend_cap",
+          "type": "int64",
+          "notes": "Lifetime spend cap of the ad set defined in your account currency. To use this field, lifetime budget must be specified in the Campaign. Set the value to 922337203685478 to remove the spend cap."
+        },
+        {
+          "field": "max_budget_spend_percentage",
+          "type": "int64",
+          "notes": "max_budget_spend_percentage"
+        },
+        {
+          "field": "min_budget_spend_percentage",
+          "type": "int64",
+          "notes": "min_budget_spend_percentage"
+        },
+        {
+          "field": "multi_event_conversion_attribution_window_seconds",
+          "type": "int64",
+          "notes": "multi_event_conversion_attribution_window_seconds"
+        },
+        {
+          "field": "multi_optimization_goal_weight",
+          "type": "enum{UNDEFINED, BALANCED, PREFER_INSTALL, PREFER_EVENT}",
+          "notes": "multi_optimization_goal_weight"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "Ad set name, max length of 400 characters."
+        },
+        {
+          "field": "optimization_goal",
+          "type": "enum{NONE, APP_INSTALLS, AD_RECALL_LIFT, ENGAGED_USERS, EVEN",
+          "notes": "What the ad set is optimizing for. APP_INSTALLS : Will optimize for people more likely to install your app. ENGAGED_USERS : Will optimize for people more likely to take a particular action in your app"
+        },
+        {
+          "field": "optimization_sub_event",
+          "type": "enum{NONE, VIDEO_SOUND_ON, TRIP_CONSIDERATION, TRAVEL_INTENT",
+          "notes": "Optimization sub event for a specific optimization goal (ex: Sound-On event for Video-View-2s optimization goal)"
+        },
+        {
+          "field": "pacing_type",
+          "type": "list<string>",
+          "notes": "Defines the pacing type, standard by default or using ad scheduling"
+        },
+        {
+          "field": "promoted_object",
+          "type": "Object",
+          "notes": "The object this ad set is promoting across all its ads. Required with certain campaign objectives. CONVERSIONS pixel_id (Conversion pixel ID) pixel_id (Facebook pixel ID) and custom_event_type pixel_i"
+        },
+        {
+          "field": "relative_value",
+          "type": "float",
+          "notes": "relative_value"
+        },
+        {
+          "field": "rf_prediction_id",
+          "type": "numeric string or integer",
+          "notes": "Reach and frequency prediction ID"
+        },
+        {
+          "field": "source_adset_id",
+          "type": "numeric string or integer",
+          "notes": "The source adset id that this ad is copied from (if applicable)."
+        },
+        {
+          "field": "status",
+          "type": "enum{ACTIVE, PAUSED, DELETED, ARCHIVED}",
+          "notes": "Only ACTIVE and PAUSED are valid for creation. The other statuses can be used for update. If it is set to PAUSED , all its active ads will be paused and have an effective status ADSET_PAUSED ."
+        },
+        {
+          "field": "targeting",
+          "type": "Targeting object",
+          "notes": "An ad set's targeting structure. \"countries\" is required. See targeting ."
+        },
+        {
+          "field": "time_based_ad_rotation_id_blocks",
+          "type": "list<list<int64>>",
+          "notes": "Specify ad creative that displays at custom date ranges in a campaign as an array. A list of Adgroup IDs. The list of ads to display for each time range in a given schedule. For example display first "
+        },
+        {
+          "field": "time_based_ad_rotation_intervals",
+          "type": "list<int64>",
+          "notes": "Date range when specific ad creative displays during a campaign. Provide date ranges in an array of UNIX timestamps where each timestamp represents the start time for each date range. For example a 3-"
+        },
+        {
+          "field": "time_start",
+          "type": "datetime",
+          "notes": "Time start"
+        },
+        {
+          "field": "time_stop",
+          "type": "datetime",
+          "notes": "Time stop"
+        },
+        {
+          "field": "tune_for_category",
+          "type": "enum{NONE, EMPLOYMENT, HOUSING, CREDIT, ISSUES_ELECTIONS_POL",
+          "notes": "tune_for_category"
+        },
+        {
+          "field": "value_rule_set_id",
+          "type": "numeric string or integer",
+          "notes": "Value Rule Set ID"
+        },
+        {
+          "field": "value_rules_applied",
+          "type": "boolean",
+          "notes": "value_rules_applied"
+        }
+      ],
+      "documented_warnings": [
+        "Beginning September 2, 2025, we will start to roll out more proactive restrictions on custom audiences and custom conversions that may suggest information not permitted under our terms . For example, any custom audience or custom conversions suggesting specific health conditions (e.g., \u201carthritis\u201d, \u201cdiabetes\u201d) or financial status (e.g., \u201ccredit score\u201d, \u201chigh income\u201d) will be flagged and prevented from being used to run ad campaigns. What these restrictions mean for your campaigns: You won\u2019t be able to use flagged custom audiences or custom conversions when creating new campaigns. If you have an active campaign using flagged custom audiences or custom conversions, you should promptly review and resolve the issues by following the resolution steps to avoid delivery and performance issues. For API developers: Starting September 2, 2025, if an ad set contains one or more flagged custom audiences and custom conversions, the issues_info list will be populated with one issue per flagged items. Creation and editing of ad sets that contain flagged custom audiences and custom conversions will not be blocked, but campaign delivery and performance may be impacted unless the flags are resolved. More information on this update and how to resolve flagged custom audiences can be found here , while information for resolving flagged custom conversions is available here .",
+        "The date_preset = lifetime parameter is disabled in Graph API v10.0 and replaced with date_preset = maximum , which returns a maximum of 37 months of data. For v9.0 and below, date_preset = maximum will be enabled on May 25, 2021, and any lifetime calls will default to maximum and return only 37 months of data.",
+        "For v20.0+, the Impressions optimization goal is deprecated for the legacy Post Engagement objective and the ON_POST destination_type.",
+        "Budget amounts shown are for illustrative purposes only and can change based on situation.",
+        "Budgets in non-USD currencies will be converted and validated upon time of ad set creation.",
+        "For ads belonging to ad accounts from countries in the list below, the minimum values are 2x the ones in the tables. For example, if the billing event is an Impression, the minimum daily budget is $0.50, but in the the following countries the minimum would be $1.00: Australia, Austria, Belgium, Canada, Denmark, Finland, France, Germany, Greece, Hong Kong, Israel, Italy, Japan, Netherlands, New Zealand, Norway, Singapore, South Korea, Spain, Sweden, Switzerland, Taiwan, United Kingdom, United States of America. The only exception to this rule are Low-Frequency Actions when bid_strategy is LOWEST_COST_WITHOUT_CAP .",
+        "Maximum number of ad sets per regular ad account: 5000 non-deleted ad sets",
+        "Maximum number of ad sets per bulk ad account: 10000 non-deleted ad sets",
+        "Maximum number of ads per ad set: 50 non-archived ads"
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-campaign.html",
+        "byte_len": 3765799,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 59
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "extraction_note": "Meta does not tabulate a separate Updating parameter list for this object; the documented mutable params are under Creating (see documented_create_fields). Some create-only fields (e.g. objective, buying_type) are immutable after create \u2014 treat create fields as attemptable, NOT proven; confirm per-field via Layer 2 / readback."
+    },
+    {
+      "object_name": "ad-campaign-group",
+      "display_name": "Campaign",
+      "graph_node": "Campaign",
+      "apb_domain": "campaign",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "adlabels",
+          "type": "list<Object>",
+          "notes": "Ad Labels associated with this campaign"
+        },
+        {
+          "field": "adset_bid_amounts",
+          "type": "JSON object {numeric string : int64}",
+          "notes": "A map of child adset IDs to their respective bid amounts required in the process of toggling campaign from autobid to manual bid"
+        },
+        {
+          "field": "adset_budgets",
+          "type": "array<JSON object>",
+          "notes": "An array of maps containing all the non-deleted child adset IDs and either daily_budget or lifetime_budget, required in the process of toggling between campaign budget and adset budget adset_id numeri"
+        },
+        {
+          "field": "bid_strategy",
+          "type": "enum{LOWEST_COST_WITHOUT_CAP, LOWEST_COST_WITH_BID_CAP, COST",
+          "notes": "Choose bid strategy for this campaign to suit your specific business goals. Each strategy has tradeoffs and may be available for certain optimization_goal s: LOWEST_COST_WITHOUT_CAP : Designed to get "
+        },
+        {
+          "field": "budget_rebalance_flag",
+          "type": "boolean",
+          "notes": "Whether to automatically rebalance budgets daily for all the adsets under this campaign."
+        },
+        {
+          "field": "campaign_optimization_type",
+          "type": "enum{NONE, ICO_ONLY}",
+          "notes": "campaign_optimization_type"
+        },
+        {
+          "field": "daily_budget",
+          "type": "int64",
+          "notes": "Daily budget of this campaign. All adsets under this campaign will share this budget. You can either set budget at the campaign level or at the adset level, not both."
+        },
+        {
+          "field": "execution_options",
+          "type": "list<enum{validate_only, include_recommendations}>",
+          "notes": "Default value: Set An execution setting validate_only : when this option is specified, the API call will not perform the mutation but will run through the validation rules against values of each field"
+        },
+        {
+          "field": "is_adset_budget_sharing_enabled",
+          "type": "boolean",
+          "notes": "Whether the child ad sets are managed under ad set budget sharing. With ad set budget sharing, advertisers can now share up to 20% of their budget with other ad sets in the same campaign."
+        },
+        {
+          "field": "is_reels_trending_ads_enabled",
+          "type": "boolean",
+          "notes": "indicator for 'reels trending ads' campaign"
+        },
+        {
+          "field": "is_skadnetwork_attribution",
+          "type": "boolean",
+          "notes": "Flag to indicate that the campaign will be using SKAdNetwork, which also means that it will only be targeting iOS 14.x and above"
+        },
+        {
+          "field": "is_using_l3_schedule",
+          "type": "boolean",
+          "notes": "is_using_l3_schedule"
+        },
+        {
+          "field": "iterative_split_test_configs",
+          "type": "list<Object>",
+          "notes": "Array of Iterative Split Test Configs created under this campaign ."
+        },
+        {
+          "field": "lifetime_budget",
+          "type": "int64",
+          "notes": "Lifetime budget of this campaign. All adsets under this campaign will share this budget. You can either set budget at the campaign level or at the adset level, not both."
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "Name for this campaign"
+        },
+        {
+          "field": "objective",
+          "type": "enum{APP_INSTALLS, BRAND_AWARENESS, CONVERSIONS, EVENT_RESPO",
+          "notes": "Campaign's objective. If it is specified the API will validate that any ads created under the campaign match that objective. Currently, with BRAND_AWARENESS objective, all creatives should be either o"
+        },
+        {
+          "field": "promoted_object",
+          "type": "Object",
+          "notes": "The object this campaign is promoting across all its ads. Only product_catalog_id is used at the ad set level. application_id int The ID of a Facebook Application. Usually related to mobile or canvas "
+        },
+        {
+          "field": "smart_promotion_type",
+          "type": "enum{GUIDED_CREATION, SMART_APP_PROMOTION}",
+          "notes": "smart_promotion_type"
+        },
+        {
+          "field": "special_ad_category",
+          "type": "enum{NONE, EMPLOYMENT, HOUSING, CREDIT, ISSUES_ELECTIONS_POL",
+          "notes": "special_ad_category"
+        },
+        {
+          "field": "special_ad_category_country",
+          "type": "array<enum {AC, AD, AE, AF, AG, AI, AL, AM, AN, AO, AQ, AR, ",
+          "notes": "special_ad_category_country"
+        },
+        {
+          "field": "spend_cap",
+          "type": "int64",
+          "notes": "A spend cap for the campaign, such that it will not spend more than this cap. Defined as integer value of subunit in your currency with a minimum value of $100 USD (or approximate local equivalent). S"
+        },
+        {
+          "field": "start_time",
+          "type": "datetime",
+          "notes": "start_time"
+        },
+        {
+          "field": "status",
+          "type": "enum{ACTIVE, PAUSED, DELETED, ARCHIVED}",
+          "notes": "Only ACTIVE and PAUSED are valid during creation. Other statuses can be used for update. If it is set to PAUSED , its active child objects will be paused and have an effective status CAMPAIGN_PAUSED ."
+        },
+        {
+          "field": "stop_time",
+          "type": "datetime",
+          "notes": "stop_time"
+        }
+      ],
+      "documented_create_fields": [
+        {
+          "field": "adbatch",
+          "type": "list<Object>",
+          "notes": "JSON encoded batch reqeust name string relative_url string body UTF-8 encoded string"
+        },
+        {
+          "field": "name",
+          "type": "UTF-8 encoded string",
+          "notes": "Name of the batch request for tracking purposes."
+        },
+        {
+          "field": "deep_copy",
+          "type": "boolean",
+          "notes": "Default value: false Whether to copy all the child ads. Limits: the total number of children ads to copy should not exceed 3 for a synchronous call and 51 for an asynchronous call."
+        },
+        {
+          "field": "end_time",
+          "type": "datetime",
+          "notes": "For deep copy, the end time of the sets under the copied campaign, e.g. 2015-03-12 23:59:59-07:00 or 2015-03-12 23:59:59 PDT . UTC UNIX timestamp. When creating a set with a daily budget, specify end_"
+        },
+        {
+          "field": "parameter_overrides",
+          "type": "Campaign spec",
+          "notes": "parameter_overrides"
+        },
+        {
+          "field": "rename_options",
+          "type": "JSON or object-like arrays",
+          "notes": "Rename options rename_strategy enum {DEEP_RENAME, ONLY_TOP_LEVEL_RENAME, NO_RENAME} Default value: ONLY_TOP_LEVEL_RENAME DEEP_RENAME : will change this object's name and children's names in the copied"
+        },
+        {
+          "field": "start_time",
+          "type": "datetime",
+          "notes": "For deep copy, the start time of the sets under the copied campaign, e.g. 2015-03-12 23:59:59-07:00 or 2015-03-12 23:59:59 PDT . UTC UNIX timestamp. If not set, the copied sets will inherit the start "
+        },
+        {
+          "field": "status_option",
+          "type": "enum {ACTIVE, PAUSED, INHERITED_FROM_SOURCE}",
+          "notes": "Default value: PAUSED ACTIVE : the copied campaign will have active status. PAUSED : the copied campaign will have paused status. INHERITED_FROM_SOURCE : the copied campaign will have the parent statu"
+        },
+        {
+          "field": "adlabels",
+          "type": "list<Object>",
+          "notes": "Ad Labels associated with this campaign"
+        },
+        {
+          "field": "bid_strategy",
+          "type": "enum{LOWEST_COST_WITHOUT_CAP, LOWEST_COST_WITH_BID_CAP, COST",
+          "notes": "Choose bid strategy for this campaign to suit your specific business goals. Each strategy has tradeoffs and may be available for certain optimization_goal s: LOWEST_COST_WITHOUT_CAP : Designed to get "
+        },
+        {
+          "field": "budget_schedule_specs",
+          "type": "list<JSON or object-like arrays>",
+          "notes": "Initial high demand periods to be created with the campaign. Provide list of time_start , time_end , budget_value , and budget_value_type . For example, -F 'budget_schedule_specs=[{ \"time_start\":16990"
+        },
+        {
+          "field": "buying_type",
+          "type": "string",
+          "notes": "Default value: AUCTION This field will help Facebook make optimizations to delivery, pricing, and limits. All ad sets in this campaign must match the buying type. Possible values are: AUCTION (default"
+        },
+        {
+          "field": "campaign_optimization_type",
+          "type": "enum{NONE, ICO_ONLY}",
+          "notes": "campaign_optimization_type"
+        },
+        {
+          "field": "daily_budget",
+          "type": "int64",
+          "notes": "Daily budget of this campaign. All adsets under this campaign will share this budget. You can either set budget at the campaign level or at the adset level, not both."
+        },
+        {
+          "field": "execution_options",
+          "type": "list<enum{validate_only, include_recommendations}>",
+          "notes": "Default value: Set An execution setting validate_only : when this option is specified, the API call will not perform the mutation but will run through the validation rules against values of each field"
+        },
+        {
+          "field": "is_skadnetwork_attribution",
+          "type": "boolean",
+          "notes": "To create an iOS 14 campaign, enable SKAdNetwork attribution for this campaign."
+        },
+        {
+          "field": "is_using_l3_schedule",
+          "type": "boolean",
+          "notes": "is_using_l3_schedule"
+        },
+        {
+          "field": "iterative_split_test_configs",
+          "type": "list<Object>",
+          "notes": "Array of Iterative Split Test Configs created under this campaign ."
+        },
+        {
+          "field": "lifetime_budget",
+          "type": "int64",
+          "notes": "Lifetime budget of this campaign. All adsets under this campaign will share this budget. You can either set budget at the campaign level or at the adset level, not both."
+        },
+        {
+          "field": "objective",
+          "type": "enum{APP_INSTALLS, BRAND_AWARENESS, CONVERSIONS, EVENT_RESPO",
+          "notes": "Campaign's objective. If it is specified the API will validate that any ads created under the campaign match that objective. Currently, with BRAND_AWARENESS objective, all creatives should be either o"
+        },
+        {
+          "field": "promoted_object",
+          "type": "Object",
+          "notes": "The object this campaign is promoting across all its ads. It\u2019s required for Meta iOS 14+ app promotion (SKAdNetwork or Aggregated Event Measurement) campaign creation. Only product_catalog_id is used "
+        },
+        {
+          "field": "source_campaign_id",
+          "type": "numeric string or integer",
+          "notes": "Used if a campaign has been copied. The ID from the original campaign that was copied."
+        },
+        {
+          "field": "special_ad_categories",
+          "type": "array<enum {NONE, EMPLOYMENT, HOUSING, CREDIT, ISSUES_ELECTI",
+          "notes": "special_ad_categories"
+        },
+        {
+          "field": "special_ad_category_country",
+          "type": "array<enum {AC, AD, AE, AF, AG, AI, AL, AM, AN, AO, AQ, AR, ",
+          "notes": "special_ad_category_country"
+        },
+        {
+          "field": "spend_cap",
+          "type": "int64",
+          "notes": "A spend cap for the campaign, such that it will not spend more than this cap. Defined as integer value of subunit in your currency with a minimum value of $100 USD (or approximate local equivalent). S"
+        },
+        {
+          "field": "status",
+          "type": "enum{ACTIVE, PAUSED, DELETED, ARCHIVED}",
+          "notes": "Only ACTIVE and PAUSED are valid during creation. Other statuses can be used for update. If it is set to PAUSED , its active child objects will be paused and have an effective status CAMPAIGN_PAUSED ."
+        },
+        {
+          "field": "stop_time",
+          "type": "datetime",
+          "notes": "stop_time"
+        },
+        {
+          "field": "topline_id",
+          "type": "numeric string or integer",
+          "notes": "Topline ID"
+        }
+      ],
+      "documented_warnings": [
+        "The date_preset = lifetime parameter is disabled in Graph API v10.0 and replaced with date_preset = maximum , which returns a maximum of 37 months of data. For v9.0 and below, date_preset = maximum will be enabled on May 25, 2021, and any lifetime calls will default to maximum and return only 37 months of data.",
+        "As of Marketing API 7.0 , the special_ad_category parameter on the POST /act_<ad_account_id>/campaigns endpoint has been deprecated and replaced with a new special_ad_categories parameter. The new special_ad_categories parameter is required and accepts an array. If you use the special_ad_category parameter, it will still return a string, but you should use GET /{campaign-id}?fields=special_ad_categories to get an array back. Refer to Special Ad Category for additional information.",
+        "These older objectives are deprecated with the release of Marketing API v17.0 . Please refer to the Outcome-Driven Ads Experiences mapping table below to find the new objectives and their corresponding destination types, optimization goals and promoted objects.",
+        "From v20.0 onwards, Impressions optimization goal is deprecated for the legacy Post Engagement objective and the ON_POST destination_type.",
+        "BRAND_AWARENESS: OUTCOME_AWARENESS",
+        "REACH: OUTCOME_AWARENESS",
+        "IMPRESSIONS: page_id",
+        "LINK_CLICKS: OUTCOME_TRAFFIC",
+        "LANDING_PAGE_VIEWS: \u2014",
+        "REACH: application_id , object_store_url",
+        "IMPRESSIONS: \u2014",
+        "MESSENGER: LINK_CLICKS"
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-campaign-group.html",
+        "byte_len": 3860851,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 24,
+        "create_fields": 28
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "ad-rule",
+      "display_name": "Ad Rule",
+      "graph_node": "AdRule",
+      "apb_domain": "rules",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-rule/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "evaluation_spec",
+          "type": "Object",
+          "notes": "Defines the evaluation spec upon which a rule will be executed"
+        },
+        {
+          "field": "evaluation_type",
+          "type": "enum{SCHEDULE, TRIGGER}",
+          "notes": "Required"
+        },
+        {
+          "field": "filters",
+          "type": "list<Object>",
+          "notes": "Required"
+        },
+        {
+          "field": "field",
+          "type": "string",
+          "notes": "Required"
+        },
+        {
+          "field": "value",
+          "type": "numeric, string, boolean, list<>, or object-like arrays",
+          "notes": "Required"
+        },
+        {
+          "field": "operator",
+          "type": "enum{GREATER_THAN, LESS_THAN, EQUAL, NOT_EQUAL, IN_RANGE, NO",
+          "notes": "Required"
+        },
+        {
+          "field": "trigger",
+          "type": "Object"
+        },
+        {
+          "field": "type",
+          "type": "enum{METADATA_CREATION, METADATA_UPDATE, STATS_MILESTONE, ST",
+          "notes": "Required"
+        },
+        {
+          "field": "execution_spec",
+          "type": "Object",
+          "notes": "Defines the execution spec upon which a rule will be executed"
+        },
+        {
+          "field": "execution_type",
+          "type": "enum{DCO, PING_ENDPOINT, NOTIFICATION, PAUSE, REBALANCE_BUDG",
+          "notes": "Required"
+        },
+        {
+          "field": "is_once_off",
+          "type": "boolean"
+        },
+        {
+          "field": "execution_options",
+          "type": "list<Object>"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The friendly name of a rule, optional for inline rules"
+        },
+        {
+          "field": "schedule_spec",
+          "type": "Object",
+          "notes": "Specifies the schedule with which a rule will be evaluated"
+        },
+        {
+          "field": "schedule_type",
+          "type": "enum{DAILY, HOURLY, SEMI_HOURLY, CUSTOM}",
+          "notes": "Required"
+        },
+        {
+          "field": "schedule",
+          "type": "list<Object>"
+        },
+        {
+          "field": "start_minute",
+          "type": "int64"
+        },
+        {
+          "field": "end_minute",
+          "type": "int64"
+        },
+        {
+          "field": "days",
+          "type": "list<int64>"
+        },
+        {
+          "field": "status",
+          "type": "enum {ENABLED, DISABLED, DELETED, HAS_ISSUES}",
+          "notes": "The status of a rule"
+        }
+      ],
+      "documented_create_fields": [
+        {
+          "field": "account_id",
+          "type": "numeric string",
+          "notes": "Ad Account ID. This is inferred from the path."
+        },
+        {
+          "field": "evaluation_spec",
+          "type": "Object",
+          "notes": "Defines the evaluation spec upon which a rule will be executed Required"
+        },
+        {
+          "field": "evaluation_type",
+          "type": "enum{SCHEDULE, TRIGGER}",
+          "notes": "Required"
+        },
+        {
+          "field": "filters",
+          "type": "list<Object>",
+          "notes": "Required"
+        },
+        {
+          "field": "field",
+          "type": "string",
+          "notes": "Required"
+        },
+        {
+          "field": "value",
+          "type": "numeric, string, boolean, list<>, or object-like arrays",
+          "notes": "Required"
+        },
+        {
+          "field": "operator",
+          "type": "enum{GREATER_THAN, LESS_THAN, EQUAL, NOT_EQUAL, IN_RANGE, NO",
+          "notes": "Required"
+        },
+        {
+          "field": "trigger",
+          "type": "Object"
+        },
+        {
+          "field": "type",
+          "type": "enum{METADATA_CREATION, METADATA_UPDATE, STATS_MILESTONE, ST",
+          "notes": "Required"
+        },
+        {
+          "field": "execution_spec",
+          "type": "Object",
+          "notes": "Defines the execution spec upon which a rule will be executed Required"
+        },
+        {
+          "field": "execution_type",
+          "type": "enum{DCO, PING_ENDPOINT, NOTIFICATION, PAUSE, REBALANCE_BUDG",
+          "notes": "Required"
+        },
+        {
+          "field": "is_once_off",
+          "type": "boolean"
+        },
+        {
+          "field": "execution_options",
+          "type": "list<Object>"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The friendly name of a rule, optional for inline rules Required"
+        },
+        {
+          "field": "schedule_spec",
+          "type": "Object",
+          "notes": "Specifies the schedule with which a rule will be evaluated"
+        },
+        {
+          "field": "schedule_type",
+          "type": "enum{DAILY, HOURLY, SEMI_HOURLY, CUSTOM}",
+          "notes": "Required"
+        },
+        {
+          "field": "schedule",
+          "type": "list<Object>"
+        },
+        {
+          "field": "start_minute",
+          "type": "int64"
+        },
+        {
+          "field": "end_minute",
+          "type": "int64"
+        },
+        {
+          "field": "days",
+          "type": "list<int64>"
+        },
+        {
+          "field": "status",
+          "type": "enum {ENABLED, DISABLED, DELETED, HAS_ISSUES}",
+          "notes": "The status of a rule"
+        }
+      ],
+      "documented_warnings": [],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_html",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-rule.html",
+        "byte_len": 1142291,
+        "template": "old_table",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 20,
+        "create_fields": 21
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "ad-study",
+      "display_name": "Ad Study (Split Test)",
+      "graph_node": "AdStudy",
+      "apb_domain": "split-test",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-study/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [],
+      "documented_create_fields": [
+        {
+          "field": "cells",
+          "type": "list<Object>",
+          "notes": "A shape to describe the cells of the study description string id int64 name string creation_template enum {AUTOMATIC_PLACEMENTS, BRAND_AWARENESS, FACEBOOK, FACEBOOK_AUDIENCE_NETWORK, FACEBOOK_INSTAGRA"
+        },
+        {
+          "field": "client_business",
+          "type": "numeric string or integer",
+          "notes": "Business associated with study"
+        },
+        {
+          "field": "confidence_level",
+          "type": "float",
+          "notes": "Confidence level used in power calculation and final report"
+        },
+        {
+          "field": "cooldown_start_time",
+          "type": "integer",
+          "notes": "The beginning of the pre measurement cooldown period. This period ends when the study period starts."
+        },
+        {
+          "field": "creative_test_config",
+          "type": "JSON object",
+          "notes": "(Optional) Configuration for launching a 2-5 cell creative test. Specify either daily_budget or lifetime_budget_percentage to set the budget allocation for the study across the cells' ads. Study \"type"
+        },
+        {
+          "field": "description",
+          "type": "string",
+          "notes": "A brief description about the purpose of the study."
+        },
+        {
+          "field": "end_time",
+          "type": "integer",
+          "notes": "The time when the study period ends."
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The name of the study."
+        },
+        {
+          "field": "objectives",
+          "type": "list<Object>",
+          "notes": "A vector of objects describing the objectives assigned to this study id numeric string or integer is_primary boolean name string type enum {SALES, NONSALES, MAE, TELCO, FTL, MAI, PARTNER, BRANDLIFT, B"
+        },
+        {
+          "field": "observation_end_time",
+          "type": "integer",
+          "notes": "The end of the observation period for this study, this period starts when the study period ends."
+        },
+        {
+          "field": "start_time",
+          "type": "integer",
+          "notes": "The time when the study period starts."
+        },
+        {
+          "field": "type",
+          "type": "enum {LIFT, SPLIT_TEST, CONTINUOUS_LIFT_CONFIG, GEO_LIFT, BA",
+          "notes": "The type of ad study, either SPLIT_TEST or LIFT."
+        },
+        {
+          "field": "viewers",
+          "type": "list<int>",
+          "notes": "The list of people who this study has been shared with."
+        }
+      ],
+      "documented_warnings": [
+        "cells  list<Object>: A shape to describe the cells of the study description string id int64 name string creation_template enum {AUTOMATIC_PLACEMENTS, BRAND_AWARENESS, FACEBOOK, FACEBOOK_AUDIENCE_NETWORK, FACEBOOK_INSTAGRAM, FACEBOOK_NEWS_FEED, FACEBOOK_NEWS_FEED_IN_STREAM_VIDEO, IN_STREAM_VIDEO, INSTAGRAM, MOBILE_OPTIMIZED_VIDEO, PAGE_POST_ENGAGEMENT, REACH, TV_COMMERCIAL, TV_FACEBOOK, VIDEO_VIEW_OPTIMIZATION, LOW_FREQUENCY, MEDIUM_FREQUENCY, HIGH_FREQUENCY} adaccounts list<int64> ads list<numeric string or integer> adsets list<numeric string or integer> campaigns list<numeric string or integer> control_percentage float with at most two digits after decimal point treatment_percentage float with at most two digits after decimal point",
+        "client_business  numeric string or integer: Business associated with study",
+        "confidence_level  float: Confidence level used in power calculation and final report",
+        "cooldown_start_time  integer: The beginning of the pre measurement cooldown period. This period ends when the study period starts.",
+        "creative_test_config  JSON object: (Optional) Configuration for launching a 2-5 cell creative test. Specify either daily_budget or lifetime_budget_percentage to set the budget allocation for the study across the cells' ads. Must be used with study type SPLIT_TEST_V2",
+        "description  string: A brief description about the purpose of the study.",
+        "end_time  integer: The time when the study period ends.",
+        "name  string: The name of the study.",
+        "objectives  list<Object>: A vector of objects describing the objectives assigned to this study id numeric string or integer is_primary boolean name string type enum {SALES, NONSALES, MAE, TELCO, FTL, MAI, PARTNER, BRANDLIFT, BRAND, MPC_CONVERSION, CONVERSIONS} offsite_datasets list<JSON or object-like arrays> id numeric string or integer event_names list<string> adspixels list<JSON or object-like arrays> id numeric string or integer event_names list<string> customconversions list<JSON or object-like arrays> id numeric string or integer event_names list<string> applications list<JSON or object-like arrays> id numeric string or integer event_names list<string> offline_conversion_data_sets list<JSON or object-like arrays> id numeric string or integer event_names list<string> product_sets list<JSON or object-like arrays> id numeric string or integer event_names list<string> product_catalogs list<JSON or object-like arrays> id numeric string or integer event_names list<string>",
+        "observation_end_time  integer: The end of the observation period for this study, this period starts when the study period ends.",
+        "start_time  integer: The time when the study period starts.",
+        "type  enum {LIFT, SPLIT_TEST, CONTINUOUS_LIFT_CONFIG, GEO_LIFT, BACKEND_AB_TESTING, CREATIVE_SPEND_ENFORCEMENT, PORTFOLIO_OPTIMIZER, VERSION_CONTROL}: A type of the study."
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ad-study.html",
+        "byte_len": 3089670,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 13
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "extraction_note": "Meta does not tabulate a separate Updating parameter list for this object; the documented mutable params are under Creating (see documented_create_fields). Some create-only fields (e.g. objective, buying_type) are immutable after create \u2014 treat create fields as attemptable, NOT proven; confirm per-field via Layer 2 / readback."
+    },
+    {
+      "object_name": "adcreative",
+      "display_name": "Ad Creative",
+      "graph_node": "AdCreative",
+      "apb_domain": "creative",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/adcreative/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "account_id",
+          "type": "numeric string",
+          "notes": "Ad account ID for the account this ad creative belongs to."
+        },
+        {
+          "field": "adlabels",
+          "type": "list<Object>",
+          "notes": "Ad Labels associated with this creative. Used to group it with related ad objects."
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The name of the creative in the creative library. This field takes a string of up to 100 characters."
+        },
+        {
+          "field": "status",
+          "type": "enum {ACTIVE, IN_PROCESS, WITH_ISSUES, DELETED}",
+          "notes": "The status of this ad creative. See Storing and Retrieving Ad Objects ."
+        }
+      ],
+      "documented_create_fields": [],
+      "documented_warnings": [
+        "Only returns 50,000 ad creatives, pagination past this is unavailable.",
+        "The following characters are not allowed:",
+        "See Placement for restrictions on placement of your ad based on creative.",
+        "Maximum ad title length: 25 characters, recommended",
+        "Minimum ad title length: 1 character",
+        "Maximum ad body length: 90 characters, recommended",
+        "Minimum ad body length: 1 character",
+        "Maximum length of a URL: 1000 characters",
+        "Maximum length of an individual word in title or body: 30 characters, recommended"
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_html",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "adcreative.html",
+        "byte_len": 1190893,
+        "template": "old_table",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 4,
+        "create_fields": 0
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "adgroup",
+      "display_name": "Ad",
+      "graph_node": "Ad",
+      "apb_domain": "ad",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/adgroup/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [],
+      "documented_create_fields": [
+        {
+          "field": "name",
+          "notes": "Required. Name of ad set for newly created ads."
+        },
+        {
+          "field": "ad_specs",
+          "notes": "Required. Ads can be created for different ad sets inside the current ad account. To use images in ad creative, provide image_hash in ad spec after you upload the image at https://graph.facebook.com/{"
+        },
+        {
+          "field": "notification_uri",
+          "notes": "Optional. Async job completed. This URI notifies the caller with a POST and ad set id."
+        },
+        {
+          "field": "notification_mode",
+          "notes": "Optional. Notification mode: OFF \u2013 No notification ON_COMPLETE \u2013 Send notification when all ads for set created."
+        }
+      ],
+      "documented_warnings": [
+        "Due to iOS 14.5 changes, Deferred Deep Linking is no longer available for SKAdsNetwork Campaigns .",
+        "Ads in regular ad account: 5000 non-deleted ads",
+        "Ads in bulk ad account: 50000 non-deleted ads",
+        "Ads in an ad set: 50 non-deleted ads",
+        "Archived ads in an ad account: 100,000 archived ads",
+        "adset_id  numeric string or integer: Single ID of an adset object to make the parent of the copy. Ignore if you want to keep the copy under the original adset parent.",
+        "creative_parameters  AdCreative: Creative inputs which will be used to construct the creative in the new ad. Overwrites happen at the top level. If no input is provided, the new ad will be created with an identical ad creative. If some input is provided, those parameters will be assigned to the ad creative created by this API call. Accepts all ad creative parameters as specified in /documentation/ads-commerce/marketing-api/reference/ad-account/adcreatives",
+        "rename_options  JSON or object-like arrays: Rename options rename_strategy enum {DEEP_RENAME, ONLY_TOP_LEVEL_RENAME, NO_RENAME} Default value: ONLY_TOP_LEVEL_RENAME DEEP_RENAME : will change this object's name and children's names in the copied object. ONLY_TOP_LEVEL_RENAME : will change the this object's name but won't change the children's name in the copied object. NO_RENAME : will change no name in the copied object rename_prefix string A prefix to copy names. Defaults to null if not provided. rename_suffix string A suffix to copy names. Defaults to null if not provided and appends a localized string of - Copy based on the ad account locale.",
+        "status_option  enum {ACTIVE, PAUSED, INHERITED_FROM_SOURCE}: Default value: PAUSED ACTIVE : the copied ad will have active status. PAUSED : the copied ad will have paused status. INHERITED_FROM_SOURCE : the copied ad will have the parent status.",
+        "100: Invalid parameter",
+        "200: Permissions error",
+        "ad_schedule_end_time  datetime: An optional parameter that defines the end time of an individual ad. If no end time is defined, the ad will run on the campaign\u2019s schedule. This parameter is only available for sales and app promotion campaigns."
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "adgroup.html",
+        "byte_len": 3197560,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 4
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "extraction_note": "Meta does not tabulate a separate Updating parameter list for this object; the documented mutable params are under Creating (see documented_create_fields). Some create-only fields (e.g. objective, buying_type) are immutable after create \u2014 treat create fields as attemptable, NOT proven; confirm per-field via Layer 2 / readback."
+    },
+    {
+      "object_name": "ads-pixel",
+      "display_name": "Ads Pixel",
+      "graph_node": "AdsPixel",
+      "apb_domain": "pixel",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ads-pixel/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "automatic_matching_fields",
+          "type": "array<enum {em, fn, ln, ph, ge, zp, ct, st, country, db, ext",
+          "notes": "Advanced matching fields for which automatic advanced matching should be enabled"
+        },
+        {
+          "field": "data_use_setting",
+          "type": "enum {EMPTY, ADVERTISING_AND_ANALYTICS, ANALYTICS_ONLY}",
+          "notes": "Setting to capture how pixel data should be used"
+        },
+        {
+          "field": "enable_automatic_matching",
+          "type": "boolean",
+          "notes": "Enable automatic advanced matching for the pixel for identity matching purposes"
+        },
+        {
+          "field": "first_party_cookie_status",
+          "type": "enum {EMPTY, FIRST_PARTY_COOKIE_ENABLED, FIRST_PARTY_COOKIE_",
+          "notes": "First party cookie status to indicate whether first party cookies can be set for this pixel"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "Name of the pixel"
+        },
+        {
+          "field": "server_events_business_ids",
+          "type": "array<numeric string>",
+          "notes": "server_events_business_ids"
+        }
+      ],
+      "documented_create_fields": [
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "Name of the pixel"
+        }
+      ],
+      "documented_warnings": [],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "ads-pixel.html",
+        "byte_len": 2958371,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 6,
+        "create_fields": 1
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "adsinsights",
+      "display_name": "Ads Insights",
+      "graph_node": "AdsInsights",
+      "apb_domain": "report",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/insights/",
+      "classification": "meta_read_edge",
+      "supports_read": true,
+      "supports_create": false,
+      "supports_update": false,
+      "supports_delete": false,
+      "documented_update_fields": [],
+      "documented_create_fields": [],
+      "documented_warnings": [
+        "Facebook will no longer be able to aggregate non-inline conversion metric values across iOS 14.5 and non-iOS 14.5 campaigns due to differences in attribution logic. Querying across iOS 14.5 and non-iOS 14.5 campaigns will result in no data getting returned for non-inline conversion metrics such as app installs and purchases. Inline event metrics like impressions, link clicks, and video views, however, can still be aggregated. Please visit our changelog for more information.",
+        "The date_preset = lifetime parameter is disabled in Graph API v10.0 and replaced with date_preset = maximum , which returns a maximum of 37 months of data. For v9.0 and below, date_preset = maximum will be enabled on May 25, 2021, and any lifetime calls will default to maximum and return only 37 months of data."
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "adsinsights.html",
+        "byte_len": 3381948,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 0
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "documented_read_params": [
+        {
+          "field": "action_attribution_windows",
+          "type": "list<enum{1d_view, 7d_view, 28d_view, 1d_click, 7d_click, 28",
+          "notes": "Default value: default The attribution window for the actions. The attribution window determines the window (e.g. 7d) and engagement type (e.g click) that\u2019s used as a filter to report actions. See Abo"
+        },
+        {
+          "field": "action_breakdowns",
+          "type": "list<enum{action_device, conversion_destination, matched_per",
+          "notes": "Default value: Vec How to break down action results. Supports more than one breakdowns. Default value is [\"action_type\"] Note: you must also include actions field whenever action_breakdowns is specifi"
+        },
+        {
+          "field": "action_report_time",
+          "type": "enum{impression, conversion, mixed, lifetime}",
+          "notes": "Determines the report time of action stats. For example, if a person saw the ad on Jan 1st but converted on Jan 2nd, when you query the API with action_report_time=impression , you see a conversion on"
+        },
+        {
+          "field": "breakdowns",
+          "type": "list<enum{ad_extension_domain, ad_extension_url, ad_format_a",
+          "notes": "How to break down the result. For more than one breakdown, only certain combinations are available: See \"Combining Breakdowns\" in the Breakdowns page. The option impression_device cannot be used by it"
+        },
+        {
+          "field": "date_preset",
+          "type": "enum{today, yesterday, this_month, last_month, this_quarter,",
+          "notes": "Default value: last_30d Represents a relative time range. This field is ignored if time_range or time_ranges is specified"
+        },
+        {
+          "field": "default_summary",
+          "type": "boolean",
+          "notes": "Default value: false Determine whether to return a summary. If summary is set, this param is ignored; otherwise, a summary section with the same fields as specified by fields is included in the summar"
+        },
+        {
+          "field": "export_columns",
+          "type": "list<string>",
+          "notes": "Select fields on the exporting report file. It is an optional param. Exporting columns are equal to the param fields if you leave this param blank"
+        },
+        {
+          "field": "export_format",
+          "type": "string",
+          "notes": "Set the format of exporting report file. If the export_format is set, Report file is asyncrhonizely generated. It expects [\"xls\", \"csv\"]."
+        },
+        {
+          "field": "export_name",
+          "type": "string",
+          "notes": "Set the file name of the exporting report."
+        },
+        {
+          "field": "fields",
+          "type": "list<string>",
+          "notes": "Fields to be retrieved. Default behavior is to return a list of most used fields"
+        },
+        {
+          "field": "filtering",
+          "type": "list<Filter Object>",
+          "notes": "Default value: Vec Filters on the report data. This parameter is an array of filter objects field string operator enum {EQUAL, NOT_EQUAL, GREATER_THAN, GREATER_THAN_OR_EQUAL, LESS_THAN, LESS_THAN_OR_E"
+        },
+        {
+          "field": "graph_cache",
+          "type": "boolean",
+          "notes": "Default value: true [internal use only] This param controls whether the the Graph API level cache should be used for insights endpoint"
+        },
+        {
+          "field": "level",
+          "type": "enum {ad, adset, campaign, account}",
+          "notes": "Represents the level of result"
+        },
+        {
+          "field": "limit",
+          "type": "integer",
+          "notes": "limit"
+        },
+        {
+          "field": "product_id_limit",
+          "type": "integer",
+          "notes": "Maximum number of product ids to be returned for each ad when breakdown by product_id ."
+        },
+        {
+          "field": "sort",
+          "type": "list<string>",
+          "notes": "Default value: Vec Field to sort the result, and direction of sorting. You can specify sorting direction by appending \"_ascending\" or \"_descending\" to the sort field. For example, \"reach_descending\". "
+        },
+        {
+          "field": "summary",
+          "type": "list<string>",
+          "notes": "If this param is used, a summary section is included, with the fields listed in this param"
+        },
+        {
+          "field": "summary_action_breakdowns",
+          "type": "list<enum{action_device, conversion_destination, matched_per",
+          "notes": "Default value: Vec Similar to action_breakdowns , but applies to summary. Default value is [\"action_type\"]"
+        },
+        {
+          "field": "time_increment",
+          "type": "enum{monthly, all_days} or integer",
+          "notes": "Default value: all_days If it is an integer, it is the number of days from 1 to 90. After you pick a reporting period by using time_range or date_preset , you may choose to have the results for the wh"
+        },
+        {
+          "field": "time_range",
+          "type": "{\u2018since\u2019:YYYY-MM-DD,\u2019until\u2019:YYYY-MM-DD}",
+          "notes": "A single time range object. UNIX timestamp not supported. This param is ignored if time_ranges is provided since datetime A date in the format of \"YYYY-MM-DD\", which means from the beginning midnight "
+        },
+        {
+          "field": "time_ranges",
+          "type": "list<{\u2018since\u2019:YYYY-MM-DD,\u2019until\u2019:YYYY-MM-DD}>",
+          "notes": "Array of time range objects. Time ranges can overlap, for example to return cumulative insights. Each time range has one result set. You cannot have more granular results with time_increment setting i"
+        },
+        {
+          "field": "use_account_attribution_setting",
+          "type": "boolean",
+          "notes": "Default value: false When this parameter is set to true, your ads results are shown using the attribution settings defined for the ad account"
+        },
+        {
+          "field": "use_unified_attribution_setting",
+          "type": "boolean",
+          "notes": "When this parameter is set to true , your ads results will be shown using unified attribution settings defined at ad set level and parameter use_account_attribution_setting will be ignored. Note: Plea"
+        }
+      ],
+      "extraction_note": "Read-only edge \u2014 apb uses it for reads only; create/update/delete are N/A. documented_read_params lists the documented GET query parameters."
+    },
+    {
+      "object_name": "custom-audience",
+      "display_name": "Custom Audience",
+      "graph_node": "CustomAudience",
+      "apb_domain": "audience",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/custom-audience/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "allowed_domains",
+          "type": "list<string>",
+          "notes": "A list of domains that the audience is restricted to"
+        },
+        {
+          "field": "claim_objective",
+          "type": "enum {AUTOMOTIVE_MODEL, COLLABORATIVE_ADS, HOME_LISTING, MED",
+          "notes": "Specifies the objective of audiences with subtype=CLAIM"
+        },
+        {
+          "field": "content_type",
+          "type": "enum {AUTOMOTIVE_MODEL, DESTINATION, FLIGHT, GENERIC, HOME_L",
+          "notes": "Specifies a mandatory content type for claim_objective : TRAVEL , AUTO_OFFER , HOME_LISTING , VEHICLE ."
+        },
+        {
+          "field": "customer_file_source",
+          "type": "enum {USER_PROVIDED_ONLY, PARTNER_PROVIDED_ONLY, BOTH_USER_A",
+          "notes": "Source of customer information in the uploaded file"
+        },
+        {
+          "field": "description",
+          "type": "string",
+          "notes": "The description for this custom audience"
+        },
+        {
+          "field": "enable_fetch_or_create",
+          "type": "boolean",
+          "notes": "Fetch custom audience instead of create new one when there exists custom audience with identical name, claim_objective, content_type, event_source_group/event_sources/sliced_event_source_group, inclus"
+        },
+        {
+          "field": "event_source_group",
+          "type": "numeric string or integer",
+          "notes": "Specifies a mandatory content type for claim_objective : TRAVEL , AUTO_OFFER , HOME_LISTING , VEHICLE ."
+        },
+        {
+          "field": "event_sources",
+          "type": "array<JSON object>",
+          "notes": "Specifies a mandatory content type for claim_objective : TRAVEL , AUTO_OFFER , HOME_LISTING , VEHICLE . id int64 id type enum {APP, OFFLINE_EVENTS, PAGE, PIXEL} type"
+        },
+        {
+          "field": "lookalike_spec",
+          "type": "JSON-encoded string",
+          "notes": "The specification for creating a lookalike audience"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The name of this custom audience"
+        },
+        {
+          "field": "opt_out_link",
+          "type": "string",
+          "notes": "Your opt-out URL so people can choose not to be targeted"
+        },
+        {
+          "field": "product_set_id",
+          "type": "numeric string or integer",
+          "notes": "The Product Set to target with this audience"
+        },
+        {
+          "field": "rule",
+          "type": "string",
+          "notes": "Audience rule to be applied on the referrer URL. Used for website custom audiences , product audiences , and video remarketing audiences ."
+        },
+        {
+          "field": "rule_aggregation",
+          "type": "string",
+          "notes": "Aggregation rule"
+        },
+        {
+          "field": "use_for_products",
+          "type": "list<enum {ADS, MARKETING_MESSAGES}>",
+          "notes": "use_for_products"
+        },
+        {
+          "field": "use_in_campaigns",
+          "type": "boolean",
+          "notes": "use_in_campaigns"
+        }
+      ],
+      "documented_create_fields": [],
+      "documented_warnings": [
+        "Beginning September 2, 2025, we will start to roll out more proactive restrictions on custom audiences that may suggest information not permitted under our terms. For example, any custom audience or lookalike audience suggesting specific health conditions (e.g., \u201carthritis\u201d, \u201cdiabetes\u201d) or financial status (e.g., \u201ccredit score\u201d, \u201chigh income\u201d) will be flagged and prevented from being used to run ad campaigns. What these restrictions mean for your campaigns: You won\u2019t be able to use flagged custom audiences when creating new campaigns. If you have an active campaign using flagged custom audiences, you should edit or pause it and choose a different audience to avoid performance and delivery issues. For API developers: Beginning September 2, 2025, operation_statu s will return 471 to signal if your custom audiences have been flagged. More information on this update and how to resolve flagged custom audiences can be found here .",
+        "When you delete a custom audience, it will be permanently removed from your account and your ads using it will stop running. You won't be able to restart any ads that used this audience in the past."
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "custom-audience.html",
+        "byte_len": 2770674,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 16,
+        "create_fields": 0
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "custom-conversion",
+      "display_name": "Custom Conversion",
+      "graph_node": "CustomConversion",
+      "apb_domain": "custom-conversion",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/custom-conversion/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "default_conversion_value",
+          "type": "float",
+          "notes": "The default conversion value of the conversion being created"
+        },
+        {
+          "field": "description",
+          "type": "string",
+          "notes": "Description of the custom conversion"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "Name of the custom conversion"
+        }
+      ],
+      "documented_create_fields": [
+        {
+          "field": "i_contains",
+          "notes": "Contains substring (case insensitive)"
+        },
+        {
+          "field": "i_not_contains",
+          "notes": "Does not contain substring (case insensitive)"
+        },
+        {
+          "field": "contains",
+          "notes": "Contains substring (case sensitive)"
+        },
+        {
+          "field": "not_contains",
+          "notes": "Does not contain substring (case sensitive)"
+        },
+        {
+          "field": "eq",
+          "notes": "Equal to (case sensitive)"
+        },
+        {
+          "field": "neq",
+          "notes": "Not equal to (case sensitive)"
+        },
+        {
+          "field": "lt",
+          "notes": "Less than (numeric fields only)"
+        },
+        {
+          "field": "lte",
+          "notes": "Less than or equal to (numeric fields only)"
+        },
+        {
+          "field": "gt",
+          "notes": "Greater than (numeric fields only)"
+        },
+        {
+          "field": "gte",
+          "notes": "Greater than or equal to (numeric fields only)"
+        },
+        {
+          "field": "regex_match",
+          "notes": "Matches a regular expression (eg: \"example\\.com.*purchase$\" ). The full PCRE grammar is supported"
+        },
+        {
+          "field": "url",
+          "notes": "The full escaped URL of the site visited"
+        },
+        {
+          "field": "event",
+          "notes": "The name of the pixel event fired from your website. Example: Purchase"
+        },
+        {
+          "field": "custom_conversion_id",
+          "type": "numeric string",
+          "notes": "Custom conversion ID the business claims. Required"
+        },
+        {
+          "field": "action_source_type",
+          "type": "enum {app, chat, email, other, phone_call, physical_store, s",
+          "notes": "Action source type the custom conversion is created from."
+        },
+        {
+          "field": "advanced_rule",
+          "type": "string",
+          "notes": "Advanced ruleset for the custom conversion being created allowing multiple sources."
+        },
+        {
+          "field": "custom_event_type",
+          "type": "enum {ADD_PAYMENT_INFO, ADD_TO_CART, ADD_TO_WISHLIST, COMPLE",
+          "notes": "The custom event type of the conversion being created."
+        },
+        {
+          "field": "default_conversion_value",
+          "type": "float",
+          "notes": "Default value: 0 The default conversion value of the conversion being created."
+        },
+        {
+          "field": "description",
+          "type": "string",
+          "notes": "The description of the conversion being created."
+        },
+        {
+          "field": "event_source_id",
+          "type": "numeric string or integer",
+          "notes": "Event source ID, where event sources are a Pixel, offline event sets and so on. Aggregate custom conversion data from these sources."
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The name of the conversion being created. Required"
+        },
+        {
+          "field": "rule",
+          "type": "string",
+          "notes": "Only count an event as a custom conversion if it fulfills this rule."
+        }
+      ],
+      "documented_warnings": [
+        "Note that the maximum number of custom conversions you can have per ad account is 100.",
+        "If you use the Ads Insights API to get metrics on custom conversions, be aware of these limitations:"
+      ],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_html",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "custom-conversion.html",
+        "byte_len": 1148888,
+        "template": "old_table",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 3,
+        "create_fields": 22
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    },
+    {
+      "object_name": "leadgen-form",
+      "display_name": "Lead Gen Form",
+      "graph_node": "LeadgenForm",
+      "apb_domain": "leadgen",
+      "reference_url": "https://developers.facebook.com/docs/graph-api/reference/page/leadgen_forms/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [],
+      "documented_create_fields": [
+        {
+          "field": "allow_organic_lead_retrieval",
+          "type": "boolean",
+          "notes": "Default value: true Previously, this flag controlled whether any leads submitted in a non-Ad context were retrievable. Now this flag will not be considered and it will be deprecated entirely. To contr"
+        },
+        {
+          "field": "block_display_for_non_targeted_viewer",
+          "type": "boolean",
+          "notes": "Whether to make the organic post invisible to viewers in non-Ad context"
+        },
+        {
+          "field": "context_card",
+          "type": "Object",
+          "notes": "Optional context card shown as the intro page Supports Emoji"
+        },
+        {
+          "field": "title",
+          "type": "string"
+        },
+        {
+          "field": "style",
+          "type": "enum {LIST_STYLE, PARAGRAPH_STYLE}"
+        },
+        {
+          "field": "content",
+          "type": "array<string>"
+        },
+        {
+          "field": "button_text",
+          "type": "string"
+        },
+        {
+          "field": "cover_photo_id",
+          "type": "numeric string"
+        },
+        {
+          "field": "cover_photo",
+          "type": "file",
+          "notes": "Custom cover photo for context card"
+        },
+        {
+          "field": "custom_disclaimer",
+          "type": "Object",
+          "notes": "Customized disclaimer including title, body content with inline links, and consent checkboxes Supports Emoji"
+        },
+        {
+          "field": "body",
+          "type": "Object",
+          "notes": "Supports Emoji"
+        },
+        {
+          "field": "text",
+          "type": "string",
+          "notes": "Required"
+        },
+        {
+          "field": "url_entities",
+          "type": "array<JSON object>"
+        },
+        {
+          "field": "checkboxes",
+          "type": "list<Object>"
+        },
+        {
+          "field": "is_required",
+          "type": "boolean",
+          "notes": "Default value: true"
+        },
+        {
+          "field": "is_checked_by_default",
+          "type": "boolean",
+          "notes": "Default value: false"
+        },
+        {
+          "field": "key",
+          "type": "string",
+          "notes": "Supports Emoji"
+        },
+        {
+          "field": "follow_up_action_url",
+          "type": "URI",
+          "notes": "The final destination URL that user will go to when clicking view website button"
+        },
+        {
+          "field": "is_for_canvas",
+          "type": "boolean",
+          "notes": "Default value: false Flag to indicate that the form is going to be used under a canvas"
+        },
+        {
+          "field": "is_optimized_for_quality",
+          "type": "boolean",
+          "notes": "Default value: false Flag to indicate whether the form will be optimized for quality"
+        },
+        {
+          "field": "is_phone_sms_verify_enabled",
+          "type": "boolean",
+          "notes": "Default value: false Whether the form requires phone sms verification when user submits"
+        },
+        {
+          "field": "locale",
+          "type": "enum {AR_AR, CS_CZ, DA_DK, DE_DE, EL_GR, EN_GB, EN_US, ES_ES",
+          "notes": "The locale of the form. Pre-defined questions renders in this locale"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "The name that will help identity the form Required"
+        },
+        {
+          "field": "privacy_policy",
+          "type": "Object",
+          "notes": "The url and link_text of the privacy policy of advertiser. link_text is limited to a maximum of 70 characters. Supports Emoji"
+        },
+        {
+          "field": "url",
+          "type": "string"
+        },
+        {
+          "field": "link_text",
+          "type": "string"
+        },
+        {
+          "field": "question_page_custom_headline",
+          "type": "string",
+          "notes": "The custom headline for the question page within the form"
+        },
+        {
+          "field": "questions",
+          "type": "list<Object>",
+          "notes": "An array of questions of the form Required"
+        },
+        {
+          "field": "label",
+          "type": "string"
+        },
+        {
+          "field": "type",
+          "type": "enum {CUSTOM, CITY, COMPANY_NAME, COUNTRY, DOB, EMAIL, GENDE",
+          "notes": "Required"
+        },
+        {
+          "field": "inline_context",
+          "type": "string"
+        },
+        {
+          "field": "options",
+          "type": "array<JSON object>"
+        },
+        {
+          "field": "dependent_conditional_questions",
+          "type": "array<JSON object>"
+        },
+        {
+          "field": "conditional_questions_group_id",
+          "type": "numeric string"
+        },
+        {
+          "field": "should_enforce_work_email",
+          "type": "boolean",
+          "notes": "Whether to enable work email enforcement."
+        },
+        {
+          "field": "thank_you_page",
+          "type": "Object",
+          "notes": "Optional customized thank you page displayed post submission Supports Emoji"
+        },
+        {
+          "field": "short_message",
+          "type": "string"
+        },
+        {
+          "field": "button_description",
+          "type": "string"
+        },
+        {
+          "field": "business_phone_number",
+          "type": "phone number string"
+        },
+        {
+          "field": "enable_messenger",
+          "type": "boolean",
+          "notes": "Default value: false"
+        },
+        {
+          "field": "website_url",
+          "type": "string"
+        },
+        {
+          "field": "button_type",
+          "type": "enum {VIEW_WEBSITE, CALL_BUSINESS, MESSAGE_BUSINESS, DOWNLOA",
+          "notes": "Required"
+        },
+        {
+          "field": "country_code",
+          "type": "string"
+        },
+        {
+          "field": "gated_file",
+          "type": "JSON object"
+        },
+        {
+          "field": "id",
+          "type": "numeric string",
+          "notes": "id"
+        },
+        {
+          "field": "tracking_parameters",
+          "type": "JSON object {string : string}",
+          "notes": "Map for additional tracking parameters to include with the form's field data"
+        },
+        {
+          "field": "upload_gated_file",
+          "type": "file",
+          "notes": "When using Meta's marketing API to create a lead ad, you can use this field to create a gated content thank you page. This field would be the file that you'd like to use as the gated file, and the tha"
+        }
+      ],
+      "documented_warnings": [],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_html",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "leadgen-form.html",
+        "byte_len": 1132986,
+        "template": "old_table",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 0,
+        "create_fields": 47
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0",
+      "extraction_note": "Meta does not tabulate a separate Updating parameter list for this object; the documented mutable params are under Creating (see documented_create_fields). Some create-only fields (e.g. objective, buying_type) are immutable after create \u2014 treat create fields as attemptable, NOT proven; confirm per-field via Layer 2 / readback."
+    },
+    {
+      "object_name": "product-catalog",
+      "display_name": "Product Catalog",
+      "graph_node": "ProductCatalog",
+      "apb_domain": "catalog",
+      "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/product-catalog/",
+      "classification": "meta_node",
+      "supports_read": true,
+      "supports_create": true,
+      "supports_update": true,
+      "supports_delete": true,
+      "documented_update_fields": [
+        {
+          "field": "additional_vertical_option",
+          "type": "enum {LOCAL_DA_CATALOG, LOCAL_PRODUCTS}",
+          "notes": "Additional catalog configurations that does not introduce either new verticals or subverticals"
+        },
+        {
+          "field": "da_display_settings",
+          "type": "Object",
+          "notes": "The display settings object when used will determine which image transformations (like cropping or padding) will be applied for the item in the specified dynamic ad format. carousel_ad Object transfor"
+        },
+        {
+          "field": "default_image_url",
+          "type": "URI",
+          "notes": "The URL for the default image, which is used for products without images or for the cases when the product image is temproarily unavailable. If a product image matches the default image, this should b"
+        },
+        {
+          "field": "destination_catalog_settings",
+          "type": "JSON object",
+          "notes": "Catalog setting for destination catalogs. generate_items_from_pages boolean Default value: false"
+        },
+        {
+          "field": "fallback_image_url",
+          "type": "URI",
+          "notes": "The URL for the fallback image. This is used as the image for the auto-generated dynamic items."
+        },
+        {
+          "field": "flight_catalog_settings",
+          "type": "JSON object",
+          "notes": "Catalog setting for flight catalogs. generate_items_from_events boolean Default value: false"
+        },
+        {
+          "field": "name",
+          "type": "string",
+          "notes": "Name of the Product Catalog"
+        },
+        {
+          "field": "partner_integration",
+          "type": "JSON object",
+          "notes": "Partner integration settings external_access_token string External access token external_merchant_id string External merchant identifier"
+        },
+        {
+          "field": "store_catalog_settings",
+          "type": "JSON object",
+          "notes": "Catalog settings for store catalogs; the page with the location structure for all the stores within this settings will be used to validate the store number for feed uploading page_id numeric string pa"
+        },
+        {
+          "field": "conversion_type",
+          "type": "enum {ATTRIBUTED, IN_SESSION}",
+          "notes": "conversion_type Identifier on whether the specified event happened within the original session of the user landing on the partner's page (IN_SESSION) or within the attribution window after the initial"
+        },
+        {
+          "field": "event_id",
+          "type": "string",
+          "notes": "event_id Unique identifier for conversion events. If there are multiple conversion events tied to a single mp_clid , this field will be used to differentiate between those events"
+        },
+        {
+          "field": "event_name",
+          "type": "enum {PURCHASE, ADD_TO_CART, VIEW_ITEM, OFFER_SUBMITTED, PUR",
+          "notes": "event_name TEST events can be used to send test data to confirm API functionality that Marketplace will ignore"
+        },
+        {
+          "field": "event_source_url",
+          "type": "string",
+          "notes": "event_source_url"
+        },
+        {
+          "field": "event_time",
+          "type": "datetime/timestamp",
+          "notes": "event_time"
+        },
+        {
+          "field": "offer_data",
+          "type": "JSON object",
+          "notes": "offer_data original_price float original_price offer_price float offer_price currency string currency"
+        },
+        {
+          "field": "order_data",
+          "type": "JSON object",
+          "notes": "order_data order_details array<JSON object> Default value: [] order_details item_price float item_price item_quantity int64 item_quantity item_id string item_id currency string currency order_total fl"
+        },
+        {
+          "field": "user_data",
+          "type": "JSON object",
+          "notes": "user_data mp_clid string mp_clid"
+        }
+      ],
+      "documented_create_fields": [
+        {
+          "field": "tasks",
+          "type": "array<enum {MANAGE, ADVERTISE, MANAGE_AR, AA_ANALYZE}>",
+          "notes": "Catalog permission tasks to assign this user"
+        },
+        {
+          "field": "user",
+          "type": "UID",
+          "notes": "Business user id or system user id"
+        },
+        {
+          "field": "address",
+          "type": "JSON object",
+          "notes": "address city string Default value: \"\" city city_id string city_id country string Default value: \"\" country latitude float latitude longitude float longitude neighborhoods array<string> neighborhoods p"
+        },
+        {
+          "field": "applinks",
+          "type": "Object",
+          "notes": "applinks web android ios ipad iphone windows_phone"
+        },
+        {
+          "field": "availability",
+          "type": "enum {AVAILABLE, NOT_AVAILABLE, PENDING, UNKNOWN}",
+          "notes": "availability"
+        },
+        {
+          "field": "body_style",
+          "type": "enum {CONVERTIBLE, COUPE, CROSSOVER, ESTATE, GRANDTOURER, HA",
+          "notes": "body_style"
+        },
+        {
+          "field": "condition",
+          "type": "enum {EXCELLENT, VERY_GOOD, GOOD, FAIR, POOR, OTHER, NONE}",
+          "notes": "condition"
+        },
+        {
+          "field": "currency",
+          "type": "ISO 4217 Currency Code",
+          "notes": "currency"
+        },
+        {
+          "field": "date_first_on_lot",
+          "type": "string",
+          "notes": "date_first_on_lot"
+        },
+        {
+          "field": "dealer_id",
+          "type": "string",
+          "notes": "dealer_id"
+        },
+        {
+          "field": "dealer_name",
+          "type": "string",
+          "notes": "dealer_name"
+        },
+        {
+          "field": "dealer_phone",
+          "type": "string",
+          "notes": "dealer_phone"
+        },
+        {
+          "field": "description",
+          "type": "string",
+          "notes": "description"
+        },
+        {
+          "field": "drivetrain",
+          "type": "enum {TWO_WD, FOUR_WD, AWD, FWD, RWD, OTHER, NONE}",
+          "notes": "drivetrain"
+        },
+        {
+          "field": "exterior_color",
+          "type": "string",
+          "notes": "exterior_color"
+        },
+        {
+          "field": "fb_page_id",
+          "type": "string",
+          "notes": "fb_page_id"
+        },
+        {
+          "field": "fuel_type",
+          "type": "enum {DIESEL, ELECTRIC, GASOLINE, FLEX, HYBRID, OTHER, PETRO",
+          "notes": "fuel_type"
+        },
+        {
+          "field": "images",
+          "type": "list<Object>",
+          "notes": "images image_url URL tags list<string>"
+        },
+        {
+          "field": "interior_color",
+          "type": "string",
+          "notes": "interior_color"
+        },
+        {
+          "field": "make",
+          "type": "string",
+          "notes": "make"
+        },
+        {
+          "field": "mileage",
+          "type": "JSON object",
+          "notes": "mileage unit enum {KILOMETERS, MILES} Default value: \"MILES\" unit value int64 Default value: 0 value"
+        },
+        {
+          "field": "model",
+          "type": "string",
+          "notes": "model"
+        },
+        {
+          "field": "price",
+          "type": "int64",
+          "notes": "price"
+        },
+        {
+          "field": "state_of_vehicle",
+          "type": "enum {NEW, USED, CPO}",
+          "notes": "state_of_vehicle"
+        },
+        {
+          "field": "title",
+          "type": "string",
+          "notes": "title"
+        },
+        {
+          "field": "transmission",
+          "type": "enum {AUTOMATIC, MANUAL, OTHER, NONE}",
+          "notes": "transmission"
+        },
+        {
+          "field": "trim",
+          "type": "string",
+          "notes": "trim"
+        },
+        {
+          "field": "url",
+          "type": "URI",
+          "notes": "url"
+        },
+        {
+          "field": "vehicle_id",
+          "type": "string",
+          "notes": "vehicle_id"
+        },
+        {
+          "field": "vehicle_type",
+          "type": "enum {BOAT, CAR_TRUCK, COMMERCIAL, MOTORCYCLE, OTHER, POWERS",
+          "notes": "vehicle_type"
+        },
+        {
+          "field": "vin",
+          "type": "string",
+          "notes": "vin"
+        },
+        {
+          "field": "year",
+          "type": "int64",
+          "notes": "year"
+        },
+        {
+          "field": "additional_vertical_option",
+          "type": "enum {LOCAL_DA_CATALOG, LOCAL_PRODUCTS}",
+          "notes": "Additional catalog configurations that does not introduce either new verticals or subverticals"
+        },
+        {
+          "field": "business_metadata",
+          "type": "JSON object",
+          "notes": "business_metadata page_id numeric string page_id external_business_id string external_business_id"
+        },
+        {
+          "field": "catalog_segment_filter",
+          "type": "A JSON-encoded rule",
+          "notes": "Provide filter for catalog to create a catalog segment."
+        },
+        {
+          "field": "da_display_settings",
+          "type": "Object",
+          "notes": "Dynamic Ads display settings. carousel_ad Object transformation_type enum{background_cropping_and_padding, background_padding, none} single_ad Object transformation_type enum{background_cropping_and_p"
+        },
+        {
+          "field": "destination_catalog_settings",
+          "type": "JSON object",
+          "notes": "Destination catalog settings. generate_items_from_pages boolean Default value: false"
+        },
+        {
+          "field": "flight_catalog_settings",
+          "type": "JSON object",
+          "notes": "Flight catalog settings. generate_items_from_events boolean Default value: false"
+        },
+        {
+          "field": "name",
+          "type": "UTF-8 encoded string",
+          "notes": "Name of the catalog."
+        },
+        {
+          "field": "parent_catalog_id",
+          "type": "numeric string or integer",
+          "notes": "Parent catalog ID."
+        },
+        {
+          "field": "partner_integration",
+          "type": "JSON object",
+          "notes": "Partner integration settings external_access_token string External access token external_merchant_id string External merchant identifier"
+        },
+        {
+          "field": "store_catalog_settings",
+          "type": "JSON object",
+          "notes": "Store catalog settings. page_id numeric string page_id"
+        },
+        {
+          "field": "vertical",
+          "type": "enum {adoptable_pets, apps_and_software, articles_and_public",
+          "notes": "Default value: commerce The catalog's industry or vertical, such as commerce ."
+        }
+      ],
+      "documented_warnings": [],
+      "documented_notes": [],
+      "example_endpoints_or_patterns": [],
+      "apb_flags": [],
+      "extraction_method": "deterministic_rsc",
+      "extraction_confidence": "high",
+      "scrape_meta": {
+        "source_file": "product-catalog.html",
+        "byte_len": 2961382,
+        "template": "rsc",
+        "sections_found": [
+          "creating",
+          "deleting",
+          "reading",
+          "updating"
+        ],
+        "update_fields": 17,
+        "create_fields": 43
+      },
+      "last_scraped_at": "2026-06-04",
+      "graph_api_version": "v25.0"
+    }
+  ]
+}

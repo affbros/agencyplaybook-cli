@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "layer": "verified",
+  "methodology": "Real write + readback observations against Meta Graph v25.0, plus runtime-rejection behavior proven by apb pre-flight guards. APPEND-ONLY: never rewrite or delete a prior observation; the Layer-1 scrape regenerates the documented index only and must never touch this file.",
+  "graph_api_version": "v25.0",
+  "disclaimer": "Absence of an entry means UNTESTED, not 'works'. An entry OVERRIDES the documented Layer-1 index on conflict. observed_result vocabulary: meta_rejected = Meta refused the write; accepted_unverified = write returned success but persistence could NOT be confirmed by readback; verified_applied = write succeeded AND a readback confirmed the new value; conditional = depends on entity state/context; unknown = documented but never live-tested.",
+  "join_key": "(object_name, field|operation) — object_name matches meta-node-manifest.json",
+  "evidence_note": "evidence is a PUBLIC-SAFE citation token (this file ships in the public skill tarball). The full private audit trail (internal eval-doc paths + commit SHAs) lives in a sibling private evidence map that is never bundled.",
+  "entries": [
+    {
+      "object_name": "ad-campaign",
+      "apb_domain": "adset",
+      "field": "value_rule_set_ids",
+      "observed_result": "accepted_unverified",
+      "verification_notes": "Accepted on POST (HTTP 200) but the field is NOT returned by `adset get` — persistence cannot be confirmed by readback. Report as 'accepted, not confirmable', never as 'updated'.",
+      "evidence": "adset readback verification (apb-core); meta-v25-field-coverage eval",
+      "apb_command_example": "apb adset create --campaign <id> --value-rule-set-ids <id1>,<id2> --execute",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-05-31"
+    },
+    {
+      "object_name": "ad-campaign-group",
+      "apb_domain": "campaign",
+      "field": "budget_type (daily_budget <-> lifetime_budget)",
+      "observed_result": "meta_rejected",
+      "verification_notes": "Budget TYPE is frozen at create — Meta rejects converting a campaign from daily to lifetime budget (or vice versa). The amounts are mutable; the type is not. apb fails this pre-flight (exit 2) before any network call.",
+      "evidence": "validate_schedule_budget (apb-core adset.rs)",
+      "apb_command_example": "apb campaign update <id> --lifetime-budget 50000 --execute   # rejected if campaign was created daily-budget",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-05-25"
+    },
+    {
+      "object_name": "ad-campaign",
+      "apb_domain": "adset",
+      "field": "budget_type (daily_budget <-> lifetime_budget)",
+      "observed_result": "meta_rejected",
+      "verification_notes": "Same as the campaign level: an ad set's budget type is frozen at create. Dayparting (adset_schedule) requires a lifetime budget, so it can only be added to ad sets created with a lifetime budget.",
+      "evidence": "validate_schedule_budget (apb-core adset.rs)",
+      "apb_command_example": "apb adset create ... --lifetime-budget 35000 --daypart-hours ... --execute",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-05-25"
+    },
+    {
+      "object_name": "ad-campaign",
+      "apb_domain": "adset",
+      "field": "attribution_spec (7d / 28d VIEW_THROUGH)",
+      "observed_result": "meta_rejected",
+      "verification_notes": "Meta v25 rejects 7-day and 28-day VIEW_THROUGH attribution windows (deprecated). Only 1-day view-through is accepted. apb validates and fails pre-flight (exit 2) with an actionable message.",
+      "evidence": "validate_attribution_spec (apb-core adset.rs); META_API_FIELDS.md",
+      "apb_command_example": "apb adset create ... --attribution-spec '[{\"event_type\":\"VIEW_THROUGH\",\"window_days\":7}]'   # rejected",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-01-12"
+    },
+    {
+      "object_name": "ad-value-rule-set",
+      "apb_domain": "value-rule",
+      "operation": "delete",
+      "observed_result": "meta_rejected",
+      "verification_notes": "DELETE of a value_rule_set is unsupported on all accounts/tokens tested (Meta: 'Unsupported delete request') — even for unattached sets; status is read-only too, so it cannot be deactivated via API. Workaround: rename to 'zzz-DELETE' and remove in Ads Manager UI.",
+      "evidence": "value_rule.rs::delete (apb-core, v0.4.2); CHANGELOG v0.4.x",
+      "apb_command_example": "apb value-rule delete --id <id> --execute   # surfaces Meta 'Unsupported delete request'",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-05-30"
+    },
+    {
+      "object_name": "custom-conversion",
+      "apb_domain": "custom-conversion",
+      "field": "rule / custom_event_type / event_source_id",
+      "observed_result": "unknown",
+      "verification_notes": "Documented as frozen at create (mutable fields are name/description/default_conversion_value). NOT yet live-verified by a real write+readback — treat as documented-only until tested; to change a frozen field, delete and recreate.",
+      "evidence": "CLI_REFERENCE custom-conversion notes",
+      "apb_command_example": "apb custom-conversion update <id> --name 'New name' --execute   # name OK; rule change untested",
+      "graph_api_version": "v25.0",
+      "last_verified_at": null
+    },
+    {
+      "object_name": "ad-campaign",
+      "apb_domain": "adset",
+      "field": "dsa_beneficiary / dsa_payor",
+      "observed_result": "conditional",
+      "verification_notes": "EU DSA fields: required/expected when targeting EU countries. apb emits a non-fatal advisory (not a hard block) when EU targeting is present without beneficiary/payor — surface this to the user before the write.",
+      "evidence": "eu_dsa_advisory (apb-core adset.rs)",
+      "apb_command_example": "apb adset create ... --dsa-beneficiary '<name>' --dsa-payor '<name>' --execute",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-05-25"
+    },
+    {
+      "object_name": "adcreative",
+      "apb_domain": "creative",
+      "field": "asset_feed_spec / format-expansion (11 risk variants)",
+      "observed_result": "conditional",
+      "verification_notes": "Creative behavior depends on format-automation combinations; apb's creative auditor detects 11 FormatRisk variants (e.g. CAROUSEL+COLLECTION+FORMAT_AUTOMATION) and blocks before the write unless explicitly allowed. Outcome is state/spec-dependent, not a flat yes/no.",
+      "evidence": "creative_audit.rs FormatRisk (apb-core); CREATIVE_AUDITOR.md",
+      "apb_command_example": "apb creative create ... --allow-format-automation --execute",
+      "graph_api_version": "v25.0",
+      "last_verified_at": "2026-05-27"
+    }
+  ]
+}

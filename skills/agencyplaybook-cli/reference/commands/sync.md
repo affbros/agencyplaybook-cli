@@ -1,6 +1,6 @@
 # `apb sync` — Command Reference
 
-2 commands. Auto-generated from the apb binary on 2026-06-01.
+2 commands. Auto-generated from the apb binary on 2026-06-05.
 
 ### `apb sync diff`
 

@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Completeness map: every apb CLI domain is classified as either a Meta Graph node we index (Layer 1 capability index) or an apb-internal concept with no Meta reference page. This is the proof that 'everything apb touches' is covered. Exact Meta reference slugs flagged verify_slug:true are best-known and confirmed when the operator saves the page HTML (on-box auto-fetch is blocked).",
+  "graph_api_version": "v25.0",
+  "generated_at": "2026-06-04",
+  "apb_domain_count": 35,
+  "classification_legend": {
+    "meta_node": "Backed by a Meta Graph object with read/create/update/delete reference page; full capability index entry.",
+    "meta_read_edge": "Backed by a Meta read-only edge (no create/update/delete of a node); supports_read only.",
+    "apb_internal": "An apb concept/operation with NO Meta reference page (analysis, pipeline, local config, or an operation over another node)."
+  },
+  "domains": [
+    { "apb_domain": "account", "classification": "meta_node", "object_name": "ad-account", "display_name": "Ad Account", "graph_node": "AdAccount", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/", "sprint": "S001" },
+    { "apb_domain": "campaign", "classification": "meta_node", "object_name": "ad-campaign-group", "display_name": "Campaign", "graph_node": "Campaign", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-campaign-group/", "sprint": "S001", "identity_note": "Meta legacy 'campaign group' = today's Campaign." },
+    { "apb_domain": "adset", "classification": "meta_node", "object_name": "ad-campaign", "display_name": "Ad Set", "graph_node": "AdSet", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-campaign/", "sprint": "S001", "identity_note": "Meta legacy 'campaign' = today's Ad Set. NOT 'adgroup' (which is the Ad)." },
+    { "apb_domain": "ad", "classification": "meta_node", "object_name": "adgroup", "display_name": "Ad", "graph_node": "Ad", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/adgroup/", "sprint": "S001", "identity_note": "Meta legacy 'adgroup' = today's Ad." },
+    { "apb_domain": "creative", "classification": "meta_node", "object_name": "adcreative", "display_name": "Ad Creative", "graph_node": "AdCreative", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/adcreative/", "sprint": "S001" },
+
+    { "apb_domain": "audience", "classification": "meta_node", "object_name": "custom-audience", "display_name": "Custom Audience", "graph_node": "CustomAudience", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/custom-audience/", "sprint": "S002", "identity_note": "Saved + lookalike audiences resolve through the same / sibling nodes (saved-audience, custom-audience lookalike)." },
+    { "apb_domain": "pixel", "classification": "meta_node", "object_name": "ads-pixel", "display_name": "Ads Pixel", "graph_node": "AdsPixel", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ads-pixel/", "sprint": "S002", "title_verified": "Ad Pixel" },
+    { "apb_domain": "dataset", "classification": "meta_node", "object_name": "dataset", "display_name": "Dataset (Conversions/Offline)", "graph_node": "AdsDataset", "reference_url": "https://developers.facebook.com/docs/marketing-api/conversions-api/", "sprint": "S002", "resolved": false, "resolved_note": "No classic CRUD reference node — Meta documents this only as the Conversions API + Dataset Quality API guides (not a Reading/Creating/Updating/Deleting reference page). Not indexable as a documented-mutability object; treat dataset mutations via Layer 2 / live verification." },
+    { "apb_domain": "custom-conversion", "classification": "meta_node", "object_name": "custom-conversion", "display_name": "Custom Conversion", "graph_node": "CustomConversion", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/custom-conversion/", "sprint": "S002" },
+    { "apb_domain": "rules", "classification": "meta_node", "object_name": "ad-rule", "display_name": "Ad Rule", "graph_node": "AdRule", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-rule/", "sprint": "S002", "title_verified": "Ad Rule" },
+    { "apb_domain": "value-rule", "classification": "meta_node", "object_name": "ad-value-rule-set", "display_name": "Ad Value Rule Set", "graph_node": "AdValueRuleSet", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/value_rule_set/", "sprint": "S002", "resolved": false, "resolved_note": "No public CRUD reference page resolves for the value_rule_set edge. Layer 2 (verified) already covers the load-bearing facts: DELETE unsupported on all tokens + status read-only. Treat via Layer 2 / live verification." },
+    { "apb_domain": "leadgen", "classification": "meta_node", "object_name": "leadgen-form", "display_name": "Lead Gen Form", "graph_node": "LeadgenForm", "reference_url": "https://developers.facebook.com/docs/graph-api/reference/page/leadgen_forms/", "sprint": "S002", "title_verified": "Lead Gen Forms", "identity_note": "Documented as the Page leadgen_forms edge (not a marketing-api node)." },
+    { "apb_domain": "catalog", "classification": "meta_node", "object_name": "product-catalog", "display_name": "Product Catalog", "graph_node": "ProductCatalog", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/product-catalog/", "sprint": "S002", "identity_note": "Also covers product-set (https://developers.facebook.com/docs/marketing-api/reference/product-set/)." },
+    { "apb_domain": "split-test", "classification": "meta_node", "object_name": "ad-study", "display_name": "Ad Study (Split Test)", "graph_node": "AdStudy", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-study/", "sprint": "S002", "title_verified": "Ad Study" },
+
+    { "apb_domain": "report", "classification": "meta_read_edge", "object_name": "adsinsights", "display_name": "Ads Insights", "graph_node": "AdsInsights", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/insights/", "sprint": "S002", "title_verified": "Ad Account, Insights", "identity_note": "Read-only insights edge on account/campaign/adset/ad." },
+    { "apb_domain": "search", "classification": "meta_read_edge", "object_name": "ad-account-targetingsearch", "display_name": "Targeting Search", "graph_node": "AdAccountTargetingSearch", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/targetingsearch/", "sprint": "S002", "title_verified": "Ad Account Targetingsearch", "identity_note": "Read-only interest/behavior/geo search edges (targetingsearch, targetingbrowse, adinterest)." },
+    { "apb_domain": "targeting", "classification": "meta_read_edge", "object_name": "ad-account-targetingbrowse", "display_name": "Targeting Browse/Validation", "graph_node": "AdAccountTargetingBrowse", "reference_url": "https://developers.facebook.com/docs/marketing-api/reference/ad-account/targetingbrowse/", "sprint": "S002", "title_verified": "Ad Account Targetingbrowse", "identity_note": "Read-only targeting browse/validation/suggestions edges." },
+
+    { "apb_domain": "action", "classification": "apb_internal", "reason": "Action Center — apb-derived recommendation pipeline (detected→validated→approved→executed), not a Meta node." },
+    { "apb_domain": "alias", "classification": "apb_internal", "reason": "Local apb account alias / config; no Meta node." },
+    { "apb_domain": "andromeda", "classification": "apb_internal", "reason": "apb delivery-system analysis; not a Meta node." },
+    { "apb_domain": "ask", "classification": "apb_internal", "reason": "Natural-language query over apb data; not a Meta node." },
+    { "apb_domain": "auth", "classification": "apb_internal", "reason": "OAuth / Meta-token connect/resolve flow; an auth procedure, not an ad object." },
+    { "apb_domain": "budget", "classification": "apb_internal", "reason": "Operation over campaign/adset budget fields; not its own Meta node (budget mutations are indexed under campaign/adset)." },
+    { "apb_domain": "coverage", "classification": "apb_internal", "reason": "apb account-coverage analysis; not a Meta node." },
+    { "apb_domain": "doctor", "classification": "apb_internal", "reason": "apb diagnostics (/doctor/*); not a Meta node." },
+    { "apb_domain": "duplicate", "classification": "apb_internal", "reason": "Operation: duplicate campaign/adset/ad; mutations land on the duplicated node, not a separate object." },
+    { "apb_domain": "growth", "classification": "apb_internal", "reason": "apb growth scoring; not a Meta node." },
+    { "apb_domain": "learning", "classification": "apb_internal", "reason": "apb learning-phase analysis; not a Meta node." },
+    { "apb_domain": "library", "classification": "apb_internal", "reason": "apb creative/asset library helper; underlying media are ad-account adimages/advideos read edges, surfaced via the creative domain." },
+    { "apb_domain": "meta", "classification": "apb_internal", "reason": "apb 'meta cache'/'meta status' local utility; not a Meta node." },
+    { "apb_domain": "metrics", "classification": "apb_internal", "reason": "apb usage/metrics; live ad metrics are the report (adsinsights) edge." },
+    { "apb_domain": "plan", "classification": "apb_internal", "reason": "apb plan-execution pipeline (CREATED→VALIDATED→EXECUTED); orchestration over Meta nodes, not a node." },
+    { "apb_domain": "playbook", "classification": "apb_internal", "reason": "apb diagnostic playbooks; analysis over Meta data, not a node." },
+    { "apb_domain": "policy", "classification": "apb_internal", "reason": "apb policy/no-touch compliance; not a Meta node." },
+    { "apb_domain": "sync", "classification": "apb_internal", "reason": "Operation: diff/sync apb state vs Meta; not a node." }
+  ]
+}

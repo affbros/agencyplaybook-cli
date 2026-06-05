@@ -1,6 +1,6 @@
 # `apb value-rule` — Command Reference
 
-4 commands. Auto-generated from the apb binary on 2026-06-01.
+4 commands. Auto-generated from the apb binary on 2026-06-05.
 
 ### `apb value-rule create`
 
