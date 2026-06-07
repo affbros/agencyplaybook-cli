@@ -6,6 +6,15 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.5] — 2026-06-07 (CLI fixes: ad-account id normalization, CBO bid default, plan-create spec)
+
+No new commands (still **254 leaves / 248 endpoints**); three CLI correctness fixes surfaced by an aggressive write-path test against a Meta Ads sandbox. Patch bump — no breaking changes.
+
+### Fixed
+- **Bare numeric ad-account IDs are normalized to `act_<id>`.** Setting `META_AD_ACCOUNT_ID=1476…` (the form Ads Manager shows) or passing `--account 1476…` previously sent every account-scoped call to `/1476…` instead of `/act_1476…`, failing with a cryptic `(#100) Tried accessing nonexisting field`. The `--account` flag, the env var, the `~/.apb/config.json` default, and the SaaS tenant default are all canonicalized now, and `apb account current` no longer falsely reports `reachable_by_token: false` for a bare-id active account.
+- **`campaign create` no longer leaves CBO campaigns on a bid-cap strategy that breaks child ad sets.** When a campaign-level budget is set without an explicit `--bid-strategy`, Meta defaulted to `LOWEST_COST_WITH_BID_CAP` (which requires a bid cap), so the next `adset create` failed with "Invalid parameter: Bid …". `apb` now defaults the no-cap strategy (`LOWEST_COST_WITHOUT_CAP`) for budgeted campaigns. ABO campaigns (no campaign budget) are unchanged — bid strategy stays at the ad set.
+- **`plan create --spec-file` now reads a file (or inline JSON) and honors the spec.** It previously treated the argument as an opaque payload string, hardcoded `action=custom`/`target=plan`, and ignored `--campaign`/`--strategy`/`--mode`/`--name`, so the resulting plan could never validate against a real target. It now accepts a file path **or** inline JSON of the form `{"action":"<domain.verb>","target_id":"<id>" (or "target_ids":[…]),"payload":{…}}`, validates the action against the known plan-action set, and falls back to `--campaign` for the target.
+
 ## [0.5.4] — 2026-06-03 (security: hardening tail)
 
 No new commands (still **254 leaves / 248 endpoints**); **CLI behavior unchanged**. Server-side hardening compiled into `apb-core`, so the CLI binary is re-released for parity. Patch bump.
