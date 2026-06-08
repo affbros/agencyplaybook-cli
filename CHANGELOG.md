@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.7] — 2026-06-08 (CLI fixes: more silently-dropped analytics scoping flags)
+
+No new commands (still **254 leaves / 248 endpoints**); continues the flag-wiring backlog from v0.5.6 (`docs/tasks/2026-06-08-cli-conformance-findings.md`). Six more arms where clap parsed a flag that `dispatch()` swallowed now actually scope the request. Patch bump — no breaking changes.
+
+### Fixed
+- **`metrics compute --campaign` and `metrics creative-quality --campaign`** now scope the metrics to that campaign's insights edge instead of being ignored and computing account-wide.
+- **`learning diagnose` / `learning prescribe --campaign`/`--adset`** and **`learning scorecard --campaign`** now scope to that entity (precedence: ad set > campaign > account), matching how `learning volume` already behaved.
+- **`account overview --days <N>`** now adds a windowed spend/delivery summary (`spend,impressions,clicks,reach` over the last N days) instead of dropping the flag.
+
+The flag-wiring lint baseline shrank from 45 → **39** grandfathered arms. (CLI-side wiring; the matching API endpoints still query account-wide — API-side scoping for these is a tracked follow-up.)
+
 ## [0.5.6] — 2026-06-08 (CLI fixes: analytics scoping flags that were silently dropped)
 
 No new commands (still **254 leaves / 248 endpoints**); three flags that clap parsed but `dispatch()` silently swallowed now actually reach the request. Surfaced by a full-surface CLI conformance + flag-wiring audit (`docs/tasks/2026-06-08-cli-conformance-findings.md`). Patch bump — no breaking changes. (More dropped-flag fixes are tracked in that report as a follow-up.)
