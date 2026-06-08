@@ -6,6 +6,19 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.9] — 2026-06-08 (CLI fixes: A-tail mechanical scoping flags)
+
+No new commands (still **254 leaves / 248 endpoints**); continues the flag-wiring backlog (`docs/tasks/2026-06-08-cli-conformance-findings.md`). Seven more parsed-but-dropped flags now reach the request. Patch bump — no breaking changes.
+
+### Fixed
+- **`dataset pixel-events --days <N>`** and **`dataset pixel-signal --event <name>`** now reach the pixel service (the `PixelService` methods already supported these; the dataset-alias dispatch arms were passing `None`). Windowed event stats / single-event signal filtering now work from the `dataset` alias, matching the `pixel` domain commands.
+- **`dataset pixel-quality --days <N>`** now windows the pixel stats it scores (`start_time`/`end_time`) instead of always scoring all-time data.
+- **`dataset pixel-health --pixel-id <id>`** now narrows the account-wide health sweep to a single pixel instead of being ignored.
+- **`dataset creative-pipeline --campaign <id>`** and **`dataset targeting-pack --campaign <id>`** now scope to that campaign's insights/adsets edge (via `DatasetService::scope_node()`) instead of reporting account-wide.
+- **`action plan --campaign <id>`** now scopes the autoplan insights sweep to one campaign instead of always scanning the whole account.
+
+Names/`@alias` resolve via `resolve_campaign_id`. The flag-wiring lint baseline shrank 35 → **31** grandfathered arms. CLI-side wiring (the matching API endpoints pass `None`/default for now — API-side scoping remains a tracked follow-up). Several flags bundled into the same arms remain **deliberately deferred** as unbuilt features or state-model risks (`creative_velocity`, `spec_file`, `sync --campaign/--path`, `creative asset-audit --campaign`, `action apply --action`, `dataset agency-ops --scope`, `action plan --plan-only`) — see the findings report §6b.
+
 ## [0.5.8] — 2026-06-08 (CLI fixes: dataset + playbook scoping flags)
 
 No new commands (still **254 leaves / 248 endpoints**); continues the flag-wiring backlog (`docs/tasks/2026-06-08-cli-conformance-findings.md`). More parsed-but-dropped scoping flags now reach the request. Patch bump — no breaking changes.
