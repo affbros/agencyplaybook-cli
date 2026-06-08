@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.8] — 2026-06-08 (CLI fixes: dataset + playbook scoping flags)
+
+No new commands (still **254 leaves / 248 endpoints**); continues the flag-wiring backlog (`docs/tasks/2026-06-08-cli-conformance-findings.md`). More parsed-but-dropped scoping flags now reach the request. Patch bump — no breaking changes.
+
+### Fixed
+- **`dataset readiness` / `learning-state` / `learning-velocity` / `report-contract-v2` `--campaign`** (and `--adset` where applicable) now scope to that entity's insights edge instead of being ignored and reporting account-wide. `dataset bundle` also scopes its readiness section to the bundle's campaign.
+- **`dataset execution-plan --campaign`** now scopes (its `--mode`/`--strategy` remain unimplemented and are tracked separately).
+- **`playbook evaluate --campaign`** now scopes the evaluation to one campaign (its `--scope` flag remains a tracked follow-up).
+
+Shared `DatasetService::scope_node()` helper, mirroring `AnalyticsService`. Flag-wiring baseline shrank 39 → **35** grandfathered arms. CLI-side wiring (the matching API endpoints pass `None` for now — API-side scoping is a tracked follow-up).
+
 ## [0.5.7] — 2026-06-08 (CLI fixes: more silently-dropped analytics scoping flags)
 
 No new commands (still **254 leaves / 248 endpoints**); continues the flag-wiring backlog from v0.5.6 (`docs/tasks/2026-06-08-cli-conformance-findings.md`). Six more arms where clap parsed a flag that `dispatch()` swallowed now actually scope the request. Patch bump — no breaking changes.
