@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.10] — 2026-06-08 (CLI fix: `auth test` no longer reports a false `is_valid: false`)
+
+No new commands (still **254 leaves / 248 endpoints**). Fixes a confusing false-negative in `apb auth test`. Patch bump — no breaking changes.
+
+### Fixed
+- **`apb auth test` no longer reports `is_valid: false` (and `app_id: -`, `scopes: []`) for a working token.** Those three fields came solely from Meta's `/debug_token`, which Meta authorizes **only with an app access token** — a user or system-user token can't introspect itself (`(#100) You must provide an app access token, or a user access token that is an owner or developer of the app`), and the rejection was silently swallowed. Now:
+  - `is_valid` reflects reality — it's `true` whenever `/me` resolves the token (the same call that populates `user` and `ad_accounts`). A genuinely bad token still errors out the command.
+  - `app_id`/`scopes` are introspected with the **app access token** (`META_APP_ID`|`META_APP_SECRET`) when configured, so they now populate correctly (e.g. a connected OAuth token reports its real `ads_management`/`ads_read`/… scopes instead of an empty list).
+  - When introspection isn't available (no app creds configured, or a token Meta won't let self-introspect), a new **`introspection_note`** field explains why `app_id`/`scopes` are empty — instead of empty values that read as "no permissions / unknown app". (System-user tokens legitimately have no classic OAuth scopes; they use Business-asset permissions.)
+
+New `MetaClient::introspect_token()` performs the app-token-authorized introspection (uncached; the app secret is never logged). The legacy duplicate `commands/auth.rs::test` now delegates to the single diagnostics implementation. (`apb doctor check` was unaffected — it validates the token via connectivity, not `/debug_token`.)
+
 ## [0.5.9] — 2026-06-08 (CLI fixes: A-tail mechanical scoping flags)
 
 No new commands (still **254 leaves / 248 endpoints**); continues the flag-wiring backlog (`docs/tasks/2026-06-08-cli-conformance-findings.md`). Seven more parsed-but-dropped flags now reach the request. Patch bump — no breaking changes.
