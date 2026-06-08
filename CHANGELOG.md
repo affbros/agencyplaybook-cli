@@ -6,6 +6,15 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.6] — 2026-06-08 (CLI fixes: analytics scoping flags that were silently dropped)
+
+No new commands (still **254 leaves / 248 endpoints**); three flags that clap parsed but `dispatch()` silently swallowed now actually reach the request. Surfaced by a full-surface CLI conformance + flag-wiring audit (`docs/tasks/2026-06-08-cli-conformance-findings.md`). Patch bump — no breaking changes. (More dropped-flag fixes are tracked in that report as a follow-up.)
+
+### Fixed
+- **`report insights --campaign <id>` / `--adset <id>` now scope the report** to that entity instead of being ignored and returning account-wide data. The flags existed but were dropped before the service ran; insights now query the `<campaign|adset>/insights` edge (ad set wins over campaign). The same `--campaign` scoping was wired into `report breakdown`. Mirrored on the HTTP API (`GET /api/v1/reports/{insights,breakdown}` accept `campaign`/`adset`).
+- **`metrics funnel --event <action_type>` now scopes the conversion tally** to a single action type (e.g. `--event purchase`) instead of being ignored and always counting all conversions. Mirrored on `GET /api/v1/analytics/funnel` (`event` query param).
+- **`creative update --name <name>` now applies the rename.** It was parsed but dropped; you previously had to use `--spec '{"name":"…"}'`. `--name` is now merged into the update payload (and is sufficient on its own).
+
 ## [0.5.5] — 2026-06-07 (CLI fixes: ad-account id normalization, CBO bid default, plan-create spec)
 
 No new commands (still **254 leaves / 248 endpoints**); three CLI correctness fixes surfaced by an aggressive write-path test against a Meta Ads sandbox. Patch bump — no breaking changes.
