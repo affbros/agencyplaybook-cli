@@ -6,6 +6,13 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.11] — 2026-06-08 (CLI polish: cleaner `auth test` output)
+
+No new commands (still **254 leaves / 248 endpoints**). Follow-up to v0.5.10 that makes the `auth test` output less confusing. Patch bump — no breaking changes.
+
+### Changed
+- **`apb auth test` now omits `app_id` and `scopes` entirely when they can't be introspected** (no `META_APP_ID`/`META_APP_SECRET` configured, or a token Meta won't let self-introspect) — instead of showing `app_id: -` / `scopes: []` alongside a verbose `introspection_note`. The note (which also leaked an internal "Config error:" label) is removed. Connection status is carried clearly by `is_valid: true` + `user` + `ad_accounts`; `app_id`/`scopes` appear only when introspection actually succeeds (app creds set). Skill + CLI-reference docs updated to match.
+
 ## [0.5.10] — 2026-06-08 (CLI fix: `auth test` no longer reports a false `is_valid: false`)
 
 No new commands (still **254 leaves / 248 endpoints**). Fixes a confusing false-negative in `apb auth test`. Patch bump — no breaking changes.
