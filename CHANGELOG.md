@@ -6,6 +6,16 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.12] — 2026-06-10 (CLI hardening: credential-file permissions + Retry-After-aware cooldown)
+
+No new commands (still **254 leaves / 248 endpoints**). Security + reliability patch. No breaking changes.
+
+### Security
+- **Credential files under `~/.apb` are now created with restrictive permissions** (`0700` directory, `0600` files) on Unix. Previously `~/.apb/credentials.json` (your SaaS API key), `~/.apb/tenant_context.json` (the resolved Meta access token), `~/.apb/config.json`, and the `.env` written by `apb auth login` inherited the process umask (typically world/group-readable `0644`), so any other local user on a shared or CI host could read your live API key and Meta OAuth token. New files are created `0600` from the start (no world-readable window) and a pre-existing loose file is re-tightened on the next write. No-op on non-Unix (Windows ACLs unaffected). CWE-732.
+
+### Changed
+- **Post-429 rate-limit cooldown now honors Meta's `Retry-After`.** When Meta returns a `Retry-After` on a 429, the cross-invocation filesystem cooldown uses that window (already capped at `META_BACKPRESSURE_MAX_RETRY_AFTER_SECS`, default 60s) instead of always applying the fixed 600s default. A transient 429 with a short `Retry-After` no longer hard-blocks the account for 10 minutes across every subsequent `apb` invocation; the 600s default still applies when Meta sends no `Retry-After`.
+
 ## [0.5.11] — 2026-06-08 (CLI polish: cleaner `auth test` output)
 
 No new commands (still **254 leaves / 248 endpoints**). Follow-up to v0.5.10 that makes the `auth test` output less confusing. Patch bump — no breaking changes.
