@@ -1,0 +1,61 @@
+{
+  "campaign_name": "Brand Search — Specialty Goods",
+  "budget_micros": 50000000,
+  "geo_target_ids": ["2840"],
+  "language_ids": ["1000"],
+  "bidding_strategy": {
+    "strategy_type": "MAXIMIZE_CONVERSIONS",
+    "target_cpa_micros": 25000000
+  },
+  "campaign_negative_keywords": [
+    {"text": "free", "match_type": "PHRASE"},
+    {"text": "jobs", "match_type": "PHRASE"}
+  ],
+  "ad_groups": [
+    {
+      "name": "Core — Specialty Goods",
+      "cpc_bid_micros": 1500000,
+      "rsa": {
+        "headlines": [
+          "Premium Specialty Goods",
+          "Shop Quality You Can Trust",
+          "Fast, Free Shipping",
+          "Top-Rated by Customers"
+        ],
+        "descriptions": [
+          "Discover premium specialty goods built to last. Free shipping on every order.",
+          "Trusted by thousands. Shop the collection and save on your first purchase."
+        ],
+        "final_urls": ["https://www.yourbrand.com"]
+      },
+      "keywords": [
+        {"text": "specialty goods", "match_type": "PHRASE"},
+        {"text": "premium specialty goods online", "match_type": "PHRASE"},
+        {"text": "buy specialty goods", "match_type": "EXACT"}
+      ],
+      "negative_keywords": [
+        {"text": "cheap", "match_type": "PHRASE"}
+      ]
+    },
+    {
+      "name": "Branded — Yourbrand",
+      "cpc_bid_micros": 800000,
+      "rsa": {
+        "headlines": [
+          "Yourbrand Official Store",
+          "Shop Yourbrand Direct",
+          "The Official Yourbrand Site"
+        ],
+        "descriptions": [
+          "Buy direct from the official Yourbrand store. Free shipping and easy returns.",
+          "The genuine Yourbrand experience. Browse the full range and order today."
+        ],
+        "final_urls": ["https://www.yourbrand.com"]
+      },
+      "keywords": [
+        {"text": "yourbrand", "match_type": "EXACT"},
+        {"text": "yourbrand store", "match_type": "PHRASE"}
+      ]
+    }
+  ]
+}

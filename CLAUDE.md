@@ -64,3 +64,13 @@ All commands print human-readable tables to stdout by default. Add `--output jso
 - [`docs/CLI_REFERENCE.md`](docs/CLI_REFERENCE.md) — every command and flag
 - [`docs/SAFETY_MODEL.md`](docs/SAFETY_MODEL.md) — the full write-gate model
 - [`docs/CLI_AUTOMATION.md`](docs/CLI_AUTOMATION.md) — CI/CD + AI-agent invocation patterns
+
+---
+
+# Sibling CLI: `apb-gads` (Google Ads)
+
+`apb-gads` is the Google Ads counterpart to `apb` — a **separate binary** for operator-grade Google Ads + Performance Max management (271 commands across 24 domains, Google Ads API v24): reads/reports, 63 diagnostic playbooks, growth-first planning, greenfield Search/PMAX launch, and 116 dry-run-first gated mutations behind a three-gate safety model.
+
+- **Same auth model**: set `APB_API_KEY` (Google Ads is a paid add-on — connect a Google account in the AgencyPlaybook dashboard). The binary defaults to `https://api.agencyplaybook.io`.
+- **Same DRY-RUN-FIRST contract**: every mutation needs `--execute`; there is no bypass flag. Prove wire shapes with `--execute --validate-only` (Google validates server-side, creates nothing). Exit codes: `0` ok · `1` runtime · `2` usage · `3` validation fail.
+- **Binary**: [`bin/`](bin) (`apb-gads`). **Skill**: [`skills/agencyplaybook-cli-google/`](skills/agencyplaybook-cli-google). **Docs**: [`docs/google/`](docs/google) — start with [`docs/google/GETTING_STARTED.md`](docs/google/GETTING_STARTED.md).

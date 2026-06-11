@@ -1,0 +1,37 @@
+{
+  "campaign_name": "PMAX — Specialty Goods",
+  "budget_micros": 50000000,
+  "final_url": "https://www.yourbrand.com",
+  "geo_target_ids": ["2840"],
+  "language_ids": ["1000"],
+  "bidding": {
+    "strategy_type": "MAXIMIZE_CONVERSION_VALUE",
+    "target_roas": 3.5
+  },
+  "business_name": "Yourbrand",
+  "headlines": [
+    "Premium Specialty Goods",
+    "Shop Quality You Can Trust",
+    "Fast, Free Shipping",
+    "Top-Rated by Customers"
+  ],
+  "long_headlines": [
+    "Discover premium specialty goods built to last — free shipping on every order"
+  ],
+  "descriptions": [
+    "Shop premium specialty goods. Free shipping.",
+    "Trusted by thousands. Browse the full collection and order today with easy returns."
+  ],
+  "campaign_negative_keywords": [
+    {"text": "free", "match_type": "PHRASE"}
+  ],
+  "logo_asset_resources": [
+    "customers/1234567890/assets/111111111111"
+  ],
+  "marketing_image_asset_resources": [
+    "customers/1234567890/assets/222222222222"
+  ],
+  "square_marketing_image_asset_resources": [
+    "customers/1234567890/assets/333333333333"
+  ]
+}
