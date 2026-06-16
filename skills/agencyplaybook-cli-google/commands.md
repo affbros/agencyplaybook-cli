@@ -1,6 +1,6 @@
 # apb-gads command index
 
-**271 leaf commands across 24 groups** (Google Ads API v24). Per-group flag references live in
+**275 leaf commands across 25 groups** (Google Ads API v24). Per-group flag references live in
 `references/commands/<group>.md` (generated from the binary — the accurate per-param source). The
 live registry is `apb-gads --help` and `apb-gads playbook list`.
 
@@ -20,6 +20,7 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
 | `customer` | 2 | list reachable customers; `suggest-brands` | `references/commands/customer.md` |
+| `account` | 4 | persist a "current" operating account (MCC child) so commands target it without `--customer`; `use` / `current` / `clear` / `list` | `references/commands/account.md` |
 | `campaign` | 2 | list / get campaigns | `references/commands/campaign.md` |
 | `ad-group` | 1 | list ad groups | `references/commands/ad-group.md` |
 | `ad` | 1 | list ads | `references/commands/ad.md` |
@@ -62,4 +63,4 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | `schedule` | 7 | cron-install recurring **read-only** runs | `references/commands/schedule.md` |
 | `export` | 1 | render an artifact JSON to CSV / JSON / Markdown | `references/commands/export.md` |
 
-> Counts verified against `apb-gads 0.1.0`. The two nesting points are `plan campaign {search,full,pmax}` and `sandbox helper full-flow`.
+> Counts verified against `apb-gads 0.1.2`. The two nesting points are `plan campaign {search,full,pmax}` and `sandbox helper full-flow`.

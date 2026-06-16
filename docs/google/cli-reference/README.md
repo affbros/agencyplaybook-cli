@@ -6,7 +6,7 @@ This is the **exhaustive, runtime-derived** reference for every command, subcomm
 
 For narrative, examples, and *how to think about* the CLI, see [`../commands.md`](../commands.md) (day-to-day reference), [`../playbooks.md`](../playbooks.md), and [`../mutations.md`](../mutations.md) (the safety model). This directory is the flat, complete enumeration those docs defer to.
 
-**At a glance:** 24 command groups · 271 total commands/subcommands · API version `v24`.
+**At a glance:** 25 command groups · 275 total commands/subcommands · API version `v24`.
 
 ## Global options
 
@@ -43,6 +43,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`auth`](auth.md) | 👁️ read | 6 | Authentication checks against the configured OAuth credentials. |
 | [`doctor`](doctor.md) | 👁️ read | 1 | Environment / configuration diagnostics — verify the CLI is wired up correctly. |
 | [`customer`](customer.md) | 👁️ read | 2 | Customer (account) reads: list accessible accounts and walk the MCC hierarchy. |
+| [`account`](account.md) | 👁️ read | 4 | Pick a persistent "current" operating account (an MCC child) so subsequent commands target it without repeating `--customer`. |
 | [`campaign`](campaign.md) | 👁️ read | 2 | Campaign reads: list and inspect campaigns on the operating account. |
 | [`ad-group`](ad-group.md) | 👁️ read | 1 | Ad-group reads: list ad groups under a campaign. |
 | [`ad`](ad.md) | 👁️ read | 1 | Ad reads: list ads under an ad group. |
@@ -86,6 +87,13 @@ Every leaf command, grouped. Click through to the parameter-level page.
 
 - [`apb-gads customer list`](customer.md#apb-gads-customer-list)
 - [`apb-gads customer suggest-brands`](customer.md#apb-gads-customer-suggest-brands) — Suggest verified brands for a name prefix (BrandSuggestionService).
+
+### `account`
+
+- [`apb-gads account list`](account.md#apb-gads-account-list) — List the MCC's child accounts (same source as `customer list`) and echo the resolved current operating account so you can see which one commands target
+- [`apb-gads account use`](account.md#apb-gads-account-use) — Persist <customer_id> as the current operating account (writes ~/.apb-gads/state.json with perms 0600).
+- [`apb-gads account current`](account.md#apb-gads-account-current) — Print the resolved current operating account and its source (flag / persisted / config-default)
+- [`apb-gads account clear`](account.md#apb-gads-account-clear) — Remove the persisted current selection; resolution falls back to the SaaS/config default account
 
 ### `campaign`
 

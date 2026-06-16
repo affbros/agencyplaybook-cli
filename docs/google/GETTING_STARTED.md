@@ -1,6 +1,6 @@
 # Getting Started with apb-gads
 
-`apb-gads` is an operator-grade command-line tool for Google Ads + Performance Max — diagnose, report, plan, and safely change accounts from your terminal. It ships **271 commands across 24 groups** (116 gated mutations, 63 diagnostic playbooks, 23 reports) against Google Ads **API v24**. Every response is JSON and every write is dry-run by default.
+`apb-gads` is an operator-grade command-line tool for Google Ads + Performance Max — diagnose, report, plan, and safely change accounts from your terminal. It ships **275 commands across 25 groups** (116 gated mutations, 63 diagnostic playbooks, 23 reports) against Google Ads **API v24**. Every response is JSON and every write is dry-run by default.
 
 > This is the on-ramp. For the exhaustive command/flag enumeration see [`cli-reference/README.md`](cli-reference/README.md); for the write-safety model see [`SAFETY_MODEL.md`](SAFETY_MODEL.md); for tiers/scopes see [`SCOPES_AND_TIERS.md`](SCOPES_AND_TIERS.md). The runtime is always the source of truth — when a doc and the binary disagree, the binary wins.
 
