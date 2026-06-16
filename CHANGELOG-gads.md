@@ -6,6 +6,20 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-06-16
+
+### Added
+- **`account` command group** (`list` / `use` / `current` / `clear`) — persistent operating-account selection for agencies managing many accounts under one manager (MCC). Pick a current child account once (`apb-gads account use <customer_id>`, persisted to `~/.apb-gads/state.json` with `0600` perms) and every later command targets it **without repeating `--customer`**. Resolution precedence: `--customer` flag > persisted selection > config/SaaS default. The manager account (`login_customer_id`) is never switched — only the operating account. `account use` validates the id against your accessible accounts in SaaS mode, and `account current` reports the resolved account and where it came from.
+
+### Changed
+- Internal hardening: the gads crates now build clean under `cargo clippy -- -D warnings` and `rustfmt --check`, both CI hard-gated.
+
+## [0.1.1] — 2026-06-12
+
+### Added
+- **Proxy auth mode (S008b)** — when the tenant is in proxy mode, `apb-gads` calls the AgencyPlaybook API edge authenticated with its `APB_API_KEY`; the real Google access/developer tokens are injected server-side and never disclosed to the binary.
+- **Docs + Claude skill at `apb` parity** — full `apb-gads` command/flag reference, the `agencyplaybook-cli-google` Claude skill, and an in-app `/cli-reference/google` page. CI hard-gates skill / catalogue / generated-doc drift against the binary.
+
 ## [0.1.0] — 2026-06-11 (first public release)
 
 The first published `apb-gads` binary — operator-grade Google Ads account management (reads, reports, agency "playbooks", and safe gated mutations), authenticated with your existing AgencyPlaybook API key.
