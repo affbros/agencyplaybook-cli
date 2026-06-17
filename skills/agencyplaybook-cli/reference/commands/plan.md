@@ -1,6 +1,6 @@
 # `apb plan` — Command Reference
 
-9 commands. Auto-generated from the apb binary on 2026-06-17.
+11 commands. Auto-generated from the apb binary on 2026-06-17.
 
 ### `apb plan approve-batch`
 
@@ -49,6 +49,53 @@ Run canary (partial) execution
 
 ```bash
 apb plan canary --plan-id <PLAN_ID> --pct <PCT>
+```
+
+### `apb plan cap`
+
+Conditional cap — freeze a campaign (pause) and hold until a release condition clears. Dry-run by default; pass --execute to pause. `--until` is required (fail-fast if invalid)
+
+**Scope:** `write:campaigns` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--campaign` | `<CAMPAIGN>` | Campaign name, @alias, or id to cap |
+| `--until` | `<UNTIL>` | Release condition: `<metric><op><value>`, e.g. "roas>=3.0" (metric ∈ roas\|cpa\|conv\|spend) |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb plan cap --campaign <CAMPAIGN> --until <UNTIL>
+```
+
+### `apb plan check-caps`
+
+Re-evaluate every open cap against current metrics; promote (un-pause) the ones whose condition has cleared. Dry-run by default; pass --execute to promote
+
+**Scope:** `write:campaigns` · **Min tier:** agency
+
+| Flag | Value | Description |
+|---|---|---|
+| `--days` | `<DAYS>` | Lookback window for the current-metric re-check (default 30) |
+| `--json` |  | Output as JSON |
+| `--execute` |  | Apply changes (opposite of dry-run) |
+| `--dry-run` |  | Preview only, do not mutate |
+| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
+| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
+| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
+| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
+| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
+
+```bash
+apb plan check-caps --days <DAYS>
 ```
 
 ### `apb plan create`

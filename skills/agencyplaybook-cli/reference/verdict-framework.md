@@ -114,9 +114,10 @@ The queue is the payload: sort verdicts by dollar impact, redeploy CAP'd/TIGHTEN
 top SCALE candidate, and act on one verb at a time — dry-run → approve → execute.
 
 > **Status note.** This is skill doctrine: Claude composes the verbs over **existing** playbooks.
-> **Shortcut — the native command.** `apb verdict --account act_… --target-roas 3.0` emits this rollup
-> directly: one verb per ACTIVE campaign with the 3 gate states, blockers, and a `next` action, ranked
-> by spend (or `--target-cpa`; `--days` sets the window). The gate-playbook route above is the
-> *explanation* + the deep dive when a verdict needs evidence; the command is the fast path. (Executing
-> a verdict — the decision queue + conditional caps — is a planned follow-up; for now act on the verbs
-> via `apb plan create` → `apb plan execute-safe`.)
+> **Shortcut — the native command.** `apb verdict --account act_… --target-roas 3.0 --queue` emits a
+> **decision queue** directly: one verb per ACTIVE campaign with the 3 gate states + blockers, **ranked
+> by $ impact/day**, each with a next-action command + a reallocation line (freed CAP'd budget → top
+> SCALE). Then execute the verbs: SCALE via `apb action autoplan` → `apb plan execute-safe`; **CAP via
+> `apb plan cap --campaign X --until "roas>=3.0"`** — a conditional freeze (pause) that holds until the
+> gate clears, and `apb plan check-caps` auto-promotes (un-pauses) the ones whose condition is met.
+> The gate-playbook route above is the deep dive when a verdict needs evidence.

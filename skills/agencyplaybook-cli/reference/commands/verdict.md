@@ -16,6 +16,7 @@ Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / H
 | `--target-cpa` | `<TARGET_CPA>` | Target CPA (USD) for the Efficiency gate |
 | `--min-age-days` | `<MIN_AGE_DAYS>` | Maturity floor — min age in days before a campaign is judged (default 30) |
 | `--min-conversions` | `<MIN_CONVERSIONS>` | Maturity floor — min conversions before a campaign is judged (default 50) |
+| `--queue` |  | Rank the verdicts into a decision queue ($ impact/day + next-action command + reallocation) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

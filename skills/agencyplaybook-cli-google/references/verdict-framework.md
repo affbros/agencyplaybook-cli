@@ -113,7 +113,9 @@ top SCALE candidate, and act on one verb at a time — dry-run → approve → e
 
 > **Shortcut — the native command.** `apb-gads verdict --customer <CID>` emits this rollup directly:
 > one verb per ENABLED campaign with the 3 gate states, blockers, and a `next` action, ranked by
-> spend (`--target-roas`/`--target-cpa` set the efficiency target; `--lookback-days` the window). The
-> gate-playbook route above is the *explanation* + the deep dive when a verdict needs evidence; the
-> command is the fast path. (Executing a verdict — the decision queue + conditional caps — is a
-> planned follow-up; for now act on the verbs via `plan from-audit` → `changes apply`.)
+> spend (`--target-roas`/`--target-cpa` set the efficiency target; `--lookback-days` the window). Add
+> **`--queue`** for a decision queue ranked by **$ impact/day**, each with a next-action command + a
+> reallocation line (freed CAP'd budget → top SCALE). The gate-playbook route above is the deep dive
+> when a verdict needs evidence. Act on the verbs via `growth scale-up` / `playbook pmax-scaling-plan`
+> (SCALE), `waste-cluster-audit` → negatives (TIGHTEN), or `mutate campaign-update-status` (CAP/CUT) —
+> gads has no plan framework, so the freeze is a manual `mutate`, not apb's conditional `plan cap`.

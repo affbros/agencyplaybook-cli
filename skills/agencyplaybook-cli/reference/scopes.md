@@ -278,7 +278,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
 - `apb budget simulate`
 
-### `write:campaigns` (47 commands)
+### `write:campaigns` (49 commands)
 
 - `apb ad create`
 - `apb ad create-multi`
@@ -320,6 +320,8 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb creative upload-video`
 - `apb plan approve-batch`
 - `apb plan canary`
+- `apb plan cap`
+- `apb plan check-caps`
 - `apb plan create`
 - `apb plan execute`
 - `apb plan execute-safe`
