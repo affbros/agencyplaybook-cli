@@ -30,6 +30,8 @@ Load `references/` files **as needed** (progressive disclosure — don't read th
 | Exact flags/params for a command ("what does `mutate campaign-budget-update` take?") | `references/commands/<group>.md` (one page per group — `mutate`, `playbook`, `report`, `plan`, `campaign`, …) |
 | Switch which account commands target (agency multi-account: "use account X", "set/show current account") | `references/commands/account.md` (`account use`/`current`/`clear`/`list` — persists a current MCC child to `~/.apb-gads/state.json`; precedence `--customer` > persisted > config default) |
 | To pick a playbook by symptom ("why won't this exit learning?", "find waste") | `references/playbook-catalog.md` (63 playbooks by section) |
+| Turn a diagnosis into ONE decisive verb per campaign ("which should I scale / cap?") — SCALE / TIGHTEN / OPTIMIZE / CAP (/ HOLD / CUT) | `references/verdict-framework.md` |
+| Choose the campaign TYPE for a goal ("Search, PMax, or Demand Gen?") | `references/campaign-type-selection.md` |
 | The doctrine behind a recommendation (modifier×strategy, RSA stats, PMAX facts) | `references/doctrine.md` |
 | Concrete command sequences for a goal (diagnose → plan → execute, launch, PMAX pass) | `references/workflows.md`, then `examples.md` |
 | To run or reason about a mutation safely | `references/safety-model.md` (the three gates + sandbox + tiers) |
@@ -86,6 +88,12 @@ These come from the account owner and override generic optimization instinct:
 ```
 DIAGNOSE → PLAN (growth-first) → CHANGE (dry-run → approve → execute) → LAUNCH (greenfield)
 ```
+
+**The output of diagnosis is a verdict** — one decisive verb per campaign (**SCALE / TIGHTEN /
+OPTIMIZE / CAP**, plus **HOLD / CUT**), derived from explicit pass/fail *gates* rather than a fuzzy
+score. When the user asks "which campaigns should I scale / cap this week?", run the gate playbooks
+and apply `references/verdict-framework.md`. For *which engine to build* (Search vs PMax vs Demand
+Gen), see `references/campaign-type-selection.md`.
 
 **1. Diagnose (always start here).** `references/workflows.md` § W1 has the full sequence; the spine is:
 
@@ -190,6 +198,8 @@ cover it — see `references/scopes.md` for the full matrix and the upgrade path
 |---|---|
 | `references/commands/<group>.md` | Per-group command + flag reference (generated from the binary — accurate) |
 | `references/playbook-catalog.md` | All 63 playbooks by section, with purpose + default window |
+| `references/verdict-framework.md` | Gate-based decision verdicts — one verb per campaign (SCALE/TIGHTEN/OPTIMIZE/CAP/HOLD/CUT) |
+| `references/campaign-type-selection.md` | Search vs PMax vs Demand Gen — when to use what (2026) |
 | `references/doctrine.md` | Modern Google Ads doctrine cheat-sheet (Smart Bidding, learning, RSA, PMAX) |
 | `references/workflows.md` | Concrete command sequences (W1-W7) + the output keys to read |
 | `references/safety-model.md` | Three-gate write model, sandbox/profile policy, capability tiers |

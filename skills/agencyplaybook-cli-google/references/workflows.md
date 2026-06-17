@@ -118,6 +118,30 @@ APB_GADS_ALLOW_MUTATIONS=true $B --customer <CID> \
 # payload shapes before proposing them on a real account.
 ```
 
+## W8 — Verdict triage (diagnose → verdict → queue)
+
+Turn a diagnosis into a ranked decision queue — **one decisive verb per campaign**. Full model +
+the gates→verb table: `references/verdict-framework.md`.
+
+```bash
+B="apb-gads --pretty"
+# 1. Run the gate playbooks — G1 efficiency · G2 delivery/headroom · G3 quality/signal:
+$B --customer <CID> playbook account-health
+$B --customer <CID> playbook campaign-bid-strategy-audit     # G1 + the learning_now[]/growth_blockers[] spine
+$B --customer <CID> playbook impression-share-loss           # G2 headroom (lost-to-budget)
+$B --customer <CID> playbook expansion-readiness             # G2 (budget-pressured AND high ROAS)
+$B --customer <CID> playbook waste-audit --lookback-days 90  # G3 waste
+$B --customer <CID> playbook policy-compliance               # G3 disapprovals
+$B --customer <CID> growth scale-up                          # ranks the SCALE candidates by upside
+```
+
+2. **Assign a verb** per campaign from the gates→verdict table: SCALE (all pass + headroom) ·
+   OPTIMIZE (pass, no headroom) · TIGHTEN (exactly one gate at-risk) · CAP (≥2 fail) · HOLD
+   (learning / `< ~50` conv) · CUT (chronic multi-window failure).
+3. **Sort the queue** by dollar impact; redeploy CAP'd / TIGHTENed budget into the top SCALE candidate.
+4. **Act on the top verb only** — route every write through W2's guarded pipeline (dry-run → approve
+   → `--execute`). Never pair a budget change with a target change in the same session (W3).
+
 ## Reading the learning/status enums (quick key)
 
 | `bidding_strategy_system_status` | Meaning | Action |
