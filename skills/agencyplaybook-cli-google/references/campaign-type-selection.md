@@ -42,10 +42,19 @@ adds **PMax once it has the conversion signal** to feed the automation, and laye
 manufacture future demand. Pair this with the verdict framework: don't add PMax to scale until the
 existing Search campaigns clear G3 (signal/tracking healthy) — PMax inherits bad signal and wastes.
 
-## Grounding the decision in the CLI (use existing reads)
+## Grounding the decision in the CLI
 
-Native `campaign-type-advisor` / `campaign-type-fit` commands are planned but not yet shipped —
-until then, answer the three questions from existing reads:
+Two native commands encode this doctrine directly (`gads-v0.1.5`):
+
+- **`apb-gads campaign-type-advisor --goal sales|leads|awareness --demand existing|none --signal-strength
+  high|medium|low --budget-daily <N>`** — prescriptive: returns the primary engine + the maturity-ordered
+  sequence (Search → PMax → Demand Gen) + use-when / not-ideal reasons + blockers. Pass `--customer <CID>`
+  to ground the signal strength in the account's trailing-30d conversion volume (overrides the flag).
+- **`apb-gads playbook campaign-type-fit --customer <CID>`** — descriptive: audits every ENABLED campaign's
+  channel type vs its conversion signal and flags mismatches (`misaligned` Demand-Gen-for-conversions-with-
+  no-signal → Search; `premature` PMax-on-thin-signal → Search-first). The type-level companion to `verdict`.
+
+To answer the three questions from raw reads instead:
 
 - **Existing demand? (Step 1)** — `apb-gads plan keyword-ideas` on seed terms / the site. Real search
   volume on intent keywords ⇒ Search has fuel.
@@ -68,8 +77,18 @@ $B --customer <CID> orchestrate campaign-launch --from-file /tmp/build/<spec>.js
 $B --customer <CID> plan campaign pmax --business "<desc>" --final-url https://<domain> --output /tmp/pmax.json
 $B validate pmax-spec --from-file /tmp/pmax.json
 $B --customer <CID> orchestrate pmax-build --from-file /tmp/pmax.json   # dry-run first
+
+# DEMAND GEN — the third pillar (gads-v0.1.5). Pre-create video + logo assets, then:
+$B --customer <CID> plan campaign demand-gen --campaign-name "<name>" --budget-micros 50000000 \
+    --final-url https://<domain> --geo-target-id 2840 --language-id 1000 \
+    --bidding-strategy MAXIMIZE_CONVERSIONS --target-cpa-micros 20000000 --ad-group-name "<ag>" \
+    --video-asset customers/<CID>/assets/<v> --logo-asset customers/<CID>/assets/<l> > /tmp/dg.json
+$B validate demand-gen-spec --from-file <(jq .spec /tmp/dg.json)            # exit 3 = fix before launching
+$B --customer <CID> orchestrate demand-gen-build --from-file <(jq .spec /tmp/dg.json)   # dry-run first
+$B --customer <CID> orchestrate demand-gen-build --from-file <(jq .spec /tmp/dg.json) --validate-only --execute  # SERVER_VALIDATED Google round-trip
 ```
 
-**Demand Gen has no greenfield builder in the CLI yet** — set it up in the Google Ads UI for now (a
-native `plan campaign demand-gen` builder is a planned third pillar, not yet shipped).
-Full launch recipes: `references/workflows.md` § W6 + `examples.md`.
+Demand Gen is ad-group-based (not PMAX asset groups): a single ad group carries audience signals +
+one Demand Gen video-responsive ad. Bidding accepts MAXIMIZE_CLICKS / MAXIMIZE_CONVERSIONS (tCPA) /
+MAXIMIZE_CONVERSION_VALUE (tROAS). Born PAUSED; `--validate-only` is the source of truth for the v24
+field shapes. Full launch recipes: `references/workflows.md` § W6 + `examples.md`.
