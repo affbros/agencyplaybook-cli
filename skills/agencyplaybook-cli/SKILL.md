@@ -1,14 +1,14 @@
 ---
 name: agencyplaybook-cli
 description: |
-  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 254 commands across 35 domains.
+  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 255 commands across 36 domains.
 
   USE WHEN user says "apb", "agencyplaybook cli", "agencyplaybook", "meta campaign automation", "meta ads via cli", "campaign create", "campaign update", "campaign delete", "duplicate campaign", "scale campaign", "pause campaign", "budget update", "ad set targeting", "creative upload", "audience upload", "lookalike audience", "custom audience", "fatigue check", "waste audit", "health score", "weekly digest", "learning accelerator", "playbook diagnostic", "plan execute", "plan validate", "report insights", "compare periods", "split test", "rules engine", "automation rule", "catalog product set", "custom conversion", "leadgen forms", "pixel health", "CAPI dual signal", "growth score", "retargeting compression", "saturation audit", "broad targeting audit", "no-touch compliance", "consolidation advisor", "ROAS recovery", "anomaly detect", "reset rebuild", "scale roadmap", "rebalance", "daypart audit", "placement audit", "creative mix", "event hierarchy", "duplicate detect", "event downgrade ladder", "andromeda", "dataset clone-plan", "sync diff", "alias create", or otherwise needs to programmatically manage Meta ad accounts via the `apb` CLI.
 ---
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-06-17 from the live binary — 254 commands across 35 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-06-17 from the live binary — 255 commands across 36 domains.
 
 ## Routing
 

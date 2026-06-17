@@ -111,6 +111,9 @@ HOLD      PMax-New        < 30d & < 50 conv                                     
 The queue is the payload: sort verdicts by dollar impact, redeploy CAP'd/TIGHTENed budget into the
 top SCALE candidate, and act on one verb at a time — dry-run → approve → execute.
 
-> **Status note.** This is skill doctrine: Claude composes the verbs over **existing** playbooks.
-> A native top-level `verdict` command that emits this rollup directly is on the near-term roadmap —
-> until it ships, run the gate playbooks above and apply the table.
+> **Shortcut — the native command.** `apb-gads verdict --customer <CID>` emits this rollup directly:
+> one verb per ENABLED campaign with the 3 gate states, blockers, and a `next` action, ranked by
+> spend (`--target-roas`/`--target-cpa` set the efficiency target; `--lookback-days` the window). The
+> gate-playbook route above is the *explanation* + the deep dive when a verdict needs evidence; the
+> command is the fast path. (Executing a verdict — the decision queue + conditional caps — is a
+> planned follow-up; for now act on the verbs via `plan from-audit` → `changes apply`.)

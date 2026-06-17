@@ -1,6 +1,6 @@
 # apb-gads command index
 
-**275 leaf commands across 25 groups** (Google Ads API v24). Per-group flag references live in
+**276 leaf commands across 26 groups** (Google Ads API v24). Per-group flag references live in
 `references/commands/<group>.md` (generated from the binary — the accurate per-param source). The
 live registry is `apb-gads --help` and `apb-gads playbook list`.
 
