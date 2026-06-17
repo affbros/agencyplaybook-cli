@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-06-16
+
+### Added
+- **`verdict` command** (`apb-gads verdict --customer <CID>`) — a per-campaign decision engine that emits one decisive verb (**SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT**) for every ENABLED campaign across all channel types, from three platform-native gates: **Efficiency** (CPA/ROAS vs target, tiered), **Delivery+headroom** (budget-capped while efficient = the SCALE signal), and **Quality/signal** (maturity + conversion floor). Generalizes the `pmax-maturity-gate` readiness rollup to the whole account. Read-only; returns a queue ranked by spend with per-gate states, blockers, and a `next` action. `--target-roas`/`--target-cpa` set the efficiency target; `--min-age-days`/`--min-conversions` tune the maturity floor; `--lookback-days` the window. Part of the cross-CLI decision-verdict framework (see the `verdict-framework.md` skill reference).
+
 ## [0.1.2] — 2026-06-16
 
 ### Added
