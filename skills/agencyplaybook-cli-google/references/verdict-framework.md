@@ -81,7 +81,7 @@ Compose these existing playbooks to evaluate each gate (`apb-gads playbook <slug
 | **SCALE** | `apb-gads growth scale-up` to size the headroom; for PMax, `apb-gads playbook pmax-scaling-plan --output-spec scale.json` (Go/No-Go, single step capped at +50%) → review → execute the budget lift (see exec path below) |
 | **OPTIMIZE** | `apb-gads playbook campaign-bid-strategy-audit`, `apb-gads playbook smart-bidding-readiness`, `apb-gads playbook rsa-quality-audit` — fix bidding / creative, hold budget flat |
 | **TIGHTEN** | `apb-gads playbook waste-cluster-audit --output-spec neg.json` / `apb-gads playbook search-term-cleanup` → negatives via `apb-gads mutate campaign-negative-keyword-add-bulk`; trim budget a step |
-| **CAP** | freeze: `apb-gads mutate campaign-budget-update` down (or pause), clear the failing gate, then re-verdict |
+| **CAP** | freeze with a release condition: `apb-gads mutate campaign-cap --campaign-id <id> --until "roas>=3.0"` (pauses + records the gate; `apb-gads mutate campaign-check-caps` re-evaluates current metrics and un-pauses when it clears — never frozen without a way out). Or `campaign-budget-update` down |
 | **HOLD** | `apb-gads playbook smart-bidding-readiness`, `apb-gads playbook pmax-maturity-gate` (`collect_data`) — protect learning, change nothing structural |
 | **CUT** | chronic: `apb-gads mutate campaign-update-status` → `PAUSED` (reversible) before archiving |
 
