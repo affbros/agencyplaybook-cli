@@ -1,6 +1,6 @@
 # `apb duplicate` — Command Reference
 
-1 commands. Auto-generated from the apb binary on 2026-06-05.
+1 commands. Auto-generated from the apb binary on 2026-06-17.
 
 ### `apb duplicate`
 

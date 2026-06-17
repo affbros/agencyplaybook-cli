@@ -1,6 +1,6 @@
 # `apb plan` — Command Reference
 
-9 commands. Auto-generated from the apb binary on 2026-06-05.
+9 commands. Auto-generated from the apb binary on 2026-06-17.
 
 ### `apb plan approve-batch`
 
@@ -62,7 +62,7 @@ Create a new execution plan
 | `--account` | `<ACCOUNT>` |  |
 | `--campaign` | `<CAMPAIGN>` |  |
 | `--name` | `<NAME>` |  |
-| `--spec-file` | `<SPEC_FILE>` |  |
+| `--spec-file` | `<SPEC_FILE>` | Plan spec — file path OR inline JSON: {"action":"<domain.verb>","target_id":"<id>" (or "target_ids":[...]),"payload":{...}} |
 | `--mode` | `<MODE>` |  |
 | `--strategy` | `<STRATEGY>` |  |
 | `--json` |  | Output as JSON |

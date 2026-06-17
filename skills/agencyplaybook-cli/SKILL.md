@@ -8,7 +8,7 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-06-05 from the live binary — 254 commands across 35 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-06-17 from the live binary — 254 commands across 35 domains.
 
 ## Routing
 
@@ -17,6 +17,7 @@ This skill packages working knowledge of every `apb` command. Generated on 2026-
 - **User wants step-by-step onboarding** ("set me up with apb") → read `workflows/setup.md`.
 - **User wants automation pattern** ("safe rollout with rollback") → read `workflows/automation.md`.
 - **User wants diagnostic playbook** ("which playbook for low ROAS?") → read `workflows/diagnostics.md`.
+- **User wants a decision / verdict** ("which campaigns should I scale, tighten, or cap this week?") → read `reference/verdict-framework.md` — collapse the playbook outputs into **one decisive verb per campaign** (SCALE / TIGHTEN / OPTIMIZE / CAP, plus HOLD / CUT) from explicit pass/fail gates, then act on the queue.
 - **User asks to set up day parting / ad scheduling** ("daypart this campaign", "only run ads 9am–9pm", "schedule ads by hour", "run evenings only") → **the campaign type to create is a NEW campaign/ad set on a LIFETIME budget** (ABO: lifetime on the ad set; CBO: lifetime on the campaign). Day parting is impossible on a **daily** budget and budget *type* can't be converted, so **never try to add it to an existing daily-budget campaign** — build a new one. Read "Meta platform constraints" below + `examples.md` §16 before writing any command.
 - **User hits a 403** ("insufficient_scope on X") → read `reference/scopes.md` and explain tier gap.
 - **User script needs exit-code branching** → read `reference/exit-codes.md` (the canonical table + decision tree).
@@ -34,6 +35,8 @@ echo 'APB_API_KEY=apb_live_<tier>_<32hex>' > ~/.apb/.env   # key from the /api-k
 apb auth test                                              # smoke test
 apb campaign list                                          # first real call
 ```
+
+> **Reading `auth test`:** treat **`is_valid: true` + a populated `user` and `ad_accounts`** as "connected." `app_id`/`scopes` only appear when app credentials (`META_APP_ID`/`META_APP_SECRET`) are set — Meta's `/debug_token` won't let a token introspect itself, so without app creds those fields are omitted (not an error). On `apb` < 0.5.10 this case wrongly showed `is_valid: false` — ignore that if `user`/`ad_accounts` are present, and upgrade. See `workflows/setup.md`.
 
 `apb` resolves credentials in order: shell environment → project-local `.env` (cwd) → `~/.apb/.env` (global) → compile-time default. Earlier sources win, so a `export APB_API_KEY=...` always overrides the file. Setting `~/.apb/.env` once makes the CLI work from any directory. You only need `APB_API_URL` if you're pointing at a non-default endpoint (self-hosting, staging, or local dev — see below).
 

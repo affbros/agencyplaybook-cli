@@ -18,6 +18,24 @@
 | Want to scale spend safely | Scaling | `apb playbook scale-roadmap` |
 | "Tell me everything that's wrong" | Turnaround | `apb playbook health-score`, then `reset-rebuild-advisor` if score <60 |
 
+## From diagnosis to a decision (verdict)
+
+Picking the right playbook is step one; the operator still wants **a decision**. Collapse the
+findings into **one decisive verb per campaign** — **SCALE / TIGHTEN / OPTIMIZE / CAP** (plus
+**HOLD** for learning and **CUT** for chronic failure) — from three gates rather than a score:
+
+- **G1 Efficiency** — `apb playbook roas-recovery`, `apb playbook bid-strategy` (and the
+  `health-score` `economics` sub-score).
+- **G2 Delivery / headroom** — `apb playbook delivery-pacing` (budget-capped + still efficient = the
+  SCALE signal), `apb playbook rebalance`.
+- **G3 Quality / signal** — `apb playbook waste-audit`, `apb playbook signal-quality`,
+  `apb playbook saturation`, `apb playbook fatigue-index`.
+
+All pass + headroom → **SCALE**; pass, no headroom → **OPTIMIZE**; exactly one gate at-risk →
+**TIGHTEN**; ≥2 fail → **CAP**; insufficient data / learning → **HOLD**; chronic → **CUT**. Sort the
+verdicts by dollar impact and act on the top one (dry-run → approve → execute). Full model, the
+gates→verb table, and the verb→action map: `reference/verdict-framework.md`.
+
 ## The 32 diagnostic playbooks
 
 ### Learning (5)

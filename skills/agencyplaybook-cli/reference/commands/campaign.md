@@ -1,6 +1,6 @@
 # `apb campaign` — Command Reference
 
-15 commands. Auto-generated from the apb binary on 2026-06-05.
+15 commands. Auto-generated from the apb binary on 2026-06-17.
 
 ### `apb campaign budget-schedule create`
 

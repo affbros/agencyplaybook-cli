@@ -63,6 +63,13 @@ apb campaign list
 # Should list campaigns in your default account.
 ```
 
+### Reading `auth test` output
+
+The "am I connected?" signals are **`is_valid: true`** plus a populated **`user`** and **`ad_accounts`** (and `token_present: true`). If those are present, you are authenticated and the CLI can act on your behalf — confirm with a real read like `apb campaign list`.
+
+- **`app_id` and `scopes` only appear when app credentials (`META_APP_ID` + `META_APP_SECRET`) are configured.** Reading them needs Meta's `/debug_token`, which Meta authorizes only with an *app* access token — a user or system-user token can't introspect itself. Without app creds the CLI omits those two fields rather than showing misleading empty values; their absence does **not** mean anything is wrong. (System-user tokens also have no classic OAuth scopes — they use Business-asset permissions.)
+- **Older binaries (`apb` < 0.5.10)** had a bug where this same situation showed `is_valid: false` / `app_id: -` / `scopes: []`. That was a false-negative — if `user`/`ad_accounts` were populated the token was fine. Upgrade to clear it.
+
 ## Set or switch the active account (optional)
 
 ```bash
