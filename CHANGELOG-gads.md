@@ -6,6 +6,26 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.7] — 2026-06-17
+
+### Added
+- **`verdict --include-paused`** — reactivation / post-mortem lens. By default `verdict` judges only ENABLED campaigns; with this flag PAUSED campaigns are judged too (their G1 Efficiency + G3 Quality history is still informative), each tagged with a per-entry `status`. Paused campaigns carry delivery **"n/a"** (no current pacing) so **SCALE can never fire** for a paused campaign; the output adds `mode: "reactivation"` and a `reactivation_note` reinterpreting the verbs — OPTIMIZE = was efficient, relaunch as-is · TIGHTEN = fix before relaunch · CAP/CUT = correctly killed, leave off · HOLD = ran too briefly to judge. The pure decision engine is unchanged; default (no-flag) output is byte-identical. Mirrors `apb verdict --include-paused` (apb `v0.5.16`). Part of decision-verdict-001.
+
+### Fixed
+- **Latent integer overflow in the `verdict` decision engine** — the zero-conversion quality check computed `cost_micros >= 3 * aov_micros.unwrap_or(i64::MAX)`, which overflowed (`i64::MAX * 3`) for **any** mature campaign with zero conversions (panic in debug, silent wrap in release). It was never hit before because earlier live checks ran against accounts whose active campaigns had conversions; an all-paused / zero-conversion account surfaced it. Fixed to treat an unknown AOV as "threshold unreachable" (no false CUT), matching the floating-point side's `f64::INFINITY` semantics.
+
+## [0.1.6] — 2026-06-17
+
+### Added
+- **Conditional campaign caps** — `mutate campaign-cap --customer <CID> --campaign <ID> --until "<metric><op><value>"` freezes a campaign (pauses it via the guarded `campaign-update-status` path) and records a release condition (`metric` ∈ `roas|cpa|conv|spend`); `--until` is **required and validated up front** so nothing is frozen without a way out. `campaign-check-caps` re-fetches current metrics and un-pauses the campaigns whose condition has cleared; `campaign-list-caps` shows open caps. Caps persist to `~/.apb-gads/caps.json` (`0700`/`0600`). The condition grammar is byte-aligned with apb's `plan cap --until` (apb `v0.5.14`); gads has no plan framework, so the freeze is a direct guarded mutation rather than a `CAPPED` plan. Part of decision-verdict-001 S005.
+
+## [0.1.5] — 2026-06-17
+
+### Added
+- **`campaign-type-advisor`** — prescriptive Search vs Performance Max vs Demand Gen recommendation: given a goal, demand state, conversion-signal strength, and daily budget it returns the primary engine plus the maturity-ordered sequence (Search captures existing demand · PMax scales it · Demand Gen creates new demand). Pure; pass `--customer` to ground the signal in the account's trailing-30-day conversions.
+- **`playbook campaign-type-fit`** — scores an account's existing campaigns as `good_fit` / `misaligned` / `premature` against the advisor's doctrine and the verdict G3 maturity gate.
+- **Demand Gen greenfield builder** — `plan campaign demand-gen` → `validate demand-gen-spec` → `orchestrate demand-gen-build`: an atomic, born-PAUSED Demand Gen campaign build with dry-run + `--validate-only` (SERVER_VALIDATED) support, reusing the existing responsive-video ad spec and gated campaign-create path. Part of decision-verdict-001 S004.
+
 ## [0.1.4] — 2026-06-16
 
 ### Added
