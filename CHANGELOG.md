@@ -6,6 +6,16 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.14] — 2026-06-16 (decision queue + conditional cap — `verdict --queue`, `plan cap --until`)
+
+### Added
+- **`verdict --queue`** — ranks the per-campaign verdicts into a decision queue by **$ impact/day**, attaches the **next-action command** per verb (SCALE→`action autoplan`→`plan execute-safe`; CAP→`plan cap`; TIGHTEN→negatives/trim; CUT→archive), and a **reallocation** line (freed CAP'd budget → top SCALE candidate). Read-only; no new Meta calls.
+- **`plan cap --campaign X --until "roas>=3.0"`** — conditional cap: freeze a campaign (pause) and hold until a release condition clears. `--until` (`<metric><op><value>`, metric ∈ roas|cpa|conv|spend) is **required + validated up front** so nothing freezes without a way out. Dry-run by default; `--execute` pauses (reversible → no `--confirm-destructive`). Persists as a `CAPPED` plan with a rollback blueprint.
+- **`plan check-caps`** — re-evaluate every open cap against **current** metrics and **promote** (un-pause) the ones whose condition cleared (`--execute`); dry-run reports `promote_ready` / `still_capped`. The auto-promote — on demand, no daemon.
+- HTTP equivalents: `GET /api/v1/verdict?queue=true`, `POST /api/v1/plans/cap`, `POST /api/v1/plans/check-caps`.
+
+Part of the decision-verdict-001 S003 workstream; the apb-gads read-only `verdict --queue` ships in `gads-v0.1.4`.
+
 ## [0.5.13] — 2026-06-16 (decision verdict — `apb verdict` command)
 
 ### Added
