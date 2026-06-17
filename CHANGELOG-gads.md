@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-06-16
+
+### Added
+- **`verdict --queue`** — ranks the per-campaign verdicts into a decision queue by **$ impact/day**, each with a next-action command (SCALE → `growth scale-up` / `playbook pmax-scaling-plan`; TIGHTEN → `playbook waste-cluster-audit` → negatives; CAP/CUT → `mutate campaign-update-status`) and a reallocation line (freed CAP'd budget → top SCALE candidate). Read-only — gads has no plan framework, so there is no conditional `plan cap` here (that's apb's `v0.5.14`); the freeze is a manual `mutate`. Part of the cross-CLI decision-verdict framework (decision-verdict-001 S003).
+
 ## [0.1.3] — 2026-06-16
 
 ### Added
