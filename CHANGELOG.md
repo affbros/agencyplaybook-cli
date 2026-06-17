@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.13] — 2026-06-16 (decision verdict — `apb verdict` command)
+
+### Added
+- **`verdict` command** (`apb verdict --account act_… --target-roas 3.0`) — a per-campaign decision engine that emits one decisive verb (**SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT**) for every ACTIVE campaign, from three platform-native gates: **Efficiency** (ROAS/CPA vs target, tiered), **Delivery+headroom** (budget-capped while efficient = the SCALE signal), and **Quality/signal** (maturity + conversion floor). Read-only; returns a queue ranked by spend with per-gate states, blockers, and a `next` action. `--target-roas`/`--target-cpa` set the efficiency target; `--min-age-days`/`--min-conversions` tune the maturity floor; `--days` the window. HTTP equivalent: `GET /api/v1/verdict`. Part of the cross-CLI decision-verdict framework (see the `verdict-framework.md` skill reference); the apb-gads twin ships in `gads-v0.1.3`.
+
 ## [0.5.12] — 2026-06-10 (CLI hardening: credential-file permissions + Retry-After-aware cooldown)
 
 No new commands (still **254 leaves / 248 endpoints**). Security + reliability patch. No breaking changes.
