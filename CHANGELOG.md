@@ -6,6 +6,14 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.19] — 2026-06-18 (server-delivered guardrail profiles)
+
+### Added
+- **Server-delivered guardrail profiles** (agency-guardrails-001 Phase 2b). An agency authors a managed account's guardrail profile once (the in-app Agency → Guardrails editor) and **every `apb` CLI host that resolves that tenant's key automatically pulls + enforces it** — no need to touch `~/.apb/guardrails.json`.
+  - The profiles ride along in the existing `/auth/resolve` response (no new round-trip) and are cached locally at `~/.apb/guardrails-server.json` (0600), refreshed on each resolve.
+  - They apply as the **lowest-precedence floor**: `--guardrails`/`--allow-*` flags > `APB_GUARDRAIL_*` env > local `~/.apb/guardrails.json` > **server-delivered** > none. An operator's local profile still overrides the central one (more-specific wins).
+- Deploy-order-independent: an older CLI ignores the new field; a newer CLI against an older server simply gets an empty floor (no enforcement) — fully backward compatible.
+
 ## [0.5.18] — 2026-06-18 (CLI-native write guardrails — `apb guardrails`)
 
 ### Added
