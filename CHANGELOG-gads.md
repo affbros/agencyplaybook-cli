@@ -6,7 +6,12 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
-## [0.1.7] — 2026-06-17
+## [0.1.8] — 2026-06-18 (retail/Shopping PMax — `plan campaign pmax --merchant-id`)
+
+### Added
+- **`plan campaign pmax --merchant-id <N> [--feed-label <label>]`** — first-class retail (Shopping) Performance Max: the planner now emits a `shopping_setting` (Merchant Center account + optional feed label) in the launch spec, so `mutate pmax-launch` creates a PMax campaign that serves product ads from the linked feed. Previously the only way to set it was hand-editing the spec JSON. Pair with a fully-partitioned listing group (`mutate pmax-listing-group-filter-*`, with an "Other" node) so every product is covered.
+
+No mutation-surface change — `pmax_mutations` already honored `shopping_setting`; this exposes it on the `plan campaign pmax` builder.
 
 ### Added
 - **`verdict --include-paused`** — reactivation / post-mortem lens. By default `verdict` judges only ENABLED campaigns; with this flag PAUSED campaigns are judged too (their G1 Efficiency + G3 Quality history is still informative), each tagged with a per-entry `status`. Paused campaigns carry delivery **"n/a"** (no current pacing) so **SCALE can never fire** for a paused campaign; the output adds `mode: "reactivation"` and a `reactivation_note` reinterpreting the verbs — OPTIMIZE = was efficient, relaunch as-is · TIGHTEN = fix before relaunch · CAP/CUT = correctly killed, leave off · HOLD = ran too briefly to judge. The pure decision engine is unchanged; default (no-flag) output is byte-identical. Mirrors `apb verdict --include-paused` (apb `v0.5.16`). Part of decision-verdict-001.
