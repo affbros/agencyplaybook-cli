@@ -6,6 +6,20 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.18] — 2026-06-18 (CLI-native write guardrails — `apb guardrails`)
+
+### Added
+- **`apb guardrails` domain** — author a local, per-account **write guardrail profile** (`~/.apb/guardrails.json`) and the CLI enforces it on create/mutate commands. Risk-proportional mistake-prevention for trusted operators + AI agents (wrong landing domain, off-brand copy, over-cap budget). **Local + honor-based** — the adversarial boundary (scope / tier / account access) stays server-side.
+  - **`guardrails set --account act_… [--allowed-domains …] [--canonical-brands …] [--blocked-terms …] [--max-daily-budget N] [--currency …] [--enforcement block|warn|off]`** — create/update a profile (partial updates merge; written `0600`).
+  - **`guardrails show [--account act_…]`** — the resolved profile (file + ENV + flags) and the stored profile, or list all stored profiles.
+  - **`guardrails test --account act_… [--link …]… [--copy …]… [--budget N] [--currency …]`** — dry-check a hypothetical write (no API call, never errors).
+  - **`guardrails clear --account act_…`** — remove a profile.
+- **Enforcement** fires on a real write (`--execute`) to `creative create-*`, `adset create` / `update-budget`, and `campaign create` / `update` / `compose-from-spec` (compose + object-story specs are walked for every final URL, copy line, and daily budget). `block` (default) refuses the write with **exit code 4** (`guardrail_blocked`) before any Meta call; `warn` prints to stderr and proceeds; `off` skips. With no profile for the account, nothing is enforced (backward compatible).
+- **Global override flags** (per command, each audited to `logs/apb.jsonl`): `--allow-domain <host>` (repeatable), `--allow-brand`, `--allow-budget` — all require `--guardrail-reason "<why>"`. `--guardrails on|warn|off` overrides the enforcement mode for one command.
+- **`APB_GUARDRAIL_*` env vars** (`ALLOWED_DOMAINS`, `CANONICAL_BRANDS`, `BLOCKED_TERMS`, `MAX_DAILY_BUDGET`, `ENFORCEMENT`) for CI. Precedence: `--guardrails` flag > env > stored profile > none.
+
+CLI leaves 261 → 265 (the guardrails leaves are local-only — `approved_cli_only`). agency-guardrails-001 Phase 2a.
+
 ## [0.5.17] — 2026-06-17 (agency CLI domain — `apb agency`)
 
 ### Added
