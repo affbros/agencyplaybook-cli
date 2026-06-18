@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.17] — 2026-06-17 (agency CLI domain — `apb agency`)
+
+### Added
+- **`apb agency` domain** — drive the BYO-token cross-channel portfolio from the CLI (Agency tier). All three run **server-side** over the SaaS API (`/api/v1/saas/agency/*`); no Meta/Google token touches the CLI host.
+  - **`agency connect-meta --token <…>`** — validate + store a Meta system-user token server-side (encrypted at rest); prints the connected account count.
+  - **`agency accounts`** — list the ad accounts the connected token(s) can see.
+  - **`agency portfolio [--days N] [--channel meta|google|all] [--compare]`** — per-currency totals (never FX-summed) + per-account rows with the server verdict (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD).
+- `apb-core` gains `saas_api_post` (authed JSON POST against the SaaS API), the write counterpart to `saas_api_get`.
+
+CLI leaves 258 → 261 (the agency leaves are SaaS-API-only — `approved_cli_only`). Part of the agency-portfolio-001 workstream (S004). The server endpoints shipped earlier (S001–S003b); this exposes them on the CLI.
+
 ## [0.5.14] — 2026-06-16 (decision queue + conditional cap — `verdict --queue`, `plan cap --until`)
 
 ### Added
