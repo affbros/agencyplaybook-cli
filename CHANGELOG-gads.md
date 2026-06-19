@@ -6,6 +6,14 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.9] — 2026-06-18 (server-delivered guardrail profiles)
+
+### Added
+- **Server-delivered guardrail profiles** (agency-guardrails-001 Sprint 005). An agency authors a managed customer's guardrail once in the web app (**Agency → Guardrails**, `channel=google`: allowed domains + a daily-budget cap), and every `apb-gads` host that resolves the tenant's `APB_API_KEY` **applies it automatically** — no `google-ads.yaml` edit per customer.
+  - The profiles ride along in the existing `/auth/resolve?provider=google_ads` response (no new round-trip) and are overlaid onto the customer's `SafetyProfile` + `LiveVerifyPolicy`: the central allowed-domains + daily-budget cap become the write authorization, with new ads forced **PAUSED**.
+  - A local `google-ads.yaml` profile, where present, **always wins** (more-specific) — the central profile only fills the gap. Only `enforcement: block` profiles with a non-empty domain allowlist are applied; `warn`/`off` are advisory for now (gads' preflight is hard-fail).
+- No new command or flag — this reuses gads' existing three-gate + `LiveVerifyPolicy` enforcement.
+
 ## [0.1.8] — 2026-06-18 (retail/Shopping PMax — `plan campaign pmax --merchant-id`)
 
 ### Added
