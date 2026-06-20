@@ -1,7 +1,7 @@
 # `apb` CLI — Command Index
 
-Auto-generated from the apb binary on 2026-06-17. 
-257 commands across 36 domains. 
+Auto-generated from the apb binary on 2026-06-18. 
+265 commands across 39 domains. 
 Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain>.md` — open the file for the domain you need.
 
 | Domain | Commands | Reference |
@@ -10,6 +10,7 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | action | 3 | `reference/commands/action.md` |
 | ad | 8 | `reference/commands/ad.md` |
 | adset | 8 | `reference/commands/adset.md` |
+| agency | 3 | `reference/commands/agency.md` |
 | alias | 3 | `reference/commands/alias.md` |
 | andromeda | 2 | `reference/commands/andromeda.md` |
 | ask | 1 | `reference/commands/ask.md` |
@@ -25,6 +26,7 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | doctor | 4 | `reference/commands/doctor.md` |
 | duplicate | 1 | `reference/commands/duplicate.md` |
 | growth | 1 | `reference/commands/growth.md` |
+| guardrails | 4 | `reference/commands/guardrails.md` |
 | leadgen | 6 | `reference/commands/leadgen.md` |
 | learning | 4 | `reference/commands/learning.md` |
 | library | 1 | `reference/commands/library.md` |
@@ -34,6 +36,7 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | plan | 11 | `reference/commands/plan.md` |
 | playbook | 34 | `reference/commands/playbook.md` |
 | policy | 2 | `reference/commands/policy.md` |
+| portfolio | 1 | `reference/commands/portfolio.md` |
 | report | 12 | `reference/commands/report.md` |
 | rules | 11 | `reference/commands/rules.md` |
 | search | 1 | `reference/commands/search.md` |

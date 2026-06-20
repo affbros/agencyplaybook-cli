@@ -50,7 +50,7 @@ Every failure maps to a documented exit code. Scripts and CI runners can branch 
 | `1` | General / unmapped | I/O error, config parse failure, fall-through |
 | `2` | Validation / invalid input | clap parse error, missing required flag, malformed JSON, invalid `--url` |
 | `3` | Auth / permission | invalid `APB_API_KEY`, expired token, unauthorized account, missing scope, tier upgrade required |
-| `4` | Safety gate blocked | `--execute` provided on a mutation but env-gates (`READ_ONLY` / `ALLOW_WRITES` / `APB_ALLOW_MUTATIONS`) blocked the write (`write_blocked`); or `--no-input` blocked a would-prompt path (`safety_gate_blocked`). **Without `--execute` the CLI dry-runs and exits 0; a missing `--confirm-destructive` is exit 2 (validation), not 4.** |
+| `4` | Safety gate blocked | `--execute` provided on a mutation but env-gates (`READ_ONLY` / `ALLOW_WRITES` / `APB_ALLOW_MUTATIONS`) blocked the write (`write_blocked`); a guardrail profile blocked the write (`guardrail_blocked` — see [Agency guardrails](#agency-guardrails-local-write-mistake-prevention)); or `--no-input` blocked a would-prompt path (`safety_gate_blocked`). **Without `--execute` the CLI dry-runs and exits 0; a missing `--confirm-destructive` is exit 2 (validation), not 4.** |
 | `5` | Network / rate-limit / 5xx | Meta API timeout, 429 throttle, 5xx response, connection refused |
 | `6` | Partial success | reserved for future batch operations |
 
@@ -76,11 +76,59 @@ Per-class `error.details` payloads:
 |---|---|---|
 | Write blocked | `write_blocked` | `reasons: [string]` — env-var and flag gate failures |
 | Safety gate blocked | `safety_gate_blocked` | `gate: string`, `required_flags: [string]` |
+| Guardrail blocked | `guardrail_blocked` | `account: string`, `violations: [{code, message, allow_flag, subject}]`, `allow_flags: [string]` |
 | Insufficient scope | `insufficient_scope` | `required_scope`, `current_tier`, `minimum_tier` |
 | Account not authorized | `account_not_authorized` | `account_id` |
 | Rate limited | `rate_limited` | `retry_after_ms` |
 
 Errors **not** in this table (e.g. `validation_error`, `auth_error`) emit a flat envelope — `code` + `message` + `exit_code`, with no `details` object.
+
+---
+
+## Agency guardrails (local write mistake-prevention)
+
+The `apb` CLI enforces an optional per-account **guardrail profile** on write commands —
+risk-proportional mistake-prevention for unattended / agent execution (wrong landing
+domain, off-brand copy, over-cap budget). It is local and honor-based; the adversarial
+boundary (scope / tier / account access) stays server-side. With no profile configured,
+nothing is enforced (backward compatible).
+
+**Control model** — precedence, highest first:
+
+1. `--guardrails on|warn|off` flag (per-command).
+2. `APB_GUARDRAIL_*` environment variables — ideal for CI:
+   - `APB_GUARDRAIL_ALLOWED_DOMAINS` (comma-separated hosts)
+   - `APB_GUARDRAIL_CANONICAL_BRANDS` (comma-separated)
+   - `APB_GUARDRAIL_BLOCKED_TERMS` (comma-separated)
+   - `APB_GUARDRAIL_MAX_DAILY_BUDGET` (major currency units, e.g. `500`)
+   - `APB_GUARDRAIL_ENFORCEMENT` = `block` (default) | `warn` | `off`
+3. The stored profile at `~/.apb/guardrails.json` (`apb guardrails set …`).
+
+**Enforcement** fires on a real write (`--execute`) to `creative create-*`,
+`adset create` / `update-budget`, and `campaign create` / `update` / `compose-from-spec`:
+
+- `block` → the write is refused with **exit code 4** (`guardrail_blocked`) *before any
+  Meta call*. The `--json` envelope carries the `violations[]` and the `allow_flags[]`
+  that would waive them.
+- `warn` → violations print to stderr; the write proceeds (exit follows the write).
+- `off` → no enforcement.
+
+**Overrides** (each writes an audit line to `logs/apb.jsonl`): `--allow-domain <host>`
+(repeatable), `--allow-brand`, `--allow-budget` — all require `--guardrail-reason "<why>"`.
+A missing reason on an override is `validation_error` (exit 2).
+
+```bash
+# Fail-closed CI: enforce a budget ceiling + domain allowlist via env, no stored profile.
+export APB_GUARDRAIL_ALLOWED_DOMAINS="client.com"
+export APB_GUARDRAIL_MAX_DAILY_BUDGET="500"
+export APB_GUARDRAIL_ENFORCEMENT="block"
+apb adset create --account act_123 --campaign 456 --name "CI adset" \
+  --daily-budget 9000 --execute --json
+# → exit 4, error.code = guardrail_blocked (budget_over_cap)
+
+# Preview-only (no API call, never errors) — useful as a CI lint step:
+apb guardrails test --account act_123 --link https://wrong.com/lp --budget 9000 --json
+```
 
 ---
 

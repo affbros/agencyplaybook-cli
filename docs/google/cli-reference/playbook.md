@@ -4,7 +4,7 @@
 
 Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 
-**Surface:** 👁️ Read-only · **64 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **67 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -32,6 +32,7 @@ Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 | [`quality-score-audit`](#apb-gads-playbook-quality-score-audit) | Distribution of keyword quality scores; flag low-QS keywords with significant spend. |
 | [`naming-convention-audit`](#apb-gads-playbook-naming-convention-audit) | Flag campaigns and ad groups whose names don't match common operator patterns. |
 | [`campaign-bid-strategy-audit`](#apb-gads-playbook-campaign-bid-strategy-audit) | Mix of bidding strategies in use across campaigns with status and channel context. |
+| [`campaign-type-fit`](#apb-gads-playbook-campaign-type-fit) | Per-ENABLED-campaign channel-type fit vs conversion signal (decision-verdict S004) |
 | [`seasonality-overview`](#apb-gads-playbook-seasonality-overview) | 365-day month-over-month spend, conversion, and CPA trend to spot seasonal patterns. |
 | [`keyword-match-type-mix`](#apb-gads-playbook-keyword-match-type-mix) | Distribution of BROAD/PHRASE/EXACT keywords; flag campaigns with imbalanced mix. |
 | [`duplicate-keywords`](#apb-gads-playbook-duplicate-keywords) | Find keywords with the same text + match-type appearing across multiple ad groups. |
@@ -60,6 +61,8 @@ Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 | [`search-term-promotion`](#apb-gads-playbook-search-term-promotion) | Promote high-value search terms to keywords, filtered by metric thresholds (impressions/clicks/cost/conversions/conv-value/ROAS/CPA/top-N), enriched with intent-based match type, historical-CPC suggested bid, and a cluster label. |
 | [`competitor-pressure`](#apb-gads-playbook-competitor-pressure) | Flag campaigns where search_rank_lost_impression_share rose ≥ 5pp in current vs prior 30d — proxy for rising auction pressure (domain-level auction insights require Standard API access). |
 | [`waste-cluster-audit`](#apb-gads-playbook-waste-cluster-audit) | Token-stem clusters of zero-conversion search queries with combined spend ≥ $200 in the lookback window; emits a mutation-ready negative-keyword spec. |
+| [`search-term-analysis`](#apb-gads-playbook-search-term-analysis) | One search_term_view read ties each term to the keyword that triggered it (text + match type) and computes per-term CPA/ROAS, then emits BOTH a promote list (high-ROI terms not yet keywords → keyword adds) and a negate list (high-cost zero-conversion clusters → ad-group negatives). |
+| [`search-term-ngram-audit`](#apb-gads-playbook-search-term-ngram-audit) | Decomposes search terms into 1/2/3-grams and aggregates spend/clicks/conversions/value per pattern, surfacing the most wasteful n-grams (high-cost, zero-conversion) and the most efficient ones (high-ROAS). |
 | [`keyword-prune-audit`](#apb-gads-playbook-keyword-prune-audit) | Rank ENABLED keywords by metrics and flag prune candidates by $ (zero-conversion spend / absolute CPA ceiling), % (CPA/ROAS vs context target), and # (no-traffic click/impression floors); emits a mutation-ready keyword-remove spec. |
 | [`conversion-value-gap`](#apb-gads-playbook-conversion-value-gap) | Flag conversion actions marked primary_for_goal in lead/form-fill categories that have no default_value or always_use_default_value=false (breaks Smart Bidding value math). |
 | [`campaign-cannibalization`](#apb-gads-playbook-campaign-cannibalization) | Detect normalized queries served by ≥ 2 of our own active campaigns with material spend each, tiered LOW/MEDIUM/HIGH/CRITICAL by CPA gap and bid-strategy divergence. |
@@ -379,6 +382,21 @@ Mix of bidding strategies in use across campaigns with status and channel contex
 
 ```
 Usage: apb-gads playbook campaign-bid-strategy-audit [OPTIONS]
+```
+
+_No command-specific options — uses only the [global options](README.md#global-options)._
+
+<a id="apb-gads-playbook-campaign-type-fit"></a>
+### `apb-gads playbook campaign-type-fit`
+
+Per-ENABLED-campaign channel-type fit vs conversion signal (decision-verdict S004)
+
+*Section `structural` · default lookback 30d · status `implemented`*
+
+**Usage**
+
+```
+Usage: apb-gads playbook campaign-type-fit [OPTIONS]
 ```
 
 _No command-specific options — uses only the [global options](README.md#global-options)._
@@ -848,7 +866,11 @@ Usage: apb-gads playbook competitor-pressure [OPTIONS]
 
 | Option | Description |
 |---|---|
-| `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational bid-response list |
+| `--windows <WINDOWS>` | Number of consecutive lookback-day windows to trend impression share over (most-recent first). Default 2 (preserves the 30d-vs-prior-30d rank-lost semantics; top/abs-top trending is added). |
+| `--level <LEVEL>` | Localize impression share to: campaign (default), ad_group, or keyword (per-keyword IS via keyword_view). [default: campaign] |
+| `--under-pressure-delta <UNDER_PRESSURE_DELTA>` | Flag a TIGHTEN verdict when rank-lost IS rises by at least this fraction window-over-window (e.g. 0.05 = 5pp). Default 0.05. Overrides customer policy. |
+| `--under-pressure-floor <UNDER_PRESSURE_FLOOR>` | …and absolute rank-lost IS in the most-recent window is at least this (e.g. 0.10 = 10%). Default 0.10. Overrides customer policy. |
+| `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational bid-response list (the under-pressure entities) |
 
 <a id="apb-gads-playbook-waste-cluster-audit"></a>
 ### `apb-gads playbook waste-cluster-audit`
@@ -870,6 +892,59 @@ Usage: apb-gads playbook waste-cluster-audit [OPTIONS]
 | `--min-cluster-cost-micros <MIN_CLUSTER_COST_MICROS>` | Minimum combined cluster cost (micros) to qualify as wasted spend. Default 200000000 ($200). Overrides customer policy. |
 | `--match-type-token-cutoff <MATCH_TYPE_TOKEN_CUTOFF>` | Suggested negatives with ≤ this many tokens become EXACT, otherwise PHRASE. Default 2. Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a mutation-ready negative-keyword spec |
+| `--negatives-to <NEGATIVES_TO>` | Where --output-spec negatives apply: ad-group (default; per-ad-group negatives), campaign (campaign-scoped negatives), or shared (a shared negative-keyword list — requires --shared-set). [default: ad-group] |
+| `--shared-set <SHARED_SET>` | Target shared negative-keyword list for --negatives-to shared: a customers/<id>/sharedSets/<id> resource OR a numeric shared-set id. Add to an existing list (the additive auto-apply path). |
+
+<a id="apb-gads-playbook-search-term-analysis"></a>
+### `apb-gads playbook search-term-analysis`
+
+One search_term_view read ties each term to the keyword that triggered it (text + match type) and computes per-term CPA/ROAS, then emits BOTH a promote list (high-ROI terms not yet keywords → keyword adds) and a negate list (high-cost zero-conversion clusters → ad-group negatives). One combined --output-spec routes promotes → KeywordAddBulk and negates → NegativeKeywordAddBulk. Read-only.
+
+*Section `data_quality_hygiene` · default lookback 90d · status `implemented`*
+
+**Usage**
+
+```
+Usage: apb-gads playbook search-term-analysis [OPTIONS]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--min-conversions <MIN_CONVERSIONS>` | Promote split: only promote terms with ≥ this many conversions. Default 1. Overrides customer policy. |
+| `--min-roas <MIN_ROAS>` | Promote split: only promote terms with ROAS ≥ this (conv_value / cost). Default 1.0. Set 0 to disable. Overrides customer policy. |
+| `--min-cost-micros <MIN_COST_MICROS>` | Negate split: minimum combined cluster cost (micros) to qualify as wasted spend. Default 200000000 ($200). Overrides customer policy. |
+| `--match-type-token-cutoff <MATCH_TYPE_TOKEN_CUTOFF>` | Negate split: suggested negatives with ≤ this many tokens become EXACT, otherwise PHRASE. Default 2. Overrides customer policy. |
+| `--limit <LIMIT>` | Max search_term_view rows to read (ORDER BY cost DESC). [default: 5000] |
+| `--output-spec <OUTPUT_SPEC>` | Optional: path to write ONE combined spec (spec_type search_term_analysis; per-item finding_type routes promotes → KeywordAddBulk, negates → NegativeKeywordAddBulk) |
+| `--negatives-to <NEGATIVES_TO>` | Where the negate split's --output-spec negatives apply: ad-group (default; per-ad-group negatives), campaign (campaign-scoped negatives), or shared (a shared negative-keyword list — requires --shared-set). Promotes are unaffected. [default: ad-group] |
+| `--shared-set <SHARED_SET>` | Target shared negative-keyword list for --negatives-to shared: a customers/<id>/sharedSets/<id> resource OR a numeric shared-set id. Add to an existing list (the additive auto-apply path). |
+
+<a id="apb-gads-playbook-search-term-ngram-audit"></a>
+### `apb-gads playbook search-term-ngram-audit`
+
+Decomposes search terms into 1/2/3-grams and aggregates spend/clicks/conversions/value per pattern, surfacing the most wasteful n-grams (high-cost, zero-conversion) and the most efficient ones (high-ROAS). Emits the wasteful MULTI-WORD n-grams as a shared_negative_candidates spec (→ shared negative list, requires --shared-set); 1-grams are reported but only emitted as negatives behind --include-unigram-negatives. Read-only.
+
+*Section `data_quality_hygiene` · default lookback 90d · status `implemented`*
+
+**Usage**
+
+```
+Usage: apb-gads playbook search-term-ngram-audit [OPTIONS]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--ngram-sizes <NGRAM_SIZES>` | Comma-separated n-gram sizes to decompose search terms into (e.g. "1,2,3"). [default: 1,2,3] |
+| `--min-cost-micros <MIN_COST_MICROS>` | Minimum summed spend (micros) for an n-gram to qualify as wasteful. Default 200000000 ($200). Overrides customer policy. |
+| `--max-conversions <MAX_CONVERSIONS>` | An n-gram with conversions ≤ this is wasteful. Default 0 (zero-conversion). Overrides customer policy. |
+| `--limit <LIMIT>` | Max search_term_view rows to read (ORDER BY cost DESC). [default: 5000] |
+| `--shared-set <SHARED_SET>` | Target shared negative-keyword list for --output-spec: a customers/<id>/sharedSets/<id> resource OR a numeric shared-set id. REQUIRED when --output-spec is set (wasteful n-grams emit as shared negatives). |
+| `--include-unigram-negatives` | Also emit single-word (1-gram) wasteful n-grams as negatives. OFF by default — a single-word negative is high-blast-radius. |
+| `--output-spec <OUTPUT_SPEC>` | Optional: path to write a shared_negative_candidates spec (→ SharedCriterionAddBulk) of the wasteful multi-word n-grams. Requires --shared-set. |
 
 <a id="apb-gads-playbook-keyword-prune-audit"></a>
 ### `apb-gads playbook keyword-prune-audit`
@@ -999,6 +1074,9 @@ Usage: apb-gads playbook bid-strategy-mismatch [OPTIONS]
 | `--maximize-conversions-conv-threshold <MAXIMIZE_CONVERSIONS_CONV_THRESHOLD>` | maximize_conversions_without_target_cpa rule: conv threshold. Default 100. Overrides customer policy. |
 | `--learning-stuck-days <LEARNING_STUCK_DAYS>` | learning_stuck rule: campaign-age cutoff in days. Default 14. Overrides customer policy. |
 | `--learning-stuck-conv-max <LEARNING_STUCK_CONV_MAX>` | learning_stuck rule: conv-count ceiling. Default 5. Overrides customer policy. |
+| `--tcpa-min-conversions <TCPA_MIN_CONVERSIONS>` | tcpa_insufficient_conversions rule: TARGET_CPA below this conv count over the window is smart-bidding misapplication → recommend Maximize Conversions. Default 30 (Google Search tCPA floor; best-practice guidance, not an API gate). Overrides customer policy. |
+| `--troas-min-conversions <TROAS_MIN_CONVERSIONS>` | troas_insufficient_conversions rule: TARGET_ROAS below this conv count over the window is smart-bidding misapplication → recommend Maximize Conversion Value (or Maximize Conversions if value tracking is unhealthy). Default 15 (Google Search/Shopping tROAS floor, NOT 50). Overrides customer policy. |
+| `--max-conv-value-min-conversions <MAX_CONV_VALUE_MIN_CONVERSIONS>` | max_conv_value_insufficient_conversions rule: MAXIMIZE_CONVERSION_VALUE below this conv count over the window → tROAS not yet advisable; keep it uncapped. Default 15. Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational bid-strategy-mismatch review list |
 
 <a id="apb-gads-playbook-audience-burnout-detection"></a>

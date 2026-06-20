@@ -3,7 +3,7 @@
   "purpose": "Completeness map: every apb CLI domain is classified as either a Meta Graph node we index (Layer 1 capability index) or an apb-internal concept with no Meta reference page. This is the proof that 'everything apb touches' is covered. Exact Meta reference slugs flagged verify_slug:true are best-known and confirmed when the operator saves the page HTML (on-box auto-fetch is blocked).",
   "graph_api_version": "v25.0",
   "generated_at": "2026-06-04",
-  "apb_domain_count": 36,
+  "apb_domain_count": 39,
   "classification_legend": {
     "meta_node": "Backed by a Meta Graph object with read/create/update/delete reference page; full capability index entry.",
     "meta_read_edge": "Backed by a Meta read-only edge (no create/update/delete of a node); supports_read only.",
@@ -48,6 +48,9 @@
     { "apb_domain": "playbook", "classification": "apb_internal", "reason": "apb diagnostic playbooks; analysis over Meta data, not a node." },
     { "apb_domain": "policy", "classification": "apb_internal", "reason": "apb policy/no-touch compliance; not a Meta node." },
     { "apb_domain": "sync", "classification": "apb_internal", "reason": "Operation: diff/sync apb state vs Meta; not a node." },
-    { "apb_domain": "verdict", "classification": "apb_internal", "reason": "Decision verdict — apb-derived per-campaign verb rollup (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) over 3 gates; analysis over Meta data, not a node." }
+    { "apb_domain": "verdict", "classification": "apb_internal", "reason": "Decision verdict — apb-derived per-campaign verb rollup (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) over 3 gates; analysis over Meta data, not a node." },
+    { "apb_domain": "portfolio", "classification": "apb_internal", "reason": "Cross-channel portfolio — apb-derived Meta+Google verdict rollup ranked by $ impact; analysis over Meta/Google data, not a node." },
+    { "apb_domain": "agency", "classification": "apb_internal", "reason": "Agency BYO-token cross-channel portfolio over the SaaS API (/saas/agency/*); server-side rollup, not a Meta node." },
+    { "apb_domain": "guardrails", "classification": "apb_internal", "reason": "Local CLI-native write guardrail config (~/.apb/guardrails.json) + dry-check; risk-proportional mistake-prevention enforced in the binary, no Meta node." }
   ]
 }

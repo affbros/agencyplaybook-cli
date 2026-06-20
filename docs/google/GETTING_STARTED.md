@@ -1,6 +1,6 @@
 # Getting Started with apb-gads
 
-`apb-gads` is an operator-grade command-line tool for Google Ads + Performance Max — diagnose, report, plan, and safely change accounts from your terminal. It ships **275 commands across 25 groups** (116 gated mutations, 63 diagnostic playbooks, 23 reports) against Google Ads **API v24**. Every response is JSON and every write is dry-run by default.
+`apb-gads` is an operator-grade command-line tool for Google Ads + Performance Max — diagnose, report, plan, and safely change accounts from your terminal. It ships **286 commands across 27 groups** (116 gated mutations, 66 diagnostic playbooks, 23 reports) against Google Ads **API v24**. Every response is JSON and every write is dry-run by default.
 
 > This is the on-ramp. For the exhaustive command/flag enumeration see [`cli-reference/README.md`](cli-reference/README.md); for the write-safety model see [`SAFETY_MODEL.md`](SAFETY_MODEL.md); for tiers/scopes see [`SCOPES_AND_TIERS.md`](SCOPES_AND_TIERS.md). The runtime is always the source of truth — when a doc and the binary disagree, the binary wins.
 
@@ -68,7 +68,7 @@ If your connection reaches exactly one account it is auto-selected; otherwise th
 
 The Google add-on grants **7 `*:google:*` scopes** as an additive overlay on your subscription tier (it does not change your Meta scope counts):
 
-- **Reads** — all 63 playbooks, all 23 reports, keyword planning, raw GAQL — at **Professional+**.
+- **Reads** — all 66 playbooks, all 23 reports, keyword planning, raw GAQL — at **Professional+**.
 - **Writes** — the 116 `mutate` subcommands, the orchestrators, and the verify chains — at **Agency+**.
 - **Scheduled automation** — recurring read-only `schedule` jobs — at **Enterprise+**.
 
@@ -76,7 +76,7 @@ A `403 insufficient_scope` means your tier or add-on doesn't cover the command �
 
 ## What you can do
 
-- **Diagnose** — run any of **63 playbooks** (`apb-gads --customer <CID> playbook account-health`, `playbook waste-audit`, `playbook campaign-bid-strategy-audit`, `playbook pmax-audit`, `playbook rsa-quality-audit`, …); browse them in [`PLAYBOOK_CATALOG.md`](PLAYBOOK_CATALOG.md).
+- **Diagnose** — run any of **66 playbooks** (`apb-gads --customer <CID> playbook account-health`, `playbook waste-audit`, `playbook campaign-bid-strategy-audit`, `playbook pmax-audit`, `playbook rsa-quality-audit`, …); browse them in [`PLAYBOOK_CATALOG.md`](PLAYBOOK_CATALOG.md).
 - **Report** — 23 reports plus the `growth` reviews (`apb-gads --customer <CID> growth scale-up`).
 - **Plan & launch greenfield** — Search: `plan campaign full` → `validate campaign-spec` → `orchestrate campaign-launch`. PMAX: `plan campaign pmax` → `validate pmax-spec` → `orchestrate pmax-build`. Entities are born PAUSED.
 - **Change safely** — 116 gated mutations, **dry-run first**. The protocol: dry-run → read the JSON plan + advisories → approve → re-run with `--execute`. See [`SAFETY_MODEL.md`](SAFETY_MODEL.md) for the three-gate model.

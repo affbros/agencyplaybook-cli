@@ -4,7 +4,7 @@
 
 Every write surface. Dry-run by default; gated behind the three-gate safety model.
 
-**Surface:** ✍️ **Write-capable** · **116 command(s)** · [← back to index](README.md)
+**Surface:** ✍️ **Write-capable** · **119 command(s)** · [← back to index](README.md)
 
 > ⚠️ Commands here can write to a Google Ads account. Every write is **dry-run by default** and must clear the three independent gates (`--execute` + config + env) plus a per-customer profile or the test sandbox policy. See [`../mutations.md`](../mutations.md).
 
@@ -47,6 +47,9 @@ Every write surface. Dry-run by default; gated behind the three-gate safety mode
 | [`asset-create-youtube-video`](#apb-gads-mutate-asset-create-youtube-video) |  |
 | [`asset-create-image`](#apb-gads-mutate-asset-create-image) |  |
 | [`campaign-update-status`](#apb-gads-mutate-campaign-update-status) |  |
+| [`campaign-cap`](#apb-gads-mutate-campaign-cap) | Conditional cap (decision-verdict S005): pause a campaign + record a release condition. |
+| [`campaign-check-caps`](#apb-gads-mutate-campaign-check-caps) | Re-evaluate open caps for the customer against current metrics; --execute un-pauses the cleared ones (decision-verdict S005) |
+| [`campaign-list-caps`](#apb-gads-mutate-campaign-list-caps) | List the open conditional caps for the customer (read-only) |
 | [`ad-create`](#apb-gads-mutate-ad-create) |  |
 | [`campaign-create`](#apb-gads-mutate-campaign-create) |  |
 | [`ad-group-create`](#apb-gads-mutate-ad-group-create) |  |
@@ -684,6 +687,50 @@ Usage: apb-gads mutate campaign-update-status [OPTIONS] --campaign-id <CAMPAIGN_
 |---|---|
 | `--campaign-id <CAMPAIGN_ID>` | — |
 | `--status <STATUS>` | — |
+
+<a id="apb-gads-mutate-campaign-cap"></a>
+### `apb-gads mutate campaign-cap`
+
+Conditional cap (decision-verdict S005): pause a campaign + record a release condition. --until is REQUIRED + validated; `mutate campaign-check-caps` un-pauses when the condition clears. Reversible pause → --execute only
+
+**Usage**
+
+```
+Usage: apb-gads mutate campaign-cap [OPTIONS] --campaign-id <CAMPAIGN_ID> --until <UNTIL>
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--campaign-id <CAMPAIGN_ID>` | — |
+| `--until <UNTIL>` | Release condition, e.g. "roas>=3.0" \| "cpa<=12" \| "conv>=50" (metric op value) |
+
+<a id="apb-gads-mutate-campaign-check-caps"></a>
+### `apb-gads mutate campaign-check-caps`
+
+Re-evaluate open caps for the customer against current metrics; --execute un-pauses the cleared ones (decision-verdict S005)
+
+**Usage**
+
+```
+Usage: apb-gads mutate campaign-check-caps [OPTIONS]
+```
+
+_No command-specific options — uses only the [global options](README.md#global-options)._
+
+<a id="apb-gads-mutate-campaign-list-caps"></a>
+### `apb-gads mutate campaign-list-caps`
+
+List the open conditional caps for the customer (read-only)
+
+**Usage**
+
+```
+Usage: apb-gads mutate campaign-list-caps [OPTIONS]
+```
+
+_No command-specific options — uses only the [global options](README.md#global-options)._
 
 <a id="apb-gads-mutate-ad-create"></a>
 ### `apb-gads mutate ad-create`

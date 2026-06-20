@@ -526,7 +526,7 @@ verification chains, and the audit trail: [`SAFETY_MODEL.md`](SAFETY_MODEL.md).
 - [`cli-reference/README.md`](cli-reference/README.md) — exhaustive per-command / per-flag reference (every group).
 - [`cli-reference/plan.md`](cli-reference/plan.md) — the greenfield campaign-build pipeline in depth (`plan campaign` / `validate` / `orchestrate`).
 - [`SAFETY_MODEL.md`](SAFETY_MODEL.md) — the three-gate write model, sandbox/profile policy, exit codes.
-- [`PLAYBOOK_CATALOG.md`](PLAYBOOK_CATALOG.md) — pick a playbook by symptom (all 63, grouped by section).
+- [`PLAYBOOK_CATALOG.md`](PLAYBOOK_CATALOG.md) — pick a playbook by symptom (all 66, grouped by section).
 - [`DOCTRINE.md`](DOCTRINE.md) — modern Google Ads doctrine (Smart Bidding, learning phase, RSA stats, PMAX facts).
 - [`CLI_AUTOMATION.md`](CLI_AUTOMATION.md) — CI/CD + AI-agent invocation patterns (JSON contract, exit codes, scheduling).
 - [`CAPABILITY.md`](CAPABILITY.md) — which write surfaces are proven at which tier; never claim persistence without readback.

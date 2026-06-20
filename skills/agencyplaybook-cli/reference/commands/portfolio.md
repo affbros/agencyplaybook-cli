@@ -1,10 +1,10 @@
-# `apb verdict` — Command Reference
+# `apb portfolio` — Command Reference
 
 1 commands. Auto-generated from the apb binary on 2026-06-18.
 
-### `apb verdict`
+### `apb portfolio`
 
-Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT) per ACTIVE campaign, from 3 gates (Efficiency / Delivery+headroom / Quality). Read-only, ranked by spend. Provide --target-roas or --target-cpa for the Efficiency gate
+Cross-channel portfolio — rank Meta + Google campaigns by the SAME gate-verdict (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT), with a per-channel rollup + cross-channel reallocation. Server-side (needs APB_API_KEY); `--include-google` adds Google Ads when the add-on is connected (degrades soft to Meta-only)
 
 **Scope:** `read:playbooks:full` · **Min tier:** agency
 
@@ -12,12 +12,12 @@ Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / H
 |---|---|---|
 | `--days` | `<DAYS>` | Lookback window in days (default 30) |
 | `--since` | `<SINCE>` | Alternative to --days: YYYY-MM-DD or relative e.g. 30d |
-| `--target-roas` | `<TARGET_ROAS>` | Target ROAS for the Efficiency gate (overrides --target-cpa precedence is CPA-first) |
+| `--target-roas` | `<TARGET_ROAS>` | Target ROAS for the Efficiency gate |
 | `--target-cpa` | `<TARGET_CPA>` | Target CPA (USD) for the Efficiency gate |
 | `--min-age-days` | `<MIN_AGE_DAYS>` | Maturity floor — min age in days before a campaign is judged (default 30) |
 | `--min-conversions` | `<MIN_CONVERSIONS>` | Maturity floor — min conversions before a campaign is judged (default 50) |
-| `--queue` |  | Rank the verdicts into a decision queue ($ impact/day + next-action command + reallocation) |
-| `--include-paused` |  | Also judge PAUSED campaigns (reactivation / post-mortem lens). Paused campaigns carry delivery "n/a" so SCALE can't fire; read OPTIMIZE=relaunch, CUT=correctly killed |
+| `--include-google` |  | Include Google Ads (requires the Google Ads add-on; Meta-only otherwise) |
+| `--include-paused` |  | Also include PAUSED campaigns (reactivation / post-mortem lens) on both channels |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
@@ -34,5 +34,5 @@ Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / H
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb verdict --days <DAYS> --since <SINCE>
+apb portfolio --days <DAYS> --since <SINCE>
 ```

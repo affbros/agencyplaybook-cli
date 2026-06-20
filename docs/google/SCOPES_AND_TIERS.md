@@ -23,7 +23,7 @@ or enabling the add-on — not a CLI flag.
 ## Capability by tier (rule of thumb)
 
 - **Starter** — no Google add-on scopes (the add-on is Professional+).
-- **Professional** — **read everything**: all reports, all 63 playbooks, keyword planning, GAQL.
+- **Professional** — **read everything**: all reports, all 66 playbooks, keyword planning, GAQL.
 - **Agency** — adds **writes**: every mutation, the orchestrators, the changeset apply path, and
   the live-verify chains.
 - **Enterprise** (and Free Enterprise) — adds **scheduled automation**.

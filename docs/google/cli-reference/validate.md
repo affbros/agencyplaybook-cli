@@ -4,7 +4,7 @@
 
 Inspect planning artifacts for launch-readiness. Pure-local validators — no API, no writes. A failing verdict prints its JSON report and exits non-zero (code 3), so `validate … && orchestrate campaign-launch` stops on bad input
 
-**Surface:** 👁️ Read-only · **2 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **3 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -14,6 +14,7 @@ Inspect planning artifacts for launch-readiness. Pure-local validators — no AP
 |---|---|
 | [`campaign-spec`](#apb-gads-validate-campaign-spec) | Validate a CampaignLaunchSpec (from `plan campaign search`) for launch readiness: budget/geo/language/bidding present, every ad group has keywords + a valid RSA (counts, char limits, dupes), match types valid, negatives recommended. |
 | [`pmax-spec`](#apb-gads-validate-pmax-spec) | Validate a PmaxLaunchPlanSpec (from `plan campaign pmax`) for launch readiness: budget/final_url/geo/language present, PMAX-valid bidding, asset-group content (headline/description counts + lengths, required BUSINESS_NAME + marketing/square images), brand-guidelines + path rules, negatives recommended. |
+| [`demand-gen-spec`](#apb-gads-validate-demand-gen-spec) | Validate a DemandGenLaunchSpec (from `plan campaign demand-gen`) for launch readiness: campaign/budget/geo/bidding + the Demand Gen video-responsive ad's published v24 minimums (≥1 video, ≥1 logo). |
 
 ---
 
@@ -50,3 +51,20 @@ Usage: apb-gads validate pmax-spec [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | Path to the PmaxLaunchPlanSpec JSON (`plan campaign pmax`) |
+
+<a id="apb-gads-validate-demand-gen-spec"></a>
+### `apb-gads validate demand-gen-spec`
+
+Validate a DemandGenLaunchSpec (from `plan campaign demand-gen`) for launch readiness: campaign/budget/geo/bidding + the Demand Gen video-responsive ad's published v24 minimums (≥1 video, ≥1 logo). Errors block (exit 3); warnings advisory
+
+**Usage**
+
+```
+Usage: apb-gads validate demand-gen-spec [OPTIONS] --from-file <FROM_FILE>
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--from-file <FROM_FILE>` | Path to the DemandGenLaunchSpec JSON (`plan campaign demand-gen`) |

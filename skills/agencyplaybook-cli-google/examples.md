@@ -385,7 +385,7 @@ $B validate campaign-spec --from-file /tmp/launch.json \
 ## Cross-references
 
 - Concrete command sequences (W1–W7) + the output keys to read: `references/workflows.md`
-- Pick a playbook by symptom (all 63, by section): `references/playbook-catalog.md`
+- Pick a playbook by symptom (all 66, by section): `references/playbook-catalog.md`
 - The three-gate write model, sandbox/profile policy, capability tiers: `references/safety-model.md`
 - Modern Google Ads doctrine (Smart Bidding, learning phase, RSA stats, PMAX facts): `references/doctrine.md`
 - The full 24-group command index: `commands.md`

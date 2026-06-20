@@ -4,7 +4,7 @@
 
 Phase 3 composite workflows — orchestrators that compose primitives into end-to-end operator flows (ad-rotate, campaign-launch, etc.)
 
-**Surface:** ✍️ **Write-capable** · **7 command(s)** · [← back to index](README.md)
+**Surface:** ✍️ **Write-capable** · **8 command(s)** · [← back to index](README.md)
 
 > ⚠️ Commands here can write to a Google Ads account. Every write is **dry-run by default** and must clear the three independent gates (`--execute` + config + env) plus a per-customer profile or the test sandbox policy. See [`../mutations.md`](../mutations.md).
 
@@ -18,6 +18,7 @@ Phase 3 composite workflows — orchestrators that compose primitives into end-t
 | [`ad-refresh`](#apb-gads-orchestrate-ad-refresh) | Refresh a fatigued RSA: create a NEW responsive search ad in the ad group and optionally pause an old one (create-new + pause-old — editing in place resets policy review and breaks history). |
 | [`campaign-launch`](#apb-gads-orchestrate-campaign-launch) | End-to-end campaign launch from a JSON spec file: budget → campaign → ad group → RSA → keywords. |
 | [`pmax-build`](#apb-gads-orchestrate-pmax-build) | Atomic Performance Max build (phase 1): a single-asset-group PMAX campaign created in ONE googleAds:mutate — budget → campaign (bidding at create) → geo/language/campaign-negatives → assets → asset group → links. |
+| [`demand-gen-build`](#apb-gads-orchestrate-demand-gen-build) | Greenfield Demand Gen builder (decision-verdict-001 S004) — atomically creates budget → campaign (DEMAND_GEN, bidding at create) → geo/language → ad group → audience criteria → a Demand Gen video-responsive ad in ONE googleAds:mutate. |
 | [`weekly-optimization`](#apb-gads-orchestrate-weekly-optimization) | Weekly-optimization readout: composes search-term-cleanup + expansion-readiness + impression-share-loss into a single advisory document. |
 | [`monthly-review`](#apb-gads-orchestrate-monthly-review) | Monthly-review readout: composes account-health + waste-audit + creative-refresh + budget-pacing + quality-score-audit into a bundled 30-day view. |
 | [`rollback`](#apb-gads-orchestrate-rollback) | Rollback: accept a list of resource names and submit a single atomic remove batch. |
@@ -102,6 +103,23 @@ Usage: apb-gads orchestrate pmax-build [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON PmaxLaunchPlanSpec file |
+
+<a id="apb-gads-orchestrate-demand-gen-build"></a>
+### `apb-gads orchestrate demand-gen-build`
+
+Greenfield Demand Gen builder (decision-verdict-001 S004) — atomically creates budget → campaign (DEMAND_GEN, bidding at create) → geo/language → ad group → audience criteria → a Demand Gen video-responsive ad in ONE googleAds:mutate. Takes a DemandGenLaunchSpec (`plan campaign demand-gen` / `validate demand-gen-spec`). Dry-run by default; --execute submits (born PAUSED). Pair with --validate-only for a SERVER_VALIDATED Google round-trip. Assets (videos/logos) must pre-exist
+
+**Usage**
+
+```
+Usage: apb-gads orchestrate demand-gen-build [OPTIONS] --from-file <FROM_FILE>
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--from-file <FROM_FILE>` | JSON DemandGenLaunchSpec file |
 
 <a id="apb-gads-orchestrate-weekly-optimization"></a>
 ### `apb-gads orchestrate weekly-optimization`

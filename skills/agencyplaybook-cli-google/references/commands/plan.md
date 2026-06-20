@@ -4,7 +4,7 @@
 
 Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaService / KeywordPlanService. Does not write; no three-gate safety applied
 
-**Surface:** 👁️ Read-only · **11 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **12 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -166,8 +166,8 @@ Usage: apb-gads plan rsa [OPTIONS] --from <FROM>
 |---|---|
 | `--from <FROM>` | Path to the campaign-structure JSON produced by `plan structure` |
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
-| `--brand <BRAND>` | Brand name to inject into templates (e.g. "Example Co") [default: ""] |
-| `--final-url <FINAL_URL>` | Base final URL for the ads (e.g. "https://www.yourbrand.com") [default: ""] |
+| `--brand <BRAND>` | Brand name to inject into templates (e.g. "Scandalous Coffee") [default: ""] |
+| `--final-url <FINAL_URL>` | Base final URL for the ads (e.g. "https://www.scandalouscoffee.com") [default: ""] |
 
 <a id="apb-gads-plan-tracking"></a>
 ### `apb-gads plan tracking`
@@ -204,6 +204,7 @@ Usage: apb-gads plan campaign [OPTIONS] <COMMAND>
 | [`search`](#apb-gads-plan-campaign-search) | Assemble a launchable multi-ad-group CampaignLaunchSpec (bare JSON) from `plan structure` + `plan rsa` (+ optional goals/keywords). |
 | [`full`](#apb-gads-plan-campaign-full) | Run the whole greenfield pipeline (keyword research → structure → rsa → goals → tracking → one launch spec per campaign + summary.md) into --export-dir. |
 | [`pmax`](#apb-gads-plan-campaign-pmax) | Assemble a launchable PmaxLaunchPlanSpec (bare JSON) for a single-asset-group Performance Max campaign (phase 1). |
+| [`demand-gen`](#apb-gads-plan-campaign-demand-gen) | Assemble a launchable DemandGenLaunchSpec (bare JSON) for a single-ad-group Demand Gen campaign (decision-verdict-001 S004) — the third pillar alongside `search` / `pmax`. |
 
 <a id="apb-gads-plan-campaign-search"></a>
 #### `apb-gads plan campaign search`
@@ -313,3 +314,38 @@ Usage: apb-gads plan campaign pmax [OPTIONS] --campaign-name <CAMPAIGN_NAME> --b
 | `--brand-exclusion-set-id <BRAND_EXCLUSION_SET_ID>` | Existing BRANDS shared set id (numeric) to exclude from the campaign |
 | `--ad-schedule <AD_SCHEDULE>` | Ad schedule (dayparting) as DAY:start_hour:end_hour (e.g. MONDAY:9:17). NO bid modifier (PMAX rejects per-schedule modifiers). Repeatable |
 | `--customer-acquisition-mode <CUSTOMER_ACQUISITION_MODE>` | New-customer-acquisition optimization mode: TARGET_ALL_EQUALLY \| BID_HIGHER_FOR_NEW_CUSTOMER \| TARGET_NEW_CUSTOMER (singular). The new-customer modes need an account-level existing-customer definition |
+| `--merchant-id <MERCHANT_ID>` | Merchant Center account ID (numeric) — makes this a RETAIL (Shopping) PMax that serves product ads from the linked feed. Pair with a fully-partitioned listing group (`mutate pmax-listing-group-filter-*`) |
+| `--feed-label <FEED_LABEL>` | Merchant Center feed label (e.g. "US") restricting which products serve. Only meaningful with --merchant-id |
+
+<a id="apb-gads-plan-campaign-demand-gen"></a>
+#### `apb-gads plan campaign demand-gen`
+
+Assemble a launchable DemandGenLaunchSpec (bare JSON) for a single-ad-group Demand Gen campaign (decision-verdict-001 S004) — the third pillar alongside `search` / `pmax`. Pre-create video + logo assets (`mutate asset-*`) and pass their resource names. Emits `{ command, spec, validation }`; pipe `.spec` to `orchestrate demand-gen-build --from-file`
+
+**Usage**
+
+```
+Usage: apb-gads plan campaign demand-gen [OPTIONS] --campaign-name <CAMPAIGN_NAME> --budget-micros <BUDGET_MICROS> --final-url <FINAL_URL> --ad-group-name <AD_GROUP_NAME>
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--campaign-name <CAMPAIGN_NAME>` | — |
+| `--budget-micros <BUDGET_MICROS>` | — |
+| `--final-url <FINAL_URL>` | — |
+| `--geo-target-id <GEO_TARGET_ID>` | Positive geo-target-constant id (numeric, e.g. 2840 = USA). Repeatable |
+| `--language-id <LANGUAGE_ID>` | Language-constant id (numeric, e.g. 1000 = English). Repeatable |
+| `--bidding-strategy <BIDDING_STRATEGY>` | Bidding: MAXIMIZE_CLICKS \| MAXIMIZE_CONVERSIONS \| MAXIMIZE_CONVERSION_VALUE [default: MAXIMIZE_CONVERSIONS] |
+| `--target-cpa-micros <TARGET_CPA_MICROS>` | Target CPA micros (MAXIMIZE_CONVERSIONS) |
+| `--target-roas <TARGET_ROAS>` | Target ROAS (MAXIMIZE_CONVERSION_VALUE, e.g. 3.5) |
+| `--ad-group-name <AD_GROUP_NAME>` | — |
+| `--audience-id <AUDIENCE_ID>` | Existing AUDIENCE id (numeric). Repeatable |
+| `--video-asset <VIDEO_ASSET>` | Video asset resource name (≥1 required). Repeatable |
+| `--logo-asset <LOGO_ASSET>` | Logo image asset resource name (≥1 required). Repeatable |
+| `--headline-asset <HEADLINE_ASSET>` | — |
+| `--long-headline-asset <LONG_HEADLINE_ASSET>` | — |
+| `--description-asset <DESCRIPTION_ASSET>` | — |
+| `--cta-asset <CTA_ASSET>` | — |
+| `--business-name-asset <BUSINESS_NAME_ASSET>` | — |

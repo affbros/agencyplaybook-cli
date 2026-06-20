@@ -188,8 +188,11 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb playbook waste-audit`
 - `apb playbook weekly-digest`
 
-### `read:playbooks:full` (30 commands)
+### `read:playbooks:full` (34 commands)
 
+- `apb agency accounts`
+- `apb agency connect-meta`
+- `apb agency portfolio`
 - `apb playbook advantage-adoption`
 - `apb playbook anomaly-detect`
 - `apb playbook bid-strategy`
@@ -219,6 +222,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb playbook segment-performance`
 - `apb playbook signal-quality`
 - `apb playbook video-engagement`
+- `apb portfolio`
 - `apb verdict`
 
 ### `read:reports` (20 commands)
@@ -359,7 +363,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb rules preview`
 - `apb rules update`
 
-### `—` (20 commands)
+### `—` (24 commands)
 
 - `apb alias list`
 - `apb alias remove`
@@ -379,5 +383,9 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb doctor check`
 - `apb doctor quota`
 - `apb doctor validate-only-matrix`
+- `apb guardrails clear`
+- `apb guardrails set`
+- `apb guardrails show`
+- `apb guardrails test`
 - `apb meta cache`
 - `apb meta status`

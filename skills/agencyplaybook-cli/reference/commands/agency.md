@@ -1,24 +1,20 @@
-# `apb action` — Command Reference
+# `apb agency` — Command Reference
 
 3 commands. Auto-generated from the apb binary on 2026-06-18.
 
-### `apb action apply`
+### `apb agency accounts`
 
-Apply an action plan or build strategy bridge output
+List the ad accounts the connected token(s) can see
 
-**Scope:** `write:automation` · **Min tier:** enterprise · **Write op** (requires `--execute`)
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` |  |
-| `--plan-id` | `<PLAN_ID>` |  |
-| `--adset` | `<ADSET>` |  |
-| `--strategy` | `<STRATEGY>` |  |
-| `--action` | `<ACTION>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -30,24 +26,23 @@ Apply an action plan or build strategy bridge output
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb action apply --execute --plan-id <PLAN_ID> --adset <ADSET>
+apb agency accounts --allow-domain <HOST> --guardrail-reason <TEXT>
 ```
 
-### `apb action autoplan`
+### `apb agency connect-meta`
 
-Generate safe plan seeds from recommendation diagnostics (no execution)
+Connect a Meta system-user token (BYO) for the agency portfolio. POSTs to /saas/agency/meta-token; the token is validated + stored server-side
 
-**Scope:** `write:automation` · **Min tier:** enterprise
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` |  |
-| `--days` | `<DAYS>` |  |
-| `--limit` | `<LIMIT>` |  |
+| `--token` | `<TOKEN>` | The Meta system-user access token (with `ads_read`). Pipe from a secret store to keep it out of shell history, e.g. `--token "$(cat token.txt)"` |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -59,26 +54,25 @@ Generate safe plan seeds from recommendation diagnostics (no execution)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb action autoplan --days <DAYS> --limit <LIMIT>
+apb agency connect-meta --token <TOKEN> --allow-domain <HOST>
 ```
 
-### `apb action plan`
+### `apb agency portfolio`
 
-Generate an action plan
+Cross-channel portfolio roll-up — per-currency totals + per-account rows with the server verdict (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD)
 
-**Scope:** `write:automation` · **Min tier:** enterprise
+**Scope:** `read:playbooks:full` · **Min tier:** agency
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` |  |
-| `--campaign` | `<CAMPAIGN>` |  |
-| `--days` | `<DAYS>` |  |
-| `--scope` | `<SCOPE>` |  |
-| `--plan-only` |  |  |
+| `--days` | `<DAYS>` | Lookback window in days (default 30) |
+| `--channel` | `<CHANNEL>` | Channel filter: meta \| google \| all (default all) |
+| `--compare` |  | Include prior-period comparison (spend Δ) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -90,5 +84,5 @@ Generate an action plan
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb action plan --campaign <CAMPAIGN> --days <DAYS>
+apb agency portfolio --days <DAYS> --channel <CHANNEL>
 ```

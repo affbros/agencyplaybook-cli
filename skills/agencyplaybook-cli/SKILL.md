@@ -1,14 +1,14 @@
 ---
 name: agencyplaybook-cli
 description: |
-  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 257 commands across 36 domains.
+  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 265 commands across 39 domains.
 
   USE WHEN user says "apb", "agencyplaybook cli", "agencyplaybook", "meta campaign automation", "meta ads via cli", "campaign create", "campaign update", "campaign delete", "duplicate campaign", "scale campaign", "pause campaign", "budget update", "ad set targeting", "creative upload", "audience upload", "lookalike audience", "custom audience", "fatigue check", "waste audit", "health score", "weekly digest", "learning accelerator", "playbook diagnostic", "plan execute", "plan validate", "report insights", "compare periods", "split test", "rules engine", "automation rule", "catalog product set", "custom conversion", "leadgen forms", "pixel health", "CAPI dual signal", "growth score", "retargeting compression", "saturation audit", "broad targeting audit", "no-touch compliance", "consolidation advisor", "ROAS recovery", "anomaly detect", "reset rebuild", "scale roadmap", "rebalance", "daypart audit", "placement audit", "creative mix", "event hierarchy", "duplicate detect", "event downgrade ladder", "andromeda", "dataset clone-plan", "sync diff", "alias create", or otherwise needs to programmatically manage Meta ad accounts via the `apb` CLI.
 ---
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-06-17 from the live binary — 257 commands across 36 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-06-18 from the live binary — 265 commands across 39 domains.
 
 ## Routing
 
@@ -18,6 +18,7 @@ This skill packages working knowledge of every `apb` command. Generated on 2026-
 - **User wants automation pattern** ("safe rollout with rollback") → read `workflows/automation.md`.
 - **User wants diagnostic playbook** ("which playbook for low ROAS?") → read `workflows/diagnostics.md`.
 - **User wants a decision / verdict** ("which campaigns should I scale, tighten, or cap this week?") → read `reference/verdict-framework.md` — collapse the playbook outputs into **one decisive verb per campaign** (SCALE / TIGHTEN / OPTIMIZE / CAP, plus HOLD / CUT) from explicit pass/fail gates, then act on the queue.
+- **User manages multiple client accounts** ("set guardrails for this client", "run changes across all my accounts safely", "did I edit the wrong account?") → read `reference/agency-guardrails.md` — the two-dial model (plan for creates/destructive, direct for small edits), the per-write right-account/domain/brand/budget checks, dry-run-all → review-exceptions → execute-clean at scale, and the override/boundary rules.
 - **User asks to set up day parting / ad scheduling** ("daypart this campaign", "only run ads 9am–9pm", "schedule ads by hour", "run evenings only") → **the campaign type to create is a NEW campaign/ad set on a LIFETIME budget** (ABO: lifetime on the ad set; CBO: lifetime on the campaign). Day parting is impossible on a **daily** budget and budget *type* can't be converted, so **never try to add it to an existing daily-budget campaign** — build a new one. Read "Meta platform constraints" below + `examples.md` §16 before writing any command.
 - **User hits a 403** ("insufficient_scope on X") → read `reference/scopes.md` and explain tier gap.
 - **User script needs exit-code branching** → read `reference/exit-codes.md` (the canonical table + decision tree).

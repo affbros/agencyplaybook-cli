@@ -1,6 +1,6 @@
 # apb-gads command index
 
-**276 leaf commands across 26 groups** (Google Ads API v24). Per-group flag references live in
+**286 leaf commands across 27 groups** (Google Ads API v24). Per-group flag references live in
 `references/commands/<group>.md` (generated from the binary — the accurate per-param source). The
 live registry is `apb-gads --help` and `apb-gads playbook list`.
 
@@ -34,7 +34,9 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
 | `report` | 23 | performance/asset/PMAX/shopping/settings reports | `references/commands/report.md` |
-| `playbook` | 64 | `list` + **63 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
+| `playbook` | 67 | `list` + **66 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
+| `verdict` | 1 | one decisive verb per campaign (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) from 3 gates | `references/commands/verdict.md`, `references/verdict-framework.md` |
+| `campaign-type-advisor` | 1 | prescriptive engine choice (Search vs PMax vs Demand Gen) for a goal | `references/commands/campaign-type-advisor.md`, `references/campaign-type-selection.md` |
 | `growth` | 5 | weekly/monthly reviews, `scale-up`, `consolidation`, `monitor` | `references/commands/growth.md` |
 
 ## Planning & greenfield
@@ -63,4 +65,4 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | `schedule` | 7 | cron-install recurring **read-only** runs | `references/commands/schedule.md` |
 | `export` | 1 | render an artifact JSON to CSV / JSON / Markdown | `references/commands/export.md` |
 
-> Counts verified against `apb-gads 0.1.2`. The two nesting points are `plan campaign {search,full,pmax}` and `sandbox helper full-flow`.
+> Counts verified against `apb-gads 0.1.11`. The two nesting points are `plan campaign {search,full,pmax}` and `sandbox helper full-flow`.
