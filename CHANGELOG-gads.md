@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.10] — 2026-06-19 (search-term analysis suite — analysis-expansion S1–S3)
+
+### Added
+- **`playbook search-term-analysis`** — consolidated search-term analysis: ties each search term to its triggering keyword (text + match type), computes per-term CPA/ROAS, and emits BOTH promote candidates (high-ROI terms not yet keywords → keyword adds) and negate candidates (high-cost / zero-conversion → negatives) in **one combined `--output-spec`** for the dry-run-first apply pipeline (`plan from-audit` → `changes from-plan` → `changes apply`).
+- **`playbook search-term-ngram-audit`** — decomposes search terms into 1/2/3-grams, aggregates spend/clicks/conversions per n-gram, and flags the most wasteful + most efficient patterns. Emits the wasteful **multi-word** n-grams as shared-negative candidates (`--shared-set <resource|id>`); 1-grams are surfaced but only emitted as negatives with `--include-unigram-negatives`.
+- **Shared-negative-list action routing** — the actionable pipeline can now write **shared** negative-keyword lists (previously ad-group / campaign only). New `--negatives-to ad-group|campaign|shared` (default `ad-group`, behavior unchanged) + `--shared-set` on `waste-cluster-audit` and `search-term-analysis`; bad-term candidates route to a shared negative list via the existing guarded `apply_plan`.
+
+### Changed
+- Surface grows to **286 commands across 27 groups · 66 diagnostic playbooks**.
+
+No safety-model change — every new write rides the existing three-gate + `apply_plan` guard. The shared-criterion *add* is auto-apply-eligible; shared-set *create* + campaign *attach* stay review-gated.
+
 ## [0.1.9] — 2026-06-18 (server-delivered guardrail profiles)
 
 ### Added
