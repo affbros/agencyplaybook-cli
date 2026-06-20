@@ -6,6 +6,14 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.11] — 2026-06-20 (competitive IS + smart-bidding misapplication — analysis-expansion S4–S5)
+
+### Added
+- **Competitive impression-share intelligence** — `playbook competitor-pressure` enhanced into an N-window impression-share competitive proxy: trends top-of-page erosion (`search_top_impression_share` + `search_absolute_top_impression_share`) alongside rank-lost IS over `--windows N`, decomposes "losing ground" into **rank-lost** (raise bid / improve Quality Score / tighten match) vs **budget-lost** (raise budget), and localizes with `--level campaign|ad_group|keyword`. Handles Google's IS clamping sentinels (`<10%` / `>90%`). **Honest about the API limit:** named-competitor / overlap / outranking data is NOT available via the Google Ads API — the playbook output and docs say so and point to the manual Google Ads UI Auction Insights report.
+- **Smart-bidding misapplication diagnostic** — `playbook bid-strategy-mismatch` gains 3 conversion-volume rules: Target CPA under 30 conv → Maximize Conversions; Target ROAS under 15 conv (the documented Search/Shopping floor, **not** 50) → Maximize Conversion Value (or Maximize Conversions if value tracking is unhealthy); plus the symmetric Maximize-Conversion-Value case. Framed as the correct **entry** strategy for the volume tier (not a retreat); the manual switch is `mutate campaign-update-bidding-strategy`. New `--tcpa-min-conversions` / `--troas-min-conversions` / `--max-conv-value-min-conversions` flags.
+
+No safety-model change; surface unchanged at **286 commands / 27 groups / 66 playbooks** (both sprints add flags/rules to existing playbooks).
+
 ## [0.1.10] — 2026-06-19 (search-term analysis suite — analysis-expansion S1–S3)
 
 ### Added
