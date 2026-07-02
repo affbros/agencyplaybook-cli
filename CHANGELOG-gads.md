@@ -6,6 +6,30 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.12] — 2026-07-02 (write-gate portability + PMAX pre-flight validators + audience/demographic fixes)
+
+Ships the full `gads-write-gate-portability-001` workstream (Tier 1 + Tier 2 + follow-up fixes). No command/flag surface change — still **286 commands / 27 groups / 66 playbooks**. Safety-model behavior changed (see below).
+
+### Changed — the binary no longer polices itself (Tier 1)
+- **Local write/read gates are advisory by default.** The binary's own `permitted_operations` allowlist, `read_only`/`allow_writes`/`require_mutation_env` flags, budget caps, and sandbox rules no longer *block* an operation — they surface as advisories in the JSON output. The dry-run→live `--execute` toggle and the `audit.jsonl` write are unchanged. Authority/consent lives at the server/proxy (tier · scope · `write_policy`) and the MCP handshake + Skill — not baked into the tool. Opt back into strict local enforcement with `safety.enforce_local_gates: true`.
+- **The server write-policy floor is enforced where it's actually enforceable.** In managed mode the SaaS `write_policy` (e.g. Starter = read-only) is re-checked server-side by the apb-api Google proxy, so the binary treats its local copy as advisory when the request is proven proxy-routed. BYO mode (no proxy in its path) keeps the local floor as its only backstop.
+
+### Changed — managed-mode portability (Tier 1)
+- **Stable `~/.apb-gads` state home.** With only `.env`/`APB_API_KEY` and no `google-ads.yaml`, `audit` logging, `context`, and `schedule` now work (they previously silently broke) — state resolves under `~/.apb-gads/` instead of erroring.
+- **`verify pmax-launch` is portable.** PMAX bootstrap asset IDs come from the tenant's server profile; the hardcoded Scandalous-Coffee fallback is scoped to that one customer only — every other account gets a clear "bootstrap assets first" error instead of a cross-account `RESOURCE_NOT_FOUND`.
+- **`doctor check` gained a `portability` block** — reports the config source (managed/byo/legacy), whether a local `google-ads.yaml` is loaded, and warns if one is silently shadowing managed mode.
+
+### Added — PMAX pre-flight validators (Tier 2)
+- **YouTube-only video attach** — `pmax-asset-attach --field-type YOUTUBE_VIDEO --asset-id <id>` best-effort-confirms the asset is actually a YouTube video before submitting; a confirmed mismatch points at `asset-create-youtube-video` (no MP4 upload path exists).
+- **New-customer acquisition precondition** — `campaign-update-customer-acquisition --optimization-mode {TARGET_NEW_CUSTOMER|BID_HIGHER_FOR_NEW_CUSTOMER}` surfaces a `precondition_advisory` (needs an account-level existing-customer definition, else Google rejects the goal).
+- **Demographic-signal-type guidance** — a demographic-looking `pmax-audience-signal-attach --signal-type` (e.g. `AGE_RANGE_35_44`) points at the real `audience-create` → `--signal-type AUDIENCE` workflow instead of a generic error.
+- **Portrait aspect ratio** — an undersized `asset-create-image --field-type PORTRAIT_MARKETING_IMAGE` names the expected 4:5 ratio alongside the pixel minimums.
+- **`INCOME_RANGE` on PMAX** — a household-income exclusion on a confirmed PERFORMANCE_MAX campaign is blocked pre-API (income isn't a PMAX control — only an Audience signal). `campaign-device-modifier-set --bid-modifier` help now documents `0.0` = exclude/opt-out.
+
+### Fixed
+- **Age-segmented audiences now work.** `audience-create --age-range AGE_RANGE_*` previously always failed against Google — the age dimension was serialized as bare enum strings, but the v24 `AgeDimension.age_ranges` is a repeated `AgeSegment` message of numeric bounds. Each `--age-range` now maps to its `{minAge, maxAge}` bucket (`AGE_RANGE_65_UP` → min-only; `AGE_RANGE_UNDETERMINED` → `includeUndetermined`). Gender/parental-status were already correct.
+- **Positive campaign-level demographic targeting is blocked with clear guidance.** `campaign-demographic-add` without `--negative` (any demo type, any channel) previously produced a confusing raw Google `FIELD_INCOMPATIBLE_WITH_NEGATIVE_TARGETING` reject — campaign demographic criteria are exclusion-only. It now fails pre-API pointing at `campaign-demographic-exclude` (to exclude) or `ad-group-demographic-add` (for positive ad-group-level demographic bid adjustments).
+
 ## [0.1.11] — 2026-06-20 (competitive IS + smart-bidding misapplication — analysis-expansion S4–S5)
 
 ### Added
