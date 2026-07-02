@@ -40,7 +40,7 @@ _No command-specific options — uses only the [global options](README.md#global
 
 Register a new job. The invocation that follows `--` must be a read-only apb-gads command — mutations cannot be scheduled.
 
-Example: apb-gads schedule add --id monthly-review --cron "0 9 1 * *" \ --customer 6523096952 -- orchestrate monthly-review
+Example: apb-gads schedule add --id monthly-review --cron "0 9 1 * *" \ --customer 1234567890 -- orchestrate monthly-review
 
 **Usage**
 

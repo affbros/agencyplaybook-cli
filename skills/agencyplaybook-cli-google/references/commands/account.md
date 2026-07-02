@@ -47,7 +47,7 @@ Usage: apb-gads account use [OPTIONS] <CUSTOMER_ID>
 
 | Argument | Description |
 |---|---|
-| `<CUSTOMER_ID>` | Numeric Google Ads customer id, no dashes (e.g. 6523096952) |
+| `<CUSTOMER_ID>` | Numeric Google Ads customer id, no dashes (e.g. 1234567890) |
 
 _No command-specific options — uses only the [global options](README.md#global-options)._
 
