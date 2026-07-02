@@ -46,7 +46,7 @@ are pinned to a fixed lookback on the closed Scandalous child customer.
 ### Anchoring + stability
 
 The live-data questions are anchored to the deliberate test customer (the Scandalous child
-`6523096952` under the apifuel MCC `1521063001`, per AGENTS.md rule #10) over a fixed lookback. The
+`1234567890` under the test MCC `1111111111`, per AGENTS.md rule #10) over a fixed lookback. The
 test child's campaigns are PAUSED, so verdict questions pass `include_paused:true` and report
 questions use a `-365d` window — a short/active-only window is legitimately empty (empty ≠ broken).
 Grades/distributions are coarse buckets; rankings are by campaign **name** (very stable). If the test

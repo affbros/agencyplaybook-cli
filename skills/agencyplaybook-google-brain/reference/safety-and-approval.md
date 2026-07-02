@@ -42,12 +42,12 @@ anything. **There is no Google plan-orchestration / multi-step execute tool** in
 
 ### Worked example — pause a campaign
 
-1. `gads_preview_change { customer_id:"6523096952", change:{ op:"campaign-update-status",
+1. `gads_preview_change { customer_id:"1234567890", change:{ op:"campaign-update-status",
    entity_id:"21869030350", params:{ status:"PAUSED" } } }` → `{ preview, guard, approval_token,
    change_set_hash, expires_at }`. Nothing changed.
-2. Tell the user: *"This will PAUSE campaign 21869030350 on customer 6523096952 (reversible).
+2. Tell the user: *"This will PAUSE campaign 21869030350 on customer 1234567890 (reversible).
    Approve?"* — wait for an explicit yes.
-3. `gads_apply_change { customer_id:"6523096952", change:{ op:"campaign-update-status",
+3. `gads_apply_change { customer_id:"1234567890", change:{ op:"campaign-update-status",
    entity_id:"21869030350", params:{ status:"PAUSED" } }, approval_token:"<from step 1>",
    operator_confirmation:true }` — the change **must be byte-identical** to the preview (else
    `hash_mismatch`).
