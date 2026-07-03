@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.21] — 2026-07-03 (just-signed-up onboarding + throttle & pagination)
+
+### Fixed — the just-signed-up seam (valid API key, Meta not yet connected)
+- **Fixed a catch-22**: `apb auth connect-meta` (and `auth test` / `auth status`) could not run before Meta was connected — the command you needed was blocked by not being connected. All `auth` subcommands now run in the not-yet-connected state.
+- **Accurate messaging**: a valid key with no Meta connection now says *"Your API key is valid, but no Meta account is connected yet — run `apb auth connect-meta`"* instead of the misleading *"your APB_API_KEY could not be validated"*.
+- **`apb auth login` now writes `~/.apb/.env`** (in addition to the local `.env`), so credentials work from any directory — previously login "succeeded" but commands run elsewhere failed with "no credentials configured". Login now also completes cleanly when Meta isn't connected yet.
+- `apb auth test` short-circuits with a clear "Meta not connected — run `apb auth connect-meta`" (and a non-zero exit) instead of a raw Meta OAuth error.
+
+### Changed
+- **Pre-emptive rate-limit throttle is now ON by default** so long-running agent/automation loops don't walk into Meta 429 exhaustion. It only ever pre-*sleeps* under measured usage pressure — it never makes a correct request fail. Opt out with `APB_NO_THROTTLE=1` (the legacy `APB_THROTTLE=0` still works too) for maximum-speed scripts.
+- **List pagination is now wired for `campaign` / `adset` / `ad` / `creative` / `audience list`.** `--all` drains every page (previously these silently truncated at the first page on large accounts); `--after <cursor>` fetches a single page from a cursor. `--json` output is unchanged (a bare array); human-readable mode prints a "next page" hint when more results exist.
+
 ## [0.5.20] — 2026-07-02 (safety & exit-code correctness)
 
 ### Fixed
