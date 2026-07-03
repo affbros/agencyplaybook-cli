@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.20] — 2026-07-02 (safety & exit-code correctness)
+
+### Fixed
+- `apb doctor check` now exits non-zero (exit 1) when a diagnostic fails, so `apb doctor check && <next step>` chains stop on failure. The full JSON report still prints either way.
+- `apb auth test` now exits non-zero (exit 3) when the resolved credential is invalid.
+- `apb custom-conversion get` / `list` no longer request Meta's write-only `event_source_id` field, which returned `(#100) Tried accessing nonexisting field` and failed the entire read on Graph API v25.
+- Disabled-workspace and disabled-user conditions now surface a clear, actionable message instead of a raw HTTP 403 body.
+- Guardrail **WARN** verdicts now appear in `--json` output (previously visible only on stderr in human-readable mode).
+
+### Changed
+- `--dry-run` and `--execute` are now mutually exclusive — passing both is rejected at parse time (exit 2) instead of `--execute` silently taking precedence.
+
 ## [0.5.19] — 2026-06-18 (server-delivered guardrail profiles)
 
 ### Added
