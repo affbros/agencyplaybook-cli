@@ -6,6 +6,26 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.13] — 2026-07-02 (correctness & gate-consistency patch)
+
+No command/flag surface change — still **286 commands / 27 groups / 66 playbooks**.
+
+### Fixed
+- **HTTP client now has connect + request timeouts.** The Google Ads API client previously had no timeout at all, so a stalled endpoint could hang the CLI indefinitely (the worst-case CI failure mode). Added a bounded connect-timeout and request-timeout.
+- **`validate demand-gen-spec` now exits 3 when the spec fails validation**, matching its own `--help` contract and its sibling validators (it previously always exited 0).
+- **`doctor check` no longer discards offline portability diagnostics on an auth failure.** Portability is computed first; an auth error is captured as `auth_ok: false` + `auth_error` instead of aborting the whole command — exactly when a misconfigured first run needs those diagnostics.
+- **`auth test` now returns a structured result** (`{valid, customer_count, resourceNames}`) instead of a raw passthrough of Google's `resourceNames`.
+- **Clearer first-run errors.** A missing credentials file now names `google-ads.example.yaml` and `apb-gads auth login` instead of a raw "failed to read config".
+- **`doctor check` now reports `binary_version`** (a top support-diagnostic field).
+
+### Changed
+- **Uniform write-gate output.** All three write gates now emit the same `advisories` key and a `decision` field (previously the key drifted between `local_gate_advisories`/`advisories`, and the sandbox gate omitted `decision`). The asset-path safety gate now follows the same advisory-by-default posture as the campaign gates instead of hard-failing — consistent with the gw1 model.
+- Updated the CLI `about` string (dropped a stale "read-only … MVP" description; the 116 gated mutations shipped many versions ago).
+
+### Security / CI
+- Added a **public-repo mirror leak guard** (`check_public_mirror_leaks.py`), enforced in CI: only the curated public docs + skill directories are mirror-eligible, and the check fails if a live account identifier appears in any mirror-eligible path.
+- The gads `cargo fmt --check` step is now a hard CI gate (previously advisory).
+
 ## [0.1.12] — 2026-07-02 (write-gate portability + PMAX pre-flight validators + audience/demographic fixes)
 
 Ships the full `gads-write-gate-portability-001` workstream (Tier 1 + Tier 2 + follow-up fixes). No command/flag surface change — still **286 commands / 27 groups / 66 playbooks**. Safety-model behavior changed (see below).
