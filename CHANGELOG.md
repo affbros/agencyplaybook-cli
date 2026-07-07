@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.22] — 2026-07-07 (invalid-key recovery URL fix)
+
+### Fixed
+- The invalid/expired API-key error message now points to the correct dashboard page — `https://agencyplaybook.io/api-keys` (previously `/dashboard/api-keys`, which is not a route and dead-ended users trying to recover). (july7-findings-001 F5)
+
 ## [0.5.21] — 2026-07-03 (just-signed-up onboarding + throttle & pagination)
 
 ### Fixed — the just-signed-up seam (valid API key, Meta not yet connected)
