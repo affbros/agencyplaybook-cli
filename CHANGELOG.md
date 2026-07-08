@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.23] — 2026-07-07 (accurate invalid-key reporting in auth test)
+
+### Fixed
+- `apb auth test` with an invalid or expired `APB_API_KEY` no longer misreports *"API key is valid, but no Meta account is connected"* — it now says the key could not be validated, includes the actual resolve error (`resolve_error` / `key_valid:false` in JSON output), and points to https://agencyplaybook.io/api-keys. The valid-but-not-yet-connected onboarding message is unchanged. (july7-findings-001 S002)
+
 ## [0.5.22] — 2026-07-07 (invalid-key recovery URL fix)
 
 ### Fixed
