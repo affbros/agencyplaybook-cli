@@ -6,6 +6,23 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.14] — 2026-07-09 (Google API retry/backoff)
+
+No command/flag surface change — still **286 commands / 27 groups / 66 playbooks**.
+
+### Added
+- **Automatic retry + capped exponential backoff for all Google Ads REST calls.** The client previously had zero rate-limit handling — any non-success response bailed immediately. Every read, report, playbook, planning, `--validate-only`, and mutate call now issues through a single retry wrapper (full-jitter backoff, 1s → 2s → 4s, max 3 retries) that classifies transient failures. Google publishes no `Retry-After`; there is one shared ops/day quota, so agent-driven loops (MCP brains, playbook fan-outs) no longer burn it and fail hard on the first 429.
+  - **Retryable:** HTTP 429 / `RESOURCE_EXHAUSTED` / `QuotaError` (all call kinds — rejected pre-execution, so safe); HTTP 5xx / `INTERNAL` / `UNAVAILABLE` / `DEADLINE_EXCEEDED` and transport drops (**reads + `--validate-only` only**).
+  - **Never retried:** auth errors, 4xx request validation, `CUSTOMER_NOT_ALLOWLISTED_*`.
+  - **Real `--execute` mutations never retry a 5xx / transport error** — they fail with a classified "verify state before re-running" error so a partially-applied write is never double-applied.
+- **New env tunables:** `APB_GADS_RETRY_MAX` (default 3), `APB_GADS_RETRY_BASE_MS` (default 1000), and `APB_GADS_NO_RETRY=1` kill-switch. Each retry emits a structured `gads_api_retry …` stderr line. Docs: `docs/configuration.md` § *API retry & backoff*.
+
+### Changed
+- Exhausted / non-retryable failures now surface a classified error naming the cause (rate-limit vs. server error) and, for quota, that the shared ops/day quota may be exhausted — replacing the terse `google ads api error <status>`.
+
+### Fixed
+- **`verify pmax-launch` is now truly portable off Scandalous Coffee.** The with-config branch of `PmaxLaunchSpec::from_policy()` previously hardcoded Scandalous Coffee's final URL, `$5` budget, and USA geo even for a non-Scandalous customer with a valid `pmax_asset_config`, so a portability run built a PMAX campaign pointed at the wrong site. `pmax_asset_config` gains three campaign-level fields — `final_url`, `budget_micros`, `geo_target_id` — that the launch path now reads; a missing one **fails loud naming the field** rather than substituting a Scandalous value. `verify bootstrap-pmax-assets` emits the three fields in its ready-to-paste YAML (`budget`/`geo` default to `$5`/USA; `final_url` empty on purpose so the launch blocks until you set it). The Scandalous-Coffee no-config fallback is unchanged and remains the only path carrying those literals. (Closes the last open portability P2 from `gads-write-gate-portability-001`; the sibling `audience-create` AGE-dimension P1 was already closed in gads-v0.1.12.)
+
 ## [0.1.13] — 2026-07-02 (correctness & gate-consistency patch)
 
 No command/flag surface change — still **286 commands / 27 groups / 66 playbooks**.
