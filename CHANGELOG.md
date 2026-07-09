@@ -6,6 +6,14 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.24] — 2026-07-09 (ASC/AAC legacy write guard + deadline advisory)
+
+### Added
+- **Fail-loud guard on legacy Advantage+ (ASC/AAC) writes.** `campaign update`, `campaign update-status`, and `campaign duplicate` (including the `--plan` capture path) now pre-flight the target campaign's `smart_promotion_type` and reject legacy ASC (`AUTOMATED_SHOPPING_ADS`) and AAC (`SMART_APP_PROMOTION`) campaigns **before any Graph mutation** (in dry-run too), with an actionable message. Meta disabled API create/update/duplicate for these types on all Marketing API versions (2026-05-19); previously these paths surfaced Meta's raw 400. Remaining legacy campaigns are PAUSED at v26 (~Sep 2026); Existing Customer Budget Cap campaigns stay editable until v26.
+- **`playbook advantage-adoption` deadline advisory.** When any live legacy ASC campaign is present, the result adds a top-level `deadline_advisory` (same facts as the write guard) and a `findings.legacy_asc_details` per-campaign list (`campaign_id`, `campaign_name`, `objective`, `smart_promotion_type`). Both absent/`null` when no legacy ASC exists. (july9-meta-compliance-001 S001)
+- **Async-report failure diagnostics (Graph v25 fields).** `report insights-async status` now requests the five v25 error fields on the report-run node (`error_code`, `error_message`, `error_subcode`, `error_user_title`, `error_user_msg`); on a failed run, human output prominently shows the user-facing title/message and `--json` carries all fields. Success/in-progress output shape unchanged (fields are simply absent). Note: v25 changed `error_code` from uint to int — we parse via JSON so both work. (july9-meta-compliance-001 S002)
+- **Creative AI-disclosure advisory.** Every `creative create-*`/`update` format audit (dry-run and `--execute` alike) now carries one non-fatal INFO-level advisory reminding the operator to confirm the Meta AI-disclosure toggle if any visual asset is AI-generated — apb cannot detect AI generation from the Graph API. Non-blocking, no new flag; surfaces in `format_audit.advisories`. Special Ad Category enforcement advisory deferred — see followups (no campaign context is available at the creative-audit call sites without a disproportionate new Graph fetch/plumbing change). (july9-meta-compliance-001 S003)
+
 ## [0.5.23] — 2026-07-07 (accurate invalid-key reporting in auth test)
 
 ### Fixed
