@@ -6,6 +6,22 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.15] — 2026-07-09 (v24.2 adoption)
+
+**287 commands / 27 groups / 66 playbooks / 24 reports** (+1 command vs 0.1.14).
+
+Google Ads API v24.2 (2026-06-24) is a non-breaking minor on our v24 major. **REST versioning finding:** minor versions do NOT get their own URL path — `googleAds:search`/`:mutate` stay on `/v24/...` regardless of 24.0/24.1/24.2; `config.rs::api_version()`'s `v24` default is correct as-is, so this was a documentation-only "bump" (no code change to the version constant). Confirmed against the v24.2 developer-blog announcement and the REST interface design doc.
+
+### Added
+- **`report pmax-network-placements`** — new report reading `performance_max_placement_view` segmented by `segments.ad_network_type` (v24.2), aggregated into a channel-mix breakdown (Search/Display/partner networks). Sibling of the existing `report pmax-placements` (same underlying view, aggregated by `placement_type` instead, for brand-safety) — impressions-only, same API limits apply. Live-verified against Scandalous Coffee (365d): valid empty-data response, confirms the query shape is accepted by v24.2. `pmax-audit` playbook placement-waste-section wiring deferred to followups (cheap-if-done bar not met this sprint; both reports are equally one CLI call away for now).
+- **`ad list --with-attestation`** / **`asset list --with-attestation`** — attempt to surface `Ad.synthetic_content_info` / `Asset.synthetic_content_info` (advertiser + system AI-content attestation, ahead of the EU AI Act's 2026-08-02 deadline). **Live finding (2026-07-09): not actually queryable yet.** `advertiser_attestation` / `system_attestation` are recognized field names (not `UNRECOGNIZED_FIELD`) but both reject with `PROHIBITED_FIELD_IN_SELECT_CLAUSE` — the schema is visible in v24.2 but GAQL search access isn't open, consistent with Google's note that write support doesn't land until v25 (evidently read access is gated the same way). Both flags now degrade gracefully: on that specific rejection they fall back to the base list plus an `attestation_unavailable` advisory field, instead of surfacing the raw 400. Revisit at the v25 bump.
+- **`playbook device-performance --by-platform`** — v24.1 `segments.mobile_device_platform` (iOS/Android) split. **Live findings (2026-07-09) that changed the original design:** (1) Google rejects `segments.device` and `segments.mobile_device_platform` together (`PROHIBITED_FIELD_COMBINATION_IN_SELECT_CLAUSE`) — this is a dimension SWAP, not an additive split; (2) `segments.mobile_device_platform` also rejects `metrics.impressions` specifically (`PROHIBITED_SEGMENT_WITH_METRIC_IN_SELECT_OR_WHERE_CLAUSE`) while clicks/cost/conversions/conversions_value are fine — the by-platform query omits impressions. Live-verified: ANDROID/IOS/DESKTOP breakdown returned correctly. Base (no-flag) output is byte-identical to 0.1.14.
+
+### Deferred (see `docs/tasks/followups.md` or the equivalent workstream followups file)
+- `CartDataSalesView` was already shipped (`report cart-data-sales`, pre-dates this sprint) — no action needed, confirmed still current under v24.2.
+- `pmax-audit` playbook does not yet ingest `pmax-network-placements` as a placement-waste input.
+- Synthetic-content attestation reads (`--with-attestation`) are wired but non-functional against live v24.2 — Google hasn't opened GAQL read access yet. Re-probe at the next version bump (v25 major, per the checklist).
+
 ## [0.1.14] — 2026-07-09 (Google API retry/backoff)
 
 No command/flag surface change — still **286 commands / 27 groups / 66 playbooks**.
