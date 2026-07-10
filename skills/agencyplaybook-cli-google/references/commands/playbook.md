@@ -279,7 +279,11 @@ Desktop vs mobile vs tablet performance comparison.
 Usage: apb-gads playbook device-performance [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--by-platform` | v24.1: REPLACE the segments.device dimension with segments.mobile_device_platform (iOS/Android) — Google rejects selecting both in the same query. Non-mobile rows report UNKNOWN |
 
 <a id="apb-gads-playbook-dayparting-analysis"></a>
 ### `apb-gads playbook dayparting-analysis`

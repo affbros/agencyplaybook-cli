@@ -92,3 +92,12 @@ do **not** manage a yaml — the broker supplies the token.
 - **Empty playbook results** usually mean no activity in the default window — retry with
   `--lookback-days 365`.
 - **v24 is pinned** — don't assume newer fields exist; the CLI rejects out-of-range inputs pre-API.
+- **Rate limits & retries (gads-v0.1.14+).** The CLI now retries transient Google Ads API failures
+  itself with capped exponential backoff (1s → 2s → 4s, max 3 retries), so agent loops don't need
+  their own retry layer for 429 / `RESOURCE_EXHAUSTED` / 5xx. Reads and `--validate-only` calls
+  retry any transient failure; **real `--execute` mutations retry ONLY 429/quota** (rejected
+  pre-execution) — on a 5xx or dropped connection a mutation fails with a "verify state before
+  re-running" error rather than risk a double-apply, so on that specific error run a read-back or
+  `verify` before retrying the write yourself. There is **one shared ops/day quota**; a persistent
+  rate-limit error means it's likely exhausted — back off, don't hammer. Tune via
+  `APB_GADS_RETRY_MAX` / `APB_GADS_RETRY_BASE_MS`, or disable with `APB_GADS_NO_RETRY=1`.

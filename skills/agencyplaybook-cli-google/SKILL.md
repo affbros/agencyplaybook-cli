@@ -1,7 +1,7 @@
 ---
 name: agencyplaybook-cli-google
 description: |
-  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 116 gated mutations; run raw GAQL; schedule read-only audits. Covers all 286 commands across 27 groups against Google Ads API v24.
+  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 116 gated mutations; run raw GAQL; schedule read-only audits. Covers all 287 commands across 27 groups against Google Ads API v24.
 
   USE WHEN the user mentions Google Ads, "apb-gads", "gads", "google ads cli", "agencyplaybook google", "apb google", PMAX / Performance Max, RSA / responsive search ads, smart bidding, tCPA / tROAS / target CPA / target ROAS, learning phase, search themes, brand exclusions, negative keywords, keyword planning, conversion value rules, bid adjustments / bid modifiers, account health, waste audit, scaling ad spend, campaign launch, ad-strength / ad rotation, quality score, impression share, dayparting, geo/device performance, GAQL, or wants ANY Google Ads account read, audit, plan, report, or change — even if they don't name the CLI. NOT for Meta/Facebook/Instagram ads (use the agencyplaybook-cli skill) or generic SEO.
 ---
@@ -12,12 +12,12 @@ Drive the `apb-gads` CLI — a safe, triple-gated Rust Google Ads operator tool 
 judgment layer it doesn't ship with: which lever for which situation, in what order, framed
 for growth, and never at the cost of a converged Smart-Bidding campaign.
 
-**Division of labor.** The CLI owns the mechanics: **286 commands across 27 groups** —
+**Division of labor.** The CLI owns the mechanics: **287 commands across 27 groups** —
 116 gated mutations, 66 diagnostic playbooks, 23 reports — every write dry-run by default
 behind three independent gates, every response JSON. This skill owns the *operating model*.
 Never reimplement what the CLI does; orchestrate it, and read the references below for depth.
 
-> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 27 groups · 286 leaf
+> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 27 groups · 287 leaf
 > commands · 116 `mutate` subcommands · 66 playbooks (6 sections) · 23 reports · Google Ads
 > **API v24**. The runtime is the source of truth — when a doc and the binary disagree, the binary wins.
 

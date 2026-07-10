@@ -1076,7 +1076,7 @@ Usage: apb-gads mutate campaign-device-modifier-set [OPTIONS] --campaign-id <CAM
 |---|---|
 | `--campaign-id <CAMPAIGN_ID>` | — |
 | `--device <DEVICE>` | DESKTOP \| MOBILE \| TABLET \| CONNECTED_TV \| OTHER |
-| `--bid-modifier <BID_MODIFIER>` | 0.1-10.0; e.g. 0.8 = -20% |
+| `--bid-modifier <BID_MODIFIER>` | 0.1-10.0 (0.0 = exclude/opt-out, e.g. for CONNECTED_TV); e.g. 0.8 = -20% |
 
 <a id="apb-gads-mutate-campaign-ad-schedule-add"></a>
 ### `apb-gads mutate campaign-ad-schedule-add`

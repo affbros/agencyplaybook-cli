@@ -6,7 +6,7 @@ This is the **exhaustive, runtime-derived** reference for every command, subcomm
 
 For narrative, examples, and *how to think about* the CLI, see [`../commands.md`](../commands.md) (day-to-day reference), [`../playbooks.md`](../playbooks.md), and [`../mutations.md`](../mutations.md) (the safety model). This directory is the flat, complete enumeration those docs defer to.
 
-**At a glance:** 27 command groups · 286 total commands/subcommands · API version `v24`.
+**At a glance:** 27 command groups · 287 total commands/subcommands · API version `v24`.
 
 ## Global options
 
@@ -52,7 +52,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`asset`](asset.md) | 👁️ read | 1 | Asset reads: list account assets (images, text, video, etc.). |
 | [`mutate`](mutate.md) | ✍️ write | 119 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
 | [`gaql`](gaql.md) | 👁️ read | 1 | Run ad-hoc Google Ads Query Language (GAQL) against the searchStream endpoint. |
-| [`report`](report.md) | 👁️ read | 23 | Named, pre-built read reports (search terms, performance, PMAX, etc.). |
+| [`report`](report.md) | 👁️ read | 24 | Named, pre-built read reports (search terms, performance, PMAX, etc.). |
 | [`playbook`](playbook.md) | 👁️ read | 67 | Agency-style read playbooks: audits, scorecards, and hygiene readouts. |
 | [`verdict`](verdict.md) | 👁️ read | 1 | Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT) per ENABLED campaign across ALL channel types, from 3 gates (Efficiency / Delivery+headroom / Quality). |
 | [`campaign-type-advisor`](campaign-type-advisor.md) | 👁️ read | 1 | Campaign-type advisor (Search vs PMax vs Demand Gen) — prescriptive: given a goal, demand state, conversion-signal strength, and daily budget, recommend the primary engine + the maturity-ordered sequence (Search captures demand · PMax scales it · Demand Gen creates it). |
@@ -260,6 +260,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads report pmax-asset-group-assets`](report.md#apb-gads-report-pmax-asset-group-assets)
 - [`apb-gads report pmax-asset-group-performance`](report.md#apb-gads-report-pmax-asset-group-performance)
 - [`apb-gads report pmax-placements`](report.md#apb-gads-report-pmax-placements) — PMAX placement + channel-proxy visibility (the black box): where ads ran (performance_max_placement_view, impressions-only — for brand-safety exclusions) aggregated by placement_type, plus PMAX campaign metrics.
+- [`apb-gads report pmax-network-placements`](report.md#apb-gads-report-pmax-network-placements) — v24.2: performance_max_placement_view segmented by segments.ad_network_type (Search/Display/partner networks) — channel-MIX proxy, sibling of `pmax-placements` (which aggregates the same view by placement_type instead)
 - [`apb-gads report campaign-settings`](report.md#apb-gads-report-campaign-settings)
 - [`apb-gads report campaign-criteria`](report.md#apb-gads-report-campaign-criteria)
 - [`apb-gads report shared-sets`](report.md#apb-gads-report-shared-sets)

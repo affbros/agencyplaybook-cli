@@ -95,6 +95,16 @@ $B --customer <CID> mutate campaign-update-url-expansion-opt-out --campaign-id <
 $B --customer <CID> mutate pmax-audience-signal-attach --asset-group-id <AG> --signal-type SEARCH_THEME --text "<theme>"  # ≤25/AG
 ```
 
+**PMAX pre-flight guardrails worth knowing** (all read-only pre-flight checks, never a change to what's sent to Google on a successful path):
+
+- **Video attach is YouTube-only.** `mutate pmax-asset-attach --field-type YOUTUBE_VIDEO --asset-id <id>` best-effort-confirms the referenced asset's real type before attaching. A confirmed non-YouTube asset fails with guidance to `mutate asset-create-youtube-video --youtube-video-id <id>` first (no MP4 upload path exists) — a failed/inconclusive read never blocks.
+- **Age/gender/parental-status are NOT direct PMAX signals.** `mutate pmax-audience-signal-attach --signal-type <demographic token>` (e.g. `AGE_RANGE_35_44`) fails with guidance at the real, already-implemented workflow: `mutate audience-create --age-range <enum>... --gender <enum>... [--parental-status <enum>...]` to build the demographic `Audience`, then `mutate pmax-audience-signal-attach --signal-type AUDIENCE --audience-id <id>` to attach it. Only `SEARCH_THEME` and `AUDIENCE` are valid `--signal-type` values.
+- **New-customer acquisition needs an account-level existing-customer definition.** `mutate campaign-update-customer-acquisition --optimization-mode {TARGET_NEW_CUSTOMER|BID_HIGHER_FOR_NEW_CUSTOMER}` (dry-run and executed) carries a `precondition_advisory` — without user-list-based existing-customer data at the account level, Google rejects the goal at the tail step. `TARGET_ALL_EQUALLY` has no such precondition.
+- **`PORTRAIT_MARKETING_IMAGE` needs a 4:5 aspect ratio**, not just the pixel minimums — `mutate asset-create-image --field-type PORTRAIT_MARKETING_IMAGE` on an undersized image names both.
+- **Campaign demographic criteria are exclusion-only.** `mutate campaign-demographic-add` without `--negative` (any demo type, any channel) is blocked pre-API — Google rejects a positive campaign-level demographic with `FIELD_INCOMPATIBLE_WITH_NEGATIVE_TARGETING`. Exclude with `campaign-demographic-exclude`, or use `ad-group-demographic-add` for positive demographic bid adjustments at the ad-group level. (Exclusions via `--negative` / `campaign-demographic-exclude` are fine.)
+- **Household income is not a PMAX targeting control.** `mutate campaign-demographic-exclude`/`campaign-demographic-add --demo-type INCOME_RANGE` (the exclusion direction) fails pre-API on a confirmed PMAX campaign — use income as an Audience signal instead (`audience-create` + `pmax-audience-signal-attach`). Household income is a supported exclusion off PMAX (Search/Display/Demand-Gen/Video).
+- **Age-segmented audiences work** (`audience-create --age-range AGE_RANGE_35_44 ...`) — the age dimension is sent as numeric `{minAge, maxAge}` segments (fixed in gads-v0.1.12; the prior shape was rejected by Google). Feed the resulting audience id into `pmax-audience-signal-attach --signal-type AUDIENCE --audience-id <id>`.
+
 ## W6 — Greenfield launch pipelines
 
 ```bash

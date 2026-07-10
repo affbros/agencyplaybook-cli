@@ -16,18 +16,19 @@ or enabling the add-on — not a CLI flag.
 | `read:google:reports` | **Professional** | the `report` group (23 reports) |
 | `read:google:playbooks` | **Professional** | the 63 `playbook` audits + `growth` reviews |
 | `read:google:planning` | **Professional** | the `plan` group (keyword ideas/metrics, greenfield specs) |
-| `write:google:mutations` | **Agency** | the 116 `mutate` subcommands + `orchestrate` + `changes apply --execute` |
-| `write:google:verify` | **Agency** | the `verify` live-write chains |
+| `write:google:mutations` | **Professional** | the 116 `mutate` subcommands + `orchestrate` + `changes apply --execute` |
+| `write:google:verify` | **Professional** | the `verify` live-write chains |
 | `admin:google:automation` | **Enterprise** | `schedule` automation (cron-installed recurring runs) |
 
 ## Capability by tier (rule of thumb)
 
 - **Starter** — no Google add-on scopes (the add-on is Professional+).
-- **Professional** — **read everything**: all reports, all 66 playbooks, keyword planning, GAQL.
-- **Agency** — adds **writes**: every mutation, the orchestrators, the changeset apply path, and
-  the live-verify chains.
+- **Professional** — **read everything** (all reports, all 66 playbooks, keyword planning, GAQL)
+  **plus writes**: every mutation, the orchestrators, the changeset apply path, and the
+  live-verify chains (consent-based-writes-001 opened writes to all paid tiers).
+- **Agency** — same Google capability as Professional (more accounts/rpm on the Meta side).
 - **Enterprise** (and Free Enterprise) — adds **scheduled automation**.
 
-Reads at Professional+, writes at Agency+, automation at Enterprise+ — the same shape as the Meta
+Reads and writes at Professional+, automation at Enterprise+ — the same shape as the Meta
 side. Even a key with empty stored scopes resolves the `*:google:*` overlay live from the tier +
 add-on flag, so you don't re-issue keys when an admin enables the add-on.

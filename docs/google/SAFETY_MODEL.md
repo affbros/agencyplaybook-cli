@@ -1,43 +1,81 @@
 # Safety model — the three-gate write system
 
 Every `mutate` (and write-capable `orchestrate` / `changes apply`) command is **dry-run by
-default**. A write only goes to Google when **all three independent gates pass** *and* a
-per-customer **profile** or the **sandbox** policy authorizes that specific operation. **There is
-no bypass flag** — a guard rejection is the system working; report it, never work around it.
+default**. Gate 1 (`--execute`) always governs whether anything is submitted at all. **Since
+gads-write-gate-portability-001 sprint gw1 (2026-07-01), gates 2–3 (config + env) and the
+profile/sandbox authorization step are advisory by default** — the binary tells you what a
+stricter local posture would have blocked (via `local_gate_advisories` / `advisories` in the guard
+output), but it does not stop the operation from reaching Google. The **SaaS read-only floor**
+(below) became conditionally advisory too, as of **sprint gw2 (2026-07-01)** — advisory only in
+managed mode when the request is confirmed routed through the server-side proxy, otherwise still a
+hard block. See "Opt-in strict mode" below to restore gates 2-3's pre-sprint hard-refusal behavior
+(the SaaS floor has its own, separate discriminator — `enforce_local_gates` never touches it).
+**There is no bypass flag for gate 1, and no *operator-settable* bypass for the SaaS floor** — a
+floor rejection is the system working; report it, never work around it.
 
 ## The three gates
 
-| # | Gate | How to satisfy |
-|---|---|---|
-| 1 | **CLI** | `--execute` on the command line. Without it the CLI prints the JSON plan it *would* submit and changes nothing. |
-| 2 | **Config** | `safety.allow_writes: true` **and** `safety.read_only: false` in `google-ads.yaml`. Shipped default is read-only. |
-| 3 | **Env** | When `safety.require_mutation_env: true`: `APB_GADS_ALLOW_MUTATIONS=true` (or `=1`) in the environment. |
+| # | Gate | How to satisfy | Enforcement |
+|---|---|---|---|
+| 1 | **CLI** | `--execute` on the command line. Without it the CLI prints the JSON plan it *would* submit and changes nothing. | **Always enforced** — dry-run is a preview, not authorization. |
+| 2 | **Config** | `safety.allow_writes: true` **and** `safety.read_only: false` in `google-ads.yaml`. Shipped default is read-only. | **Advisory by default** (sprint gw1) — a failing check is reported in `local_gate_advisories`, not blocked. |
+| 3 | **Env** | When `safety.require_mutation_env: true`: `APB_GADS_ALLOW_MUTATIONS=true` (or `=1`) in the environment. | **Advisory by default** (sprint gw1) — same as gate 2. |
 
-**SaaS read-only floor.** In SaaS mode (`APB_API_KEY`), the tenant's resolved write policy is a
-ceiling the local config can only *tighten*, never loosen — if your entitlement is read-only,
-every execute-mode write is blocked regardless of any local yaml. Writes additionally require the
-`write:google:mutations` scope (Agency+ add-on — see `SCOPES_AND_TIERS.md`).
+Set `safety.enforce_local_gates: true` to restore the pre-sprint hard block on gates 2–3 (see
+"Opt-in strict mode" below).
 
-## Then: profile OR sandbox must authorize the op
+**SaaS read-only floor — advisory only when a server-side proxy re-check exists (sprint gw2).** In
+SaaS mode (`APB_API_KEY`), the tenant's resolved write policy is a ceiling the local config can
+only *tighten*, never loosen. In BYO mode, or any managed-mode resolve where the proxy routing
+didn't actually apply, a read-only entitlement still hard-blocks every execute-mode write — there's
+no local opt-out (`enforce_local_gates` doesn't reach this check), because nothing else re-checks
+policy for that request. In managed mode, once the request is confirmed routed through the apb-api
+Google proxy, the same read-only entitlement is reported as an advisory instead and the binary lets
+the write proceed — the proxy independently re-checks `write_policy` server-side, with a fresh DB
+read, before it ever calls Google, so a Starter/read-only tenant is still refused, just at the
+proxy instead of the binary. Writes additionally require the `write:google:mutations` scope
+(Agency+ add-on — see `SCOPES_AND_TIERS.md`).
 
-After the three gates, `execute_policy_guard` requires **one** of:
+## Then: profile OR sandbox authorization (advisory by default since sprint gw1)
+
+After the gates, `execute_policy_guard` looks at **one** of:
 
 **A per-customer profile** (`safety.profiles[<customer_id>]`), which wins when present:
 - `permitted_operations: [...]` — an allowlist of operation slugs.
-- `max_budget_micros` — a hard cap on any `amount_micros`.
-- `require_confirmation_above_micros` — operations above this need the global **`--confirm`** flag.
+- `max_budget_micros` — a cap on any `amount_micros`.
+- `require_confirmation_above_micros` — operations above this normally need the global **`--confirm`** flag.
 
-**…or the sandbox policy** (the deny-by-default fallback when no profile matches):
+**…or the sandbox policy** (the fallback when no profile matches):
 - Campaign name must contain the literal `Test-ok-to-delete`.
 - Budget must be a positive `$0.01`-multiple at or under the sandbox ceiling (`sandbox_max_budget_micros`, default **$1.00**).
 - At most **one** `Test-ok-to-delete` campaign may exist at a time.
 - Newly-created ads must be born **PAUSED**.
-- **Account-level operations fail closed.** An op with no campaign/ad-group/budget anchor (e.g.
-  `customer-negative-criterion-add`, `conversion-action-create`, `shared-set-create`,
-  `user-list-create`) can't be proven confined to the sandbox, so it's rejected without a profile.
+- Account-level operations (no campaign/ad-group/budget anchor — e.g. `customer-negative-criterion-add`,
+  `conversion-action-create`, `shared-set-create`, `user-list-create`) can't be proven confined to the sandbox.
+
+**Since sprint gw1, none of the checks above block the operation by default.** A failing check
+surfaces its message in the response's `advisories` array (profile/sandbox branch) or
+`local_gate_advisories` (gates 2–3) — the operation still proceeds to Google, subject only to gate
+1 and the SaaS read-only floor. This is intentional: consent and authority belong at the MCP
+handshake + Skill + the server/proxy, not in a locally-editable config file. Treat the advisories
+as diagnostic — they tell you what a stricter local posture would have flagged, not a rejection.
+
+## Opt-in strict mode: `safety.enforce_local_gates: true`
+
+Set this in `google-ads.yaml` if you want the pre-sprint-gw1 hard-refusal behavior back, as a
+local safety net layered on top of the SaaS floor — every check above (gates 2–3, the profile
+allowlist/budget/confirmation checks, and the sandbox checks including the account-level-op
+denial) reverts to blocking with the exact same error messages as before sprint gw1. Default is
+`false` (advisory).
+
+```yaml
+safety:
+  enforce_local_gates: true
+```
 
 **Named presets** surface as `active_profile` in guard output so you can see the posture at a
-glance: `read_only` → `dry_run_only` → `safe_writes` → `operator_full`.
+glance: `read_only` → `dry_run_only` → `safe_writes` → `operator_full`. (Display-only — it never
+gates anything itself, regardless of `enforce_local_gates`.)
 
 ## Capability tiers — how strongly a write has been proven
 
