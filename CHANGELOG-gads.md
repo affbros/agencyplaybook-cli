@@ -6,6 +6,20 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.18] — 2026-07-16 (plan-first apply hardening: schema + hash + staleness gates)
+
+No command/flag surface change to the leaf count — still **287 commands / 27 groups / 66 playbooks / 24 reports**. Adds two subcommand-scoped override flags to `mutate apply-plan`. Second sprint of `plan-first-cli-001` (Track B of `docs/July16-update.md`). Plan files are now treated as **untrusted input** at apply time.
+
+### Added
+- **`mutate apply-plan` envelope validation** — an envelope plan (written by `--plan`) must be `schema_version: 1`; an unknown/newer `schema_version` is rejected with an "upgrade apb-gads" error. Legacy plans (no `schema_version`, e.g. `--save-plan` files or `inverse-plan` output) still apply unchanged, tagged `"integrity": "legacy-v1 (no hash/staleness gates)"`.
+- **Integrity (hash) gate** — apply recomputes the `plan_hash` and refuses on mismatch (or a missing hash on an envelope plan), naming the expected and actual hashes. New **`--allow-edited-plan`** override (explicit, audited) applies a hand-edited plan anyway.
+- **Staleness (drift) gate** — when the plan carries `prior_values`, apply re-reads each targeted field live (reported in dry-run too) and refuses on drift, listing `resource · field: recorded → current`. New **`--allow-stale-plan`** override (explicit, audited). Plans with no prior values (create/remove-only, or capture failed) skip with a note; a resource that can't be re-read is treated as drift-unknown (fatal by default).
+- **Prior-value capture at plan time** — `--plan` now embeds a `prior_values` array in the envelope (audit-v3 shape) for any `update` operation, captured **before** the `plan_hash` so it is integrity-protected. Create/remove-only plans capture nothing (no network). Capture failure degrades gracefully — the plan is written without prior values and the apply-time staleness gate skips.
+- **Audit linkage** — every executed `apply-plan` write records `plan_hash`, `plan_path`, and any `overrides` used, so `audit list` can answer "what plan produced this write".
+
+### Unchanged
+- All existing gates are enforced exactly as before at apply time: dry-run default, `--execute`, config gate, `APB_GADS_ALLOW_MUTATIONS`, per-customer profile / sandbox policy. An override unlocks only the gate it names — never a write gate. The plan file carries no authority.
+
 ## [0.1.17] — 2026-07-16 (plan-first `--plan`: human plan document + versioned envelope)
 
 No command/flag surface change to the 287 leaves — still **287 commands / 27 groups / 66 playbooks / 24 reports**. Adds one global flag (`--plan`) and deprecates `--save-plan` in favor of it. First sprint of `plan-first-cli-001` (Track A of `docs/July16-update.md`).
