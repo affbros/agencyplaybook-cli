@@ -6,6 +6,23 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.17] — 2026-07-16 (plan-first `--plan`: human plan document + versioned envelope)
+
+No command/flag surface change to the 287 leaves — still **287 commands / 27 groups / 66 playbooks / 24 reports**. Adds one global flag (`--plan`) and deprecates `--save-plan` in favor of it. First sprint of `plan-first-cli-001` (Track A of `docs/July16-update.md`).
+
+### Added
+- **Global `--plan <path>` flag** — "plan it, don't do it." On any mutating command, orchestrator, or playbook it runs the full dry-run pipeline and writes **two** artifacts, performing **zero** API mutations:
+  - `<path>.md` — a human-readable **plan document** (header with binary version + customer + timestamp + plan hash + redacted source command; summary; actions table with `current → new` per field where the dry-run captured prior values, new-only otherwise — never fabricated; projected-impact section only when the source carries it; guardrails/gates note; rollback pointer; copy-paste apply command; staleness note).
+  - `<path>.json` — the machine plan in a new versioned envelope, re-playable via `mutate apply-plan --from-file <path>.json --execute`.
+  - **`--plan` + `--execute` is a hard error** naming both flags (clap `conflicts_with` — no silent precedence).
+  - **Path twins**: a `.md` path keeps its name and the JSON twin is `<path>.md.json`; any other path gets `.md`/`.json` appended (`waste` → `waste.md` + `waste.json`).
+  - **Playbook with no actionable operations** writes only the `.md` with an explicit empty-plan section (not an error); no JSON twin.
+  - **Pure reads**: warns `nothing to plan` and runs the read normally; writes no files.
+- **Versioned plan envelope** — the machine plan is now a superset of the version-1 plan (still consumed byte-compatibly by `mutate apply-plan`): the existing `version: 1` / `action` / `customer_id` / `timestamp` / `operation_count` / `operations` fields are preserved, plus `schema_version: 1`, `product: "google-ads"`, `binary_version`, `created_at` (RFC3339), and `plan_hash` (SHA-256 hex of the compact JSON with `plan_hash` absent). Apply-side hash + staleness gate enforcement is deferred to the next sprint (S2) — this release only emits the fields.
+
+### Changed
+- **`--save-plan` is deprecated** in favor of `--plan` (help text prefixed `(deprecated — use --plan)`). Behavior is unchanged — it writes only the machine plan JSON (the JSON half of `--plan`), no document — and is kept for back-compat and the QA harness. If both flags are given, both fire independently.
+
 ## [0.1.16] — 2026-07-15 (explicit --config credential precedence)
 
 No command/flag surface change — still **287 commands / 27 groups / 66 playbooks / 24 reports**.
