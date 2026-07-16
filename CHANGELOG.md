@@ -6,6 +6,18 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.25] — 2026-07-16 (`--plan <path>`: plan it, don't do it)
+
+### Added
+- **Global `--plan <path>` flag** — "plan it, don't do it." Runs the full dry-run/validation pipeline exactly as a bare dry-run does, then writes TWO artifacts and performs **zero** API mutation:
+  - `<path>.json` — the machine plan: an envelope (`schema_version` / `product: "meta"` / `binary_version` / `account` / `created_at` / `plan_hash`) wrapping `actions[]`, each action carrying the `PlanAction` fields (`action` slug / `target_id(s)` / `payload` / `blast_radius` / `destructive`). SHA-256 `plan_hash` over the compact JSON is the integrity primitive the S4 apply path will re-check.
+  - `<path>.md` — a human-readable plan document a person (or a client) can read and approve: header (binary/account/timestamp/hash/redacted command line), summary, actions table (order · action · target · changed fields · blast · destructive), projected impact (playbooks only, never fabricated), guardrails-&-gates (apb's 5-layer write gate + SaaS write-policy/scope, re-enforced at apply), rollback, how-to-apply, staleness.
+  - Path-twin rule mirrors the gads side: `scale.md` → `scale.md` + `scale.md.json`; `scale` → `scale.md` + `scale.json`.
+  - **`--plan` + `--execute` is a hard error** (fail-loud, names both flags). Secret-bearing flag values are redacted from the recorded command line.
+- **Mutation cohort v1** — `campaign update-status`/`duplicate`/`delete`, `adset update-budget`/`update-targeting`/`delete`, `ad update-status`/`create`/`delete`, `creative create-image`/`create-video` serialize their would-be mutation as one plan action. Mutating commands outside the cohort run a normal dry-run and note "not yet plannable — no plan files written"; pure reads note "nothing to plan."
+- **Playbook cohort v1** — `playbook rebalance` (budget-neutral `adset.update-budget` reallocation), `playbook waste-audit` (pause flagged adsets/ads), and `playbook fatigue-index` (pause dead/fatigued ads) derive plan actions from their findings and include the playbook's own projected-impact numbers. Every other playbook writes the doc with its summary + an explicit "not yet plannable" section (no JSON twin). A playbook with no concrete per-entity action writes an explicit empty-plan doc — a valid, non-error outcome.
+- Applying a plan file (`apb plan apply --from-file …`) ships in **v0.5.26 (S4)**; until then the JSON twin is a portable, hash-verified record. The plan file carries no authority — apb's full write-gate stack is re-enforced at apply time regardless. (plan-first-cli-001 S3)
+
 ## [0.5.24] — 2026-07-09 (ASC/AAC legacy write guard + deadline advisory)
 
 ### Added
