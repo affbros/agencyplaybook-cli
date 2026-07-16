@@ -6,6 +6,17 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.16] — 2026-07-15 (explicit --config credential precedence)
+
+No command/flag surface change — still **287 commands / 27 groups / 66 playbooks / 24 reports**.
+
+### Fixed
+- **An explicit `--config <path>` now beats ambient `APB_API_KEY` SaaS resolution for Google credentials** (july15-findings-001 P2). Previously the `--config` flag had a static `default_value`, so an explicit path was indistinguishable from the default: in managed mode (`APB_API_KEY` present) the CLI always injected the server-minted SaaS Google token and read the named yaml only for its `safety:` block. Because `dotenvy` walks cwd ancestors, running `apb-gads --config google-ads.test.yaml … ` from inside the repo silently picked up the repo `.env`'s `APB_API_KEY` and operated as the **SaaS tenant's** Google connection instead of the credentials in the yaml you named — the documented footgun (workaround was prefixing `APB_API_KEY=`). Now, when an explicit `--config` is given AND the yaml at that path carries real Google credentials (non-empty `developer_token` + `refresh_token`), the CLI uses those yaml credentials (mirroring BYO: the `APB_API_KEY` still governs tier/scope/entitlement, but the server token is never injected). An explicit `--config` that carries only a `safety:` block (no credentials) keeps the managed SaaS injection as before.
+- **The CLI now announces the winning credential source on stderr** whenever an explicit `--config` and an ambient `APB_API_KEY` could conflict, e.g. `credential source: explicit --config <path> (ambient APB_API_KEY ignored for Google auth; used for entitlement only)` or `credential source: SaaS (APB_API_KEY); --config <path> used for safety block only (no credentials in yaml)`. The line goes to **stderr**, so the JSON-on-stdout output contract is untouched.
+
+### Changed
+- The `--config` flag lost its clap `default_value` (it is now `Option<PathBuf>` internally, resolving to `google-ads.yaml` when omitted) so the CLI can distinguish an explicit `--config google-ads.yaml` from the implicit default. No behavior change for the default (no-`--config`) path. `--help` still documents the `[default: google-ads.yaml]`.
+
 ## [0.1.15] — 2026-07-09 (v24.2 adoption)
 
 **287 commands / 27 groups / 66 playbooks / 24 reports** (+1 command vs 0.1.14).
