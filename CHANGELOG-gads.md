@@ -6,6 +6,15 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.19] — 2026-07-16 (publish the distributable batch scripts)
+
+No command/flag surface change to the leaf count — still **287 commands / 27 groups / 66 playbooks / 24 reports**. This release **publishes the batch-script library** to the public repo. On the next `gads-v0.1.19` tag the `release-gads.yml` workflow copies `rust/gads/scripts/public-scripts/` into `affbros/agencyplaybook-cli` under `scripts/gads/` (beside the binaries and apb's `scripts/apb/`).
+
+### Added
+- **`scripts/gads/` on the public repo** — the plan-first-cli-001 Google Ads batch-script library (Tier 1 watchdogs, Tier 2 opportunity scans incl. `scan-search-terms`, Tier 3 reviews, generated `audit-*` bundles incl. `audit-pmax`/`audit-keywords`/`audit-audience`, the shared `lib/` + `thresholds.conf`, and `README.md`) now ships to end users. `release-gads.yml` rsyncs the whole `public-scripts/` tree (`--delete`-scoped to `scripts/gads/` so removals propagate); it never touches apb's `scripts/apb/`, binaries, or `CHANGELOG.md`.
+- **`public/data/scripts-catalogue.json`** — the shared `gen_scripts_catalogue.py` (apb-side; reads BOTH trees) emits the gads entries with GitHub-raw `download_url`s into `scripts/gads/`. `--check`-gated in `rust-quality.yml` (covers both trees in one run; `gads-quality.yml`'s `rust/gads/scripts/public-scripts/**` changes re-trigger it).
+- **Docs/skill** — the `apb-gads` Claude skill gains a "Batch scripts" section; AGENTS.md/CLAUDE.md record that `scripts/gads/` is published on the `gads-v*` line.
+
 ## [0.1.18] — 2026-07-16 (plan-first apply hardening: schema + hash + staleness gates)
 
 No command/flag surface change to the leaf count — still **287 commands / 27 groups / 66 playbooks / 24 reports**. Adds two subcommand-scoped override flags to `mutate apply-plan`. Second sprint of `plan-first-cli-001` (Track B of `docs/July16-update.md`). Plan files are now treated as **untrusted input** at apply time.
