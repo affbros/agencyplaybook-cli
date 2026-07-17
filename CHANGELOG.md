@@ -6,6 +6,19 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.26] — 2026-07-16 (`plan apply --from-file` + `plan export` + `POST /plans/import`)
+
+### Added
+- **`apb plan apply --from-file <plan.json>`** — apply a plan-first envelope (from `--plan` or `plan export`) back through the existing plan framework. Imports every envelope action as a CREATED plan, validates it, and previews — **zero mutation by default**. Pass `--execute` (+ the four env/CLI write gates) to apply; delete-class / blast-radius-5 actions additionally require `--confirm-destructive`. Multi-action envelopes apply sequentially, stop-on-first-failure. The plan hash and any overrides are recorded in the execution trail.
+- **Untrusted-input gates (gads parity)** — the plan file is input, not consent:
+  - **Schema** — `schema_version` must be `1` (a newer one → "upgrade apb"); `product` must be `"meta"` (a Google plan is rejected with a clear cross-product message); `actions[]` must be non-empty.
+  - **Integrity** — the recorded `plan_hash` is recomputed; a mismatch or missing hash is refused, naming both hashes, unless `--allow-edited-plan` (explicit, audited) is passed.
+  - **Staleness** — when the envelope carries `prior_values`, each recorded field is re-read live at apply time; any drift (or an entity/field that can't be re-read → drift-unknown) is refused unless `--allow-stale-plan` (explicit, audited) is passed.
+- **Prior-value capture at `--plan` time** — update-class actions (`campaign.update-status`, `adset.update-budget`, `adset.update-targeting`, `ad.update-status`) now embed `prior_values: [{index, action, target_id, fields: {<field>: <current>}}]` in the envelope before hashing, so the plan doc's Actions table shows **current → new** and the apply-time staleness gate has a baseline. Capture failure is non-fatal — the plan is written without prior values and the staleness gate skips with a note.
+- **`apb plan export --id <plan-id> --out <path>`** — serialize a stored plan to a portable, hash-verified envelope file, re-appliable via `plan apply`. Export → apply round-trips.
+- **`POST /api/v1/plans/import`** — HTTP parity: import an envelope (same schema/hash/staleness gates via the shared apb-core engine), returns `{plan_ids, validation, integrity, staleness}`. Execution stays on the existing `POST /plans/:id/execute[-safe]` endpoints (`WritePolicy` + scopes re-enforced there).
+- The S3 plan document's "ships in v0.5.26 (S4)" caveat is removed — `plan apply` is live. (plan-first-cli-001 S4)
+
 ## [0.5.25] — 2026-07-16 (`--plan <path>`: plan it, don't do it)
 
 ### Added
