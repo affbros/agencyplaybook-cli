@@ -1,0 +1,73 @@
+# AgencyPlaybook campaign brief — the planner's intake form.
+# Copy to briefs/<slug>.yaml. Fields marked [v1] are carried by today's CampaignLaunchSpec
+# (`plan campaign search --export`). Fields marked [v2] need campaign-build-001 S1/S2 — until then
+# the planner emits them as post-launch `mutate …` commands in build/post-launch.md.
+# Minimum to proceed: customer_id, type, business.landing_page, goals.mode+target, goals.daily_budget,
+# research.seed_keywords or seed_url, targeting.geo.
+
+customer_id: "6338615768"                 # [v1] sandbox child shown; real accounts need a human YES to launch
+type: search                              # [v1] search | pmax | demand-gen  (meta builds use `apb` — see cli-handoff.md)
+campaign_name: "Test-ok-to-delete Example Roasters — Whole Bean — US"   # [v1] sandbox REQUIRES the Test-ok-to-delete substring
+
+business:
+  brand: "Example Roasters"               # [v1] injected into copy; also the brand-exclusion term
+  landing_page: https://www.example.com/whole-bean      # [v1] final URL base (LIVE payloads: the client's REAL domain, never a placeholder)
+  final_url_suffix: "utm_source=google&utm_medium=cpc&utm_campaign={campaignid}"   # [v2] tracking
+  reviews_source: null                    # optional URL/file of verified reviews for social-proof claims (ad-copy-verification-standard)
+
+goals:                                    # read from `context show` when present; never from memory
+  mode: target_cpa                        # [v1] target_cpa | target_roas | maximize_conversions | maximize_conversion_value | manual_cpc
+  target_cpa: 18.00                       # [v1]
+  target_roas: null                       # [v1]
+  daily_budget: 75.00                     # [v1] account currency
+  conversion_actions: ["Purchase"]        # [v2] resolved by name → must be unambiguous
+  customer_acquisition: { optimize_new_customers: false, value_bid: null }   # [v2] (tail exists; v25 Goal migration pending)
+
+research:
+  seed_keywords: ["whole bean coffee", "fresh roasted coffee beans"]   # [v1]
+  seed_url: https://www.example.com/whole-bean                          # [v1] alternative/additional seed
+  exclude_intents: [jobs, wholesale, recipes]                           # planner filters research output
+  match_type_policy: { default: PHRASE, exact_for_top_n: 15, broad: false }   # applied when assembling keywords
+
+structure:
+  max_ad_groups: 8                        # consolidation doctrine: fewer, stronger
+  themes: auto                            # or an explicit list of cluster names to keep
+  rsa_per_ad_group: 1                     # 1 strong RSA; add a 2nd only as a deliberate test
+
+targeting:
+  geo: { include: ["US"], exclude: [], type: PRESENCE }   # include [v1] as geo ids; exclude + type [v2]
+  languages: ["en"]                       # [v1]
+  schedule: null                          # [v2] { days: [MON..FRI], hours: "06-22", timezone: America/Los_Angeles }
+  devices: null                           # [v2] { mobile: +10, tablet: -100 }  (-100 = exclude; modifiers are no-ops under most Smart Bidding — the CLI warns)
+  audiences: { observation: [], targeting: [] }           # [v2]
+  demographics: { exclude_age: [] }       # [v2]
+
+negatives:
+  campaign_level: ["free", "jobs", "wholesale"]           # [v1] campaign_negative_keywords
+  ad_group_level: auto                    # [v1] from research seed negatives
+  shared_sets: []                         # [v2] attach existing lists by exact name → ambiguity fails loud
+  brand_exclusion: true                   # [v2] keep brand traffic out of non-brand (tail exists)
+
+assets:                                   # [v2] all optional; char limits enforced by policy.rs
+  sitelinks: []                           # [{ text, url, desc1, desc2 }]  ≥4 recommended
+  callouts: []                            # ≤25 chars each, ≥4 recommended
+  snippets: null                          # { header, values[] }
+  call: null                              # { number, country }
+  images: []                              # pre-uploaded asset resource names only
+
+copy:
+  provider: agent                         # heuristic (CLI templates; Title Case, generic) | agent (planner writes it — see copy-doctrine.md)
+  headlines: []                           # filled by the planner when provider=agent (8–15, ≤30 chars, sentence case)
+  descriptions: []                        # 2–4, ≤90 chars
+  pins: {}                                # partial pinning only: { position_1: ["…", "…"] }
+  paths: []                               # ≤2 × ≤15 chars
+
+settings:                                 # [v2]
+  networks: { search_partners: false, display_expansion: false }
+  ad_rotation: OPTIMIZE
+  url_expansion: false
+  ai_max: false                           # requires Google Ads API v25 (api-bump-google-v25)
+
+safety:
+  born_paused: true                       # always
+  sandbox_required_substring: "Test-ok-to-delete"   # enforced by the CLI on the sandbox; omit on real accounts

@@ -72,3 +72,24 @@ apb-gads auth test
 ```
 
 Google Ads is a paid add-on — connect a Google account in the AgencyPlaybook dashboard (Integrations → Connect Google Ads). Full docs: [`../docs/google/`](../docs/google).
+
+## `agencyplaybook-planner`
+
+A campaign PLANNER skill — turns a client brief into an expert-grade, launch-ready Google Ads (Search / PMAX / Demand Gen) or Meta build: keyword research, account structure, grounded ad copy, negatives, geo/schedule/device/audience targeting, assets, bidding and goals. It's a thin orchestration layer — research and structure come from the CLIs, every write still goes through their dry-run-first gates. Nothing launches without an explicit human YES.
+
+| | |
+|---|---|
+| **Browse the skill** | [`agencyplaybook-planner/`](./agencyplaybook-planner) — `SKILL.md`, `references/` |
+| **One-step install** | [`agencyplaybook-planner.tar.gz`](./agencyplaybook-planner.tar.gz) |
+
+### Install
+
+```bash
+mkdir -p ~/.claude/skills
+tar xzf agencyplaybook-planner.tar.gz -C ~/.claude/skills/
+# Restart Claude Code. Ask "plan a campaign" to verify the skill activates.
+```
+
+### Pair it with the CLIs
+
+The planner hands its output to `apb` and `apb-gads` — grab both from [`../bin`](../bin) and set your API key once (see the `agencyplaybook-cli` / `agencyplaybook-cli-google` sections above).
