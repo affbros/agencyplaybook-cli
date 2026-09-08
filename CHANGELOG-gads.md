@@ -6,6 +6,19 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.1.20] — 2026-07-23 (portfolio reporting: MCC-wide per-currency roll-ups)
+
+Adds a new top-level **`portfolio`** command group (3 leaves) — the CLI equivalent of the web UI's S002 portfolio reporting endpoints, closing the "every capability has a CLI command" parity gap (analytics-upgrade-001 S007). Leaf count **287 → 290 commands / 27 → 28 groups**; playbooks (66) and reports (24) unchanged. All three commands are **READ-ONLY** — no three-gate safety, no mutations.
+
+### Added
+- **`portfolio summary`** — MCC-wide account summary: per reportable child-account totals (cost, conversions, conversions_value, clicks, impressions, ctr, cpa, roas) plus a per-currency roll-up (`totals_by_currency`). `--compare` adds an equal-length prior window, per-account `delta`, and a `previous_totals_by_currency` sibling. Mirrors `/gads/accounts/summary?compare=true`.
+- **`portfolio breakdown --dimension <device|network|campaign_type>`** — metrics segmented by one dimension, grouped per currency (`rows_by_currency`, each currency's rows sorted by cost desc, cpa/roas/ctr derived). Mirrors `/gads/reports/breakdown`.
+- **`portfolio trend`** — per-currency daily cost / conversions / conversions_value time-series (`series_by_currency`). Mirrors the portfolio `/gads/reports/trend`.
+- All three fan out **sequentially** per account (Google one-ops/day per-developer-token accounting — no parallel fan-out) through the standard `gaql_query` pacing/backoff path. **Money is never summed across currencies** — every roll-up is grouped by `customer.currency_code` (no FX). Window size is the global `--lookback-days` (default 30). With `--customer`, the fan-out scopes to that single child; without it, every non-manager child of the configured MCC (`login_customer_id`). A per-account read failure soft-degrades (summary marks the account `reachable: false`; breakdown/trend skip it) rather than failing the whole portfolio; a `--customer`-scoped single account surfaces the error.
+
+### Unchanged
+- No mutation surface, no new config fields, no new env vars, no safety-model change. Google Ads API still pinned to **v24**.
+
 ## [0.1.19] — 2026-07-16 (publish the distributable batch scripts)
 
 No command/flag surface change to the leaf count — still **287 commands / 27 groups / 66 playbooks / 24 reports**. This release **publishes the batch-script library** to the public repo. On the next `gads-v0.1.19` tag the `release-gads.yml` workflow copies `rust/gads/scripts/public-scripts/` into `affbros/agencyplaybook-cli` under `scripts/gads/` (beside the binaries and apb's `scripts/apb/`).

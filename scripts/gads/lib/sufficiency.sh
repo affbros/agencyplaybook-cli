@@ -33,8 +33,11 @@ suff_load_thresholds() {
   MIN_AUDIENCE_SIZE="$(_suff_get min_audience_size "$f")"
   LOOKBACK_DAYS_DEFAULT="$(_suff_get lookback_days_default "$f")"
   CHANGE_BUDGET="$(_suff_get change_budget "$f")"
+  FATIGUE_INCLUDE_AVERAGE="$(_suff_get fatigue_include_average "$f")"
+  TRACKING_FLAG_REMOVED="$(_suff_get tracking_flag_removed "$f")"
   : "${MIN_CONVERSIONS:=0}" "${MIN_SPEND_USD:=0}" "${MIN_IMPRESSIONS:=0}"
   : "${MIN_AUDIENCE_SIZE:=0}" "${LOOKBACK_DAYS_DEFAULT:=30}" "${CHANGE_BUDGET:=3}"
+  : "${FATIGUE_INCLUDE_AVERAGE:=0}" "${TRACKING_FLAG_REMOVED:=0}"
 }
 
 # sufficient '<entity-json>' -> "pass" | "fail — insufficient data — keep collecting (...)"

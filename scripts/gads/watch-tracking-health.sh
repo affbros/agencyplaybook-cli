@@ -14,14 +14,23 @@ WATCH_NAME="watch-tracking-health"
 LOOKBACK=30
 parse_common_args "$@"
 
+# shellcheck source=lib/sufficiency.sh
+source "${HERE}/lib/sufficiency.sh"
+suff_load_thresholds
+
+# REMOVED actions no longer feed Smart Bidding — long-removed ones are stale
+# cleanup, re-flagged forever if included. Opt in via tracking_flag_removed=1.
+status_re="HIDDEN|UNVERIFIED|NO_RECENT|INACTIVE|PENDING|UNTAGGED"
+[ "${TRACKING_FLAG_REMOVED:-0}" = "1" ] && status_re="REMOVED|${status_re}"
+
 track="$(run_gads playbook conversion-tracking-check --lookback-days "$LOOKBACK")"
 status_write tracking-health "$track"
 
-flagged="$(printf '%s' "$track" | jq -c '
+flagged="$(printf '%s' "$track" | jq -c --arg re "$status_re" '
   [ .. | objects
     | select(
         ((((.status? // .conversion_status? // .state? // "") | tostring) | ascii_upcase)
-          | test("REMOVED|HIDDEN|UNVERIFIED|NO_RECENT|INACTIVE|PENDING|UNTAGGED"))
+          | test($re))
         or (.verified? == false)
       )
     | { action: (.name? // .conversion_action? // .id? // "conversion_action"),

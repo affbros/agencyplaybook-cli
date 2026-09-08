@@ -9,18 +9,26 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
 source "${HERE}/lib/common.sh"
+# shellcheck source=lib/sufficiency.sh
+source "${HERE}/lib/sufficiency.sh"
 
 WATCH_NAME="watch-fatigue"
 LOOKBACK=30
 parse_common_args "$@"
+suff_load_thresholds
+
+# AVERAGE ad_strength is the busy-account steady state — noise unless the
+# operator opts in (thresholds.conf fatigue_include_average=1).
+strength_re="POOR|LOW"
+[ "${FATIGUE_INCLUDE_AVERAGE:-0}" = "1" ] && strength_re="POOR|LOW|AVERAGE"
 
 rsa="$(run_gads playbook rsa-quality-audit --lookback-days "$LOOKBACK")"
 status_write fatigue "$rsa"
 
-flagged="$(printf '%s' "$rsa" | jq -c '
+flagged="$(printf '%s' "$rsa" | jq -c --arg re "$strength_re" '
   [ .. | objects
     | select(
-        ((((.ad_strength? // .strength? // "") | tostring) | ascii_upcase) | test("POOR|LOW|AVERAGE"))
+        ((((.ad_strength? // .strength? // "") | tostring) | ascii_upcase) | test($re))
         or ((((.quality? // .quality_label? // .verdict? // "") | tostring) | ascii_downcase) | test("decay|poor|weak|refresh"))
         or (.refresh_candidate? == true)
       )
