@@ -104,6 +104,90 @@ Per ad group:
   - **2–4 descriptions**, each **≤ 90 chars**.
   - **≥ 1 `final_urls`**, each `http`/`https`. Use your real landing page.
 
+### Spec v2 — the whole build in one file (0.1.21+)
+
+Everything above is **v1**, and it still works exactly as written. From **0.1.21** the
+spec accepts an additional set of **optional** blocks, applied by eight sequential
+**tail stages** that run after the campaign exists — so one `orchestrate campaign-launch`
+leaves no hand-run checklist behind:
+
+| Tail stage | Blocks it applies |
+|---|---|
+| `ads` | `ad_groups[].rsas[]` — additional RSAs for the same ad group (max **3 per ad group**). The primary `rsa` also accepts `pins`, `path1`, `path2`. |
+| `targeting` | `geo_exclude_ids`, `geo_target_type` (`PRESENCE` / `PRESENCE_OR_INTEREST`), `location_modifiers`, `proximity`, `ad_schedules`, `device_modifiers`, `audiences.observation`, `demographics.exclude` |
+| `negatives-extra` | `shared_sets.create[]` / `shared_sets.attach[]`, `brand_exclusion` |
+| `assets` | `assets.sitelinks[]`, `.callouts[]`, `.snippets[]`, `.call`, `.price`, `.promotion`, `.image_resources[]` |
+| `tracking` | `tracking.url_template`, `tracking.final_url_suffix` |
+| `settings` | `settings.search_partners`, `.display_expansion`, `.ad_rotation`, `.url_expansion_opt_out`, `.frequency_cap` |
+| `goals` | `conversion_goals.actions[]`, `conversion_goals.customer_acquisition` |
+| `portfolio-bidding` | `bidding_strategy.portfolio_resource` |
+
+Formats worth knowing before you write the file:
+
+- `rsa.pins` — `{"HEADLINE_1": ["exact headline text"], …}`. A pin must reference copy that
+  is present in the same RSA; otherwise `validate campaign-spec` exits 3 (Google would
+  create the ad **without** the asset).
+- `demographics.exclude[]` — `"TYPE:VALUE"` strings, e.g. `"AGE_RANGE:AGE_RANGE_18_24"`.
+  Campaign-level demographics are **exclusion-only**.
+- `conversion_goals.actions[]` — either `"<CATEGORY>:<ORIGIN>"` (e.g. `"PURCHASE:WEBSITE"`)
+  or a conversion-action resource name / id.
+- `ad_schedules[]` — `{day, start_hour, end_hour, bid_modifier?}`. On Search a
+  `bid_modifier` is allowed (unlike PMAX).
+
+**Four v2 fields are refused before any write**, with a message naming the field and the
+workaround, rather than being silently dropped: `tracking.custom_params`,
+`audiences.targeting`, `demographics.include`, and
+`conversion_goals.customer_acquisition.value_bid_micros`.
+
+> ⚠️ **Check your binary version before using a v2 spec.** `CampaignLaunchSpec` does not
+> reject unknown fields and carries no schema version, so **0.1.20 or older parses a v2
+> spec happily and silently ignores every v2 block** — you get the v1 skeleton with no
+> error. Run `apb-gads --version` (need ≥ 0.1.21) and check the launch output carries
+> `spec_summary.v2_blocks`.
+
+### If a tail stage fails
+
+The head (budget + campaign) is atomic; the tails are sequential by necessity. If a tail
+stage fails, the launch **stops there**, the campaign stays `PAUSED` (it is born paused and
+never enabled, so it cannot spend), and the output is a receipt with
+`"status": "partial-failure"`, `failed_stage`, `tail_completed_through` and
+`tail_resources[]`.
+
+> ⚠️ **A partial failure still exits 0.** The outcome is in `.status`, not the exit code —
+> a `set -e` script must read it.
+
+Save the receipt and undo the whole launch with one atomic batch:
+
+```bash
+apb-gads --customer <CID> orchestrate campaign-launch \
+  --from-file spec.json --execute > receipt.json
+
+# if .status is "partial-failure":
+apb-gads --customer <CID> orchestrate rollback --from-receipt receipt.json          # dry-run
+APB_GADS_ALLOW_MUTATIONS=true apb-gads --customer <CID> \
+  orchestrate rollback --from-receipt receipt.json --execute
+```
+
+Rollback removes children before parents and detaches shared sets before removing them.
+Two things it deliberately leaves behind and reports rather than dropping: a **device
+campaign criterion** (Google refuses to remove one individually — it goes away with the
+campaign) and any **created assets** (the v24 API has no asset-remove operation; delete
+them in the Google Ads UI).
+
+### Pre-flight the whole build without creating anything
+
+```bash
+APB_GADS_ALLOW_MUTATIONS=true apb-gads --customer <CID> orchestrate campaign-launch \
+  --from-file spec.json --validate-only --execute
+```
+
+Google validates the head **and** every tail op server-side; nothing is created. Three op
+classes cannot be validated before the campaign exists — the customer-acquisition goal (a
+separate API service), the conversion-goal set (its resource name is a composite key), and
+the brand-list exclusion (eligibility is evaluated against a real campaign). They are listed
+under `sequential_tail_steps[].skipped`, and the top-level verdict is then
+**`validated-partial`** rather than `validated`. All three are validated at execute time.
+
 ## The PMAX launch spec
 
 `orchestrate pmax-build --from-file` (and `validate pmax-spec`) consume a

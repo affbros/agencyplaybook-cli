@@ -152,6 +152,8 @@ Usage: apb-gads mutate apply-plan [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | — |
+| `--allow-edited-plan` | Explicit, audited override: apply an envelope plan even though its contents no longer match its recorded plan_hash (it was hand-edited). Without this, a hash mismatch is a hard error |
+| `--allow-stale-plan` | Explicit, audited override: apply an envelope plan even though a recorded prior value has drifted from the live value since the plan was emitted. Without this, detected drift is a hard error |
 
 <a id="apb-gads-mutate-inverse-plan"></a>
 ### `apb-gads mutate inverse-plan`

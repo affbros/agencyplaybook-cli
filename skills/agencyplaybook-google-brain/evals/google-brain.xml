@@ -1,0 +1,71 @@
+<evaluation>
+   <!--
+     agencyplaybook-google-brain evals — READ-ONLY, INDEPENDENT, multi-tool questions
+     answerable ONLY via the AgencyPlaybook MCP's Google (gads_*) + shared (agency_*) READ tools
+     (no CLI, no writes). Most answers are STRUCTURAL/STABLE (catalogue sizes, the Google Ads API
+     version, the resolved display name) so they are drift-proof; the few live-data questions are
+     anchored to the deliberate test customer — the Scandalous child 6523096952 under the apifuel
+     MCC 1521063001 (AGENTS.md rule #10) — over a FIXED lookback, with paused campaigns included
+     (the test child's campaigns are PAUSED, so a short/active-only window is legitimately empty).
+     Answers are single, verifiable, direct-string-comparison values; the output format is stated
+     in each question. None requires a write/destructive operation.
+
+     NOTE: live-data answers (Q4, Q8, Q9) are anchored/illustrative — re-derive with a quick
+     read-only pass if the test customer was materially changed; the structural answers
+     (Q1,Q2,Q3,Q5,Q6,Q7,Q10) are stable regardless.
+   -->
+   <qa_pair>
+      <question>Using the AgencyPlaybook MCP, determine whether the connected tenant has the Google Ads add-on entitlement active (the paid overlay that unlocks Google writes). Respond with exactly True or False.</question>
+      <answer>False</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Discover the catalogue of Google diagnostic playbooks (audits) the MCP can run for this tenant. How many distinct Google audit slugs are available? Answer with a single integer.</question>
+      <answer>66</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Using the MCP, determine how many distinct Google Ads reports the performance tool recognizes for this tenant (the catalogue of valid report names). Answer with a single integer.</question>
+      <answer>23</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Using the MCP's capabilities tool, report the Google Ads API version the server targets. Answer with exactly the version string as reported (e.g. "v24").</question>
+      <answer>v24</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Using the MCP's Google customer tools, resolve the customer named "Scandalous" and report its bare numeric customer id (digits only, no dashes, no "customers/" prefix). Answer with the numeric id.</question>
+      <answer>6523096952</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Using the MCP, list the Google customers this tenant can reach and identify the login MCC (the level-0 manager customer). Report its bare numeric customer id (digits only). Answer with the numeric id.</question>
+      <answer>1521063001</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>A user asks the MCP to run a raw GAQL statement that is NOT a SELECT (for example an attempt to mutate). The read-only GAQL tool refuses it before any subprocess. Respond with exactly the error code the tool returns (a single lowercase token).</question>
+      <answer>invalid_query</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Ask the MCP for the per-campaign decision verdict on the Scandalous Google customer 6523096952 over the last 30 days, INCLUDING paused campaigns. Across all judged campaigns, which single verdict verb is assigned to the most campaigns? Answer with one of: SCALE, OPTIMIZE, TIGHTEN, CAP, HOLD, CUT.</question>
+      <answer>TIGHTEN</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>For the Scandalous Google customer 6523096952 over the last 30 days including paused campaigns, how many campaigns does the MCP's verdict tool judge in total? Answer with a single integer.</question>
+      <answer>3</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>A user asks the Google brain to apply "keyword-update-match-type" through the MCP's managed write path. This op is one of the four currently DEFERRED managed ops. Respond with exactly the structured refusal reason the managed write path returns (a single lowercase token).</question>
+      <answer>google_managed_op_requires_ad_group</answer>
+   </qa_pair>
+   <!--
+     Group L (agency) cross-channel read-only scenario — sprint-016e Part C. agency_get_portfolio
+     is the entitlement-gated cross-channel roll-up (Meta + Google together), so it belongs in the
+     Google brain's surface as much as the Meta one. Referenced by name so the evals-integrity
+     guard validates it against declaredToolNames(). Anchored on the STABLE channel set the
+     roll-up reports (the test tenant has both Meta and Google accounts connected) — NOT volatile
+     spend. LIVE-VERIFIED read-only on 2026-06-22 via `./apb agency portfolio` against the
+     agency-entitled solo tenant: totals.channels = ["meta","google"], totals.account_count = 4
+     (2 Meta + 2 Google). READ-ONLY; no writes.
+   -->
+   <qa_pair>
+      <question>This tenant is agency-entitled. Using the MCP's agency_get_portfolio tool with the default "all" channel scope, list the distinct advertising channels that appear in the cross-channel portfolio roll-up. Answer with the channel names in alphabetical order, comma-separated, lowercase (e.g. "google, meta").</question>
+      <answer>google, meta</answer>
+   </qa_pair>
+</evaluation>

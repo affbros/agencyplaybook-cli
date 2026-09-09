@@ -82,6 +82,9 @@ preview/validate → surface impact → get an explicit user YES → execute →
 needs the fresh approval token AND the human YES; if either is missing, do the analysis + propose
 the change-set in words and ask for the go-ahead instead of writing.
 
+Greenfield builds → `agencyplaybook-planner` skill (this brain audits/diagnoses/executes on
+existing campaigns; it does not draft new ones).
+
 ## MCP tool-selection rules (the canonical read sequence)
 
 Follow this order — each step grounds the next. Detail per workflow in `reference/workflows.md`.

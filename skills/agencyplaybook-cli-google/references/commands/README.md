@@ -6,7 +6,7 @@ This is the **exhaustive, runtime-derived** reference for every command, subcomm
 
 For narrative, examples, and *how to think about* the CLI, see [`../commands.md`](../commands.md) (day-to-day reference), [`../playbooks.md`](../playbooks.md), and [`../mutations.md`](../mutations.md) (the safety model). This directory is the flat, complete enumeration those docs defer to.
 
-**At a glance:** 27 command groups · 287 total commands/subcommands · API version `v24`.
+**At a glance:** 28 command groups · 290 total commands/subcommands · API version `v24`.
 
 ## Global options
 
@@ -14,7 +14,7 @@ These are defined on the top-level parser and accepted by (almost) every command
 
 | Option | Description |
 |---|---|
-| `--config <CONFIG>` | [default: google-ads.yaml] |
+| `--config <CONFIG>` | Path to google-ads.yaml (credentials + safety config) [default: google-ads.yaml]. An explicit --config carrying developer_token + refresh_token takes precedence over ambient APB_API_KEY SaaS resolution for Google credentials. |
 | `--customer <CUSTOMER>` | — |
 | `--pretty` | Pretty-print JSON |
 | `--execute` | Allow a mutating command to proceed past dry-run planning |
@@ -22,7 +22,8 @@ These are defined on the top-level parser and accepted by (almost) every command
 | `--confirm` | Confirm operations whose amount_micros exceeds a safety profile's require_confirmation_above_micros threshold |
 | `--lookback-days <LOOKBACK_DAYS>` | Override the per-playbook default lookback window (in days) for any read that uses a date range |
 | `--output <OUTPUT>` | Write JSON output to this file path instead of stdout |
-| `--save-plan <SAVE_PLAN>` | After a dry-run mutation, write a normalized plan JSON to this path (re-playable via `mutate apply-plan`) |
+| `--save-plan <SAVE_PLAN>` | (deprecated — use --plan) After a dry-run mutation, write a normalized plan JSON to this path (re-playable via `mutate apply-plan`) |
+| `--plan <PLAN>` | Plan it, don't do it: run the full dry-run pipeline and write <path>.md (human plan document) + <path>.json (re-playable machine plan). No API mutation is performed. Cannot be combined with --execute. |
 | `-h, --help` | Print help |
 | `-V, --version` | Print version |
 
@@ -53,6 +54,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`mutate`](mutate.md) | ✍️ write | 119 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
 | [`gaql`](gaql.md) | 👁️ read | 1 | Run ad-hoc Google Ads Query Language (GAQL) against the searchStream endpoint. |
 | [`report`](report.md) | 👁️ read | 24 | Named, pre-built read reports (search terms, performance, PMAX, etc.). |
+| [`portfolio`](portfolio.md) | 👁️ read | 3 | Portfolio reporting — MCC-wide, per-currency roll-ups across every reportable child account (analytics-upgrade-001 S007). |
 | [`playbook`](playbook.md) | 👁️ read | 67 | Agency-style read playbooks: audits, scorecards, and hygiene readouts. |
 | [`verdict`](verdict.md) | 👁️ read | 1 | Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT) per ENABLED campaign across ALL channel types, from 3 gates (Efficiency / Delivery+headroom / Quality). |
 | [`campaign-type-advisor`](campaign-type-advisor.md) | 👁️ read | 1 | Campaign-type advisor (Search vs PMax vs Demand Gen) — prescriptive: given a goal, demand state, conversion-signal strength, and daily budget, recommend the primary engine + the maturity-ordered sequence (Search captures demand · PMax scales it · Demand Gen creates it). |
@@ -275,6 +277,12 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads report cart-data-sales`](report.md#apb-gads-report-cart-data-sales) — v24 CartDataSalesView — segments by product SOLD (not clicked).
 - [`apb-gads report customer-settings`](report.md#apb-gads-report-customer-settings) — Customer-level settings (v24).
 
+### `portfolio`
+
+- [`apb-gads portfolio summary`](portfolio.md#apb-gads-portfolio-summary) — MCC-wide account summary: per reportable child-account totals (cost, conversions, value, clicks, impressions, ctr, cpa, roas) plus a per-currency roll-up (never FX-blended).
+- [`apb-gads portfolio breakdown`](portfolio.md#apb-gads-portfolio-breakdown) — MCC-wide metric breakdown segmented by a single dimension, grouped per currency.
+- [`apb-gads portfolio trend`](portfolio.md#apb-gads-portfolio-trend) — MCC-wide daily trend: per-currency cost / conversions / conversions_value time-series across reportable children.
+
 ### `playbook`
 
 - [`apb-gads playbook list`](playbook.md#apb-gads-playbook-list)
@@ -381,7 +389,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads orchestrate demand-gen-build`](orchestrate.md#apb-gads-orchestrate-demand-gen-build) — Greenfield Demand Gen builder (decision-verdict-001 S004) — atomically creates budget → campaign (DEMAND_GEN, bidding at create) → geo/language → ad group → audience criteria → a Demand Gen video-responsive ad in ONE googleAds:mutate.
 - [`apb-gads orchestrate weekly-optimization`](orchestrate.md#apb-gads-orchestrate-weekly-optimization) — Weekly-optimization readout: composes search-term-cleanup + expansion-readiness + impression-share-loss into a single advisory document.
 - [`apb-gads orchestrate monthly-review`](orchestrate.md#apb-gads-orchestrate-monthly-review) — Monthly-review readout: composes account-health + waste-audit + creative-refresh + budget-pacing + quality-score-audit into a bundled 30-day view.
-- [`apb-gads orchestrate rollback`](orchestrate.md#apb-gads-orchestrate-rollback) — Rollback: accept a list of resource names and submit a single atomic remove batch.
+- [`apb-gads orchestrate rollback`](orchestrate.md#apb-gads-orchestrate-rollback) — Rollback: accept a list of resource names (or a campaign-launch receipt) and submit a single atomic remove batch.
 
 ### `audit`
 
@@ -404,7 +412,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads verify preflight`](verify.md#apb-gads-verify-preflight) — Report the live-verify policy shape for the target customer.
 - [`apb-gads verify noop`](verify.md#apb-gads-verify-noop) — W2 scaffold probe: exercises the verification state machine end-to-end (lock → manifest → stages → ledger) without touching the Google Ads API.
 - [`apb-gads verify smoke`](verify.md#apb-gads-verify-smoke) — W2 server-side gate: submit a synthetic Scandalous-shaped campaign-budget create payload to Google with `validateOnly=true`.
-- [`apb-gads verify search-lifecycle`](verify.md#apb-gads-verify-search-lifecycle) — W3 Chain 1: full search-campaign lifecycle.
+- [`apb-gads verify search-lifecycle`](verify.md#apb-gads-verify-search-lifecycle) — W3 Chain 1: full search-campaign lifecycle, CampaignLaunchSpec v2 shape.
 - [`apb-gads verify pmax-launch`](verify.md#apb-gads-verify-pmax-launch) — W4 Chain 2: full PMAX launch (Path 3 — production-asset reuse).
 - [`apb-gads verify rsa-lifecycle`](verify.md#apb-gads-verify-rsa-lifecycle) — P5 Chain 3: full RSA create + refresh lifecycle.
 - [`apb-gads verify bootstrap-pmax-assets`](verify.md#apb-gads-verify-bootstrap-pmax-assets) — Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end.

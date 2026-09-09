@@ -1,0 +1,74 @@
+<evaluation>
+   <!--
+     agencyplaybook-meta-brain evals — 10 READ-ONLY, INDEPENDENT, multi-tool questions
+     answerable ONLY via the AgencyPlaybook MCP's 15 read-only Meta tools (no CLI, no writes).
+     Anchored against the solo read tenant's default account (the deliberate "Scandalous" /
+     scandalouscoffee test account, per AGENTS.md rule #10) over a FIXED 365-day window so the
+     answers are stable. Answers are single, verifiable, direct-string-comparison values; the
+     output format is stated in each question. None requires a write/destructive operation.
+   -->
+   <qa_pair>
+      <question>Using the AgencyPlaybook MCP, determine the subscription tier of the connected tenant and whether its plan unlocks the agency / multi-account surface. Respond with exactly the tier name followed by " / agency-entitled: " and True or False (e.g. "Agency / agency-entitled: True").</question>
+      <answer>Agency / agency-entitled: True</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Discover the catalogue of Meta diagnostic playbooks (audits) the MCP can run for this tenant. How many distinct audit slugs are available? Answer with a single integer.</question>
+      <answer>32</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>List the available Meta diagnostic playbooks and group them by their pillar. Which pillar contains the largest number of playbooks? Answer with the pillar name in lowercase (one of: learning, signal, scaling, turnaround).</question>
+      <answer>signal</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>For the tenant's default Meta ad account, pull campaign-level performance over the last 365 days and identify the single campaign that spent the most money in that window. Respond with the campaign name exactly as reported.</question>
+      <answer>Meta Recommendation Ad</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>For the tenant's default Meta ad account over the last 365 days, find the campaign that accumulated the highest number of impressions (note: most-impressions is not necessarily highest-spend). Respond with the campaign name exactly as reported.</question>
+      <answer>Awareness Campaign</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Run the overall account-health diagnostic playbook against the tenant's default Meta account for a 365-day lookback. What letter grade does it assign? Answer with a single letter A, B, C, D, or F.</question>
+      <answer>F</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Run the wasted-spend diagnostic playbook (the one that surfaces budget being wasted / flagged inefficient entities) against the tenant's default Meta account over a 365-day window. What letter grade does it assign? Answer with a single letter A, B, C, D, or F.</question>
+      <answer>C</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Ask the MCP for the per-campaign decision verdict on the tenant's default Meta account over the last 365 days, including paused campaigns. Across all judged campaigns, which single verdict verb is assigned to the most campaigns? Answer with one of: SCALE, OPTIMIZE, TIGHTEN, CAP, HOLD, CUT.</question>
+      <answer>TIGHTEN</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>For the tenant's default Meta account over the last 365 days (including paused campaigns), first find the campaign that spent the most, then report the decision verdict the MCP assigns to that specific campaign. Answer with one of: SCALE, OPTIMIZE, TIGHTEN, CAP, HOLD, CUT.</question>
+      <answer>TIGHTEN</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Using the MCP's account tools, resolve the tenant's default Meta ad account and report its account display name exactly as returned (the human-readable account name, not the act_ id).</question>
+      <answer>scandalouscoffee's ad account</answer>
+   </qa_pair>
+   <!--
+     Group L (agency) read-only scenarios — sprint-016e Part C. These exercise the
+     entitlement-gated agency surface added by 016a/016b: meta_agency_list_accounts (the
+     Meta-only sub-account list) and agency_select_subaccount (the portfolio-membership pin).
+     They reference the real Group L tool names by name so the evals-integrity guard
+     (test/evals-integrity.test.ts) validates them against declaredToolNames(). Answers are
+     anchored to STABLE structural facts (account COUNT, connection STATUS strings, membership
+     boolean) — NOT volatile spend/verdict — and were LIVE-VERIFIED read-only on 2026-06-22 via
+     `./apb agency accounts` against the agency-entitled solo tenant: the Meta portfolio lists
+     2 connected sub-accounts (scandalouscoffee's ad account act_535043909388877 [primary] +
+     EngineSEO act_1886644758637992), both connection status "connected". READ-ONLY; no writes.
+   -->
+   <qa_pair>
+      <question>This tenant is agency-entitled. Using the MCP's meta_agency_list_accounts tool, how many Meta sub-accounts does the agency portfolio list across all connections? Answer with a single integer.</question>
+      <answer>2</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Using meta_agency_list_accounts, inspect the health of each Meta connection in the agency portfolio. How many of the listed connections report a status of "connected" (i.e. are NOT degraded/in error)? Answer with a single integer.</question>
+      <answer>2</answer>
+   </qa_pair>
+   <qa_pair>
+      <question>Call agency_select_subaccount with account_id "act_999999999999" (an id that is NOT a member of this tenant's portfolio). The tool refuses to pin a non-member sub-account. Respond with exactly the structured refusal reason it returns (a single lowercase token).</question>
+      <answer>not_in_portfolio</answer>
+   </qa_pair>
+</evaluation>

@@ -1,7 +1,7 @@
 ---
 name: agencyplaybook-cli-google
 description: |
-  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 116 gated mutations; run raw GAQL; schedule read-only audits. Covers all 287 commands across 27 groups against Google Ads API v24.
+  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 116 gated mutations; run raw GAQL; schedule read-only audits. Covers all 290 commands across 28 groups against Google Ads API v24.
 
   USE WHEN the user mentions Google Ads, "apb-gads", "gads", "google ads cli", "agencyplaybook google", "apb google", PMAX / Performance Max, RSA / responsive search ads, smart bidding, tCPA / tROAS / target CPA / target ROAS, learning phase, search themes, brand exclusions, negative keywords, keyword planning, conversion value rules, bid adjustments / bid modifiers, account health, waste audit, scaling ad spend, campaign launch, ad-strength / ad rotation, quality score, impression share, dayparting, geo/device performance, GAQL, or wants ANY Google Ads account read, audit, plan, report, or change — even if they don't name the CLI. NOT for Meta/Facebook/Instagram ads (use the agencyplaybook-cli skill) or generic SEO.
 ---
@@ -12,12 +12,13 @@ Drive the `apb-gads` CLI — a safe, triple-gated Rust Google Ads operator tool 
 judgment layer it doesn't ship with: which lever for which situation, in what order, framed
 for growth, and never at the cost of a converged Smart-Bidding campaign.
 
-**Division of labor.** The CLI owns the mechanics: **287 commands across 27 groups** —
-116 gated mutations, 66 diagnostic playbooks, 23 reports — every write dry-run by default
-behind three independent gates, every response JSON. This skill owns the *operating model*.
-Never reimplement what the CLI does; orchestrate it, and read the references below for depth.
+**Division of labor.** The CLI owns the mechanics: **290 commands across 28 groups** —
+116 gated mutations, 66 diagnostic playbooks, 23 reports, MCC-wide portfolio roll-ups — every
+write dry-run by default behind three independent gates, every response JSON. This skill owns
+the *operating model*. Never reimplement what the CLI does; orchestrate it, and read the
+references below for depth.
 
-> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 27 groups · 287 leaf
+> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 28 groups · 290 leaf
 > commands · 116 `mutate` subcommands · 66 playbooks (6 sections) · 23 reports · Google Ads
 > **API v24**. The runtime is the source of truth — when a doc and the binary disagree, the binary wins.
 
@@ -129,6 +130,13 @@ bypass or hand-craft around a guard rejection — the rejection is the system wo
 `plan campaign pmax` → `validate pmax-spec` → `orchestrate pmax-build` (atomic
 budget→campaign→assets→asset groups→signals, then brand-exclusion + customer-acquisition tail).
 Entities are born PAUSED; review before enabling. Full recipes in `examples.md`.
+**`CampaignLaunchSpec` v2 (0.1.21+)** carries the whole build — extra RSAs, geo extras, ad
+schedules, device modifiers, audiences, shared sets, sitelinks/callouts, tracking, network
+settings, conversion goals, portfolio bidding — applied by eight sequential tail stages, so a
+launch leaves no hand-run checklist. A partial failure stops the tail, leaves the campaign PAUSED
+and **still exits 0** — read `.status`, then undo with `orchestrate rollback --from-receipt`.
+Blocks, formats, the pre-flight refusals and the ≤0.1.20 silent-drop trap:
+`references/workflows.md` § W6b.
 
 ## Safety doctrine (apply to every mutation)
 
@@ -147,6 +155,36 @@ Entities are born PAUSED; review before enabling. Full recipes in `examples.md`.
    ad-validate`. So `apb-gads validate campaign-spec --from-file s.json && apb-gads orchestrate
    campaign-launch …` halts on a bad spec. See `references/automation.md`.
 6. **Every executed write lands in `audit list`;** `mutate inverse-plan` builds the rollback.
+
+### `--plan` (plan-first) — hand the user a readable plan
+
+The global `--plan <path>` flag means **"plan it, don't do it."** On any mutating command,
+orchestrator, or playbook it runs the full dry-run pipeline and writes a human-readable **plan
+document** (`<path>.md`) plus, when the result has re-playable operations, the machine plan
+(`<path>.json`) — with **zero** API mutation. Use it to give the user (or their client) a document
+to approve before anything is applied.
+
+- `--plan` **cannot** be combined with `--execute` (hard error naming both flags).
+- Path twins: a `.md` path → doc `<path>.md` + twin `<path>.md.json`; any other path → `.md`/`.json`
+  appended (`waste` → `waste.md` + `waste.json`).
+- A playbook with no actionable operations writes an explicit *empty-plan* doc (not an error); a
+  pure read warns "nothing to plan" and runs normally.
+- The plan file is **input, not consent** — applying it re-runs every gate, and is itself validated
+  as untrusted input: unknown `schema_version` is rejected, a hand-edited file fails the `plan_hash`
+  check, and recorded prior values are re-read to detect drift. A hash mismatch needs
+  `--allow-edited-plan`; detected drift needs `--allow-stale-plan` (both explicit, audited). Prefer
+  re-running `--plan` to refresh a stale plan over overriding.
+
+```sh
+# 1. Plan (writes waste.md + waste.md.json, touches nothing):
+apb-gads --customer 1234567890 playbook waste-audit --plan waste.md
+# 2. Show the user waste.md, get explicit approval, then apply:
+apb-gads mutate apply-plan --from-file waste.md.json --execute
+#    (refuses if the file was edited after step 1, or if the account drifted since;
+#     override with --allow-edited-plan / --allow-stale-plan only with the user's OK.)
+```
+
+`--save-plan` is the **deprecated** predecessor (JSON only, no document) — prefer `--plan`.
 
 ## Reading results & capability reasoning
 
@@ -192,6 +230,22 @@ cover it — see `references/scopes.md` for the full matrix and the upgrade path
 - **When a guard blocks a write, report it — never handcraft a workaround.** There is no bypass
   flag by design.
 - **v24 is pinned.** Don't assume v25+ fields exist; the CLI rejects out-of-range inputs pre-API.
+
+## Batch scripts (the watchful eye)
+
+A downloadable library of thin bash wrappers around `apb-gads` encodes how a disciplined operator runs a Google Ads account: **watch constantly, change rarely, no decision without sufficient data.** They are samples users run with their own credentials — the intelligence stays in the binary; each script is auditable in 60 seconds.
+
+Three cadence tiers plus a shared library:
+
+- **Tier 1 — Watchdogs** (daily, strictly read-only): `watch-account-pulse.sh`, `watch-budget-pacing.sh`, `watch-policy-flags.sh`, `watch-tracking-health.sh`, `watch-learning-phase.sh`, `watch-fatigue.sh`, `watch-anomalies.sh`. They observe and alert (exit 10 = attention items) and never propose a change — a daily finding is flagged for the weekly review. Because they are read-only by construction, they register cleanly with the native scheduler.
+- **Tier 2 — Opportunity scans** (weekly, read-only analysis): `scan-scaling-readiness.sh`, `scan-waste.sh`, `scan-audience-health.sh`, `scan-creative-refresh.sh`, `scan-structure-hygiene.sh`, `scan-query-mining.sh`, `scan-search-terms.sh`, plus `check-sufficiency.sh`. Anything actionable renders as a plan document, gated by the data-sufficiency floor, a cooldown check, and learning-phase protection (entities still learning are watch-only).
+- **Tier 3 — Reviews** (weekly/monthly, the only tier that proposes): `weekly-review.sh`, `monthly-strategic-review.sh`, `budget-rebalance.sh`, and `plan-then-apply.sh`.
+- **Audit bundles** (`audit-full.sh` + sectioned `audit-*.sh` such as `audit-pmax.sh`, `audit-keywords.sh`, `audit-audience.sh`) run every read-only diagnostic playbook into a timestamped results dir.
+- **Shared library** (`lib/common.sh`, `lib/sufficiency.sh`, `lib/cooldown.sh`) and the tunable `thresholds.conf` — defaults mirror the binary's own metric-policy constants so scripts and playbooks agree on what "enough data" means.
+
+**Safety posture:** shipped scripts **never** write. The single sanctioned write path is `plan-then-apply.sh`, which is interactive — it opens a plan document and makes you type the apply command's confirmation yourself. Every proposed change is a plan document you (or a client) read and approve before anything touches the account.
+
+**Where to get them:** the in-app **Scripts** page (`/scripts`), or the public repo under `scripts/gads/` (<https://github.com/affbros/agencyplaybook-cli/tree/main/scripts/gads>). The `/scripts` page reads a live catalogue, so each card's description, cadence, and safety badge come straight from the script's own manifest header.
 
 ## Reference index
 

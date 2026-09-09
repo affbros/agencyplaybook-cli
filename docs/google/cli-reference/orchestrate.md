@@ -21,7 +21,7 @@ Phase 3 composite workflows — orchestrators that compose primitives into end-t
 | [`demand-gen-build`](#apb-gads-orchestrate-demand-gen-build) | Greenfield Demand Gen builder (decision-verdict-001 S004) — atomically creates budget → campaign (DEMAND_GEN, bidding at create) → geo/language → ad group → audience criteria → a Demand Gen video-responsive ad in ONE googleAds:mutate. |
 | [`weekly-optimization`](#apb-gads-orchestrate-weekly-optimization) | Weekly-optimization readout: composes search-term-cleanup + expansion-readiness + impression-share-loss into a single advisory document. |
 | [`monthly-review`](#apb-gads-orchestrate-monthly-review) | Monthly-review readout: composes account-health + waste-audit + creative-refresh + budget-pacing + quality-score-audit into a bundled 30-day view. |
-| [`rollback`](#apb-gads-orchestrate-rollback) | Rollback: accept a list of resource names and submit a single atomic remove batch. |
+| [`rollback`](#apb-gads-orchestrate-rollback) | Rollback: accept a list of resource names (or a campaign-launch receipt) and submit a single atomic remove batch. |
 
 ---
 
@@ -155,7 +155,7 @@ _No command-specific options — uses only the [global options](README.md#global
 <a id="apb-gads-orchestrate-rollback"></a>
 ### `apb-gads orchestrate rollback`
 
-Rollback: accept a list of resource names and submit a single atomic remove batch. Supported: campaigns, adGroups, adGroupAds, adGroupCriteria, campaignBudgets. Assets are flagged as unsupported (AssetService has no remove op as of v24 — remove via Google Ads UI)
+Rollback: accept a list of resource names (or a campaign-launch receipt) and submit a single atomic remove batch. Supported: campaigns, adGroups, adGroupAds, adGroupCriteria, campaignBudgets, campaignCriteria, campaignAssets, campaignSharedSets, sharedSets, sharedCriteria. Assets are flagged as unsupported (AssetService has no remove op as of v24 — remove via Google Ads UI)
 
 **Usage**
 
@@ -168,3 +168,4 @@ Usage: apb-gads orchestrate rollback [OPTIONS]
 | Option | Description |
 |---|---|
 | `--resource <RESOURCE>` | Resource name to remove. Repeat for each resource. Example: customers/123/campaigns/456 |
+| `--from-receipt <FROM_RECEIPT>` | A saved `orchestrate campaign-launch --execute` receipt (JSON). Removes everything that launch created — the head (budget/campaign/ad groups/ads/ keywords) AND every v2 tail resource — children first. Mutually exclusive with --resource |

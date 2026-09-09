@@ -2,7 +2,7 @@
 
 > ⚙️ **Auto-generated** from `apb-gads --help` by [`scripts/gen_cli_docs.py`](../../scripts/gen_cli_docs.py). **Do not edit by hand** — re-run the generator after any CLI change (`python3 scripts/gen_cli_docs.py`). Drift is caught by `--check`. See AGENTS.md § *CLI documentation*.
 
-Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaService / KeywordPlanService. Does not write; no three-gate safety applied
+Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaService / KeywordPlanService. Does not write; no three-gate safety applied. Expert copy + brief: install the agencyplaybook-planner skill (see /downloads)
 
 **Surface:** 👁️ Read-only · **12 command(s)** · [← back to index](README.md)
 
@@ -225,6 +225,7 @@ Usage: apb-gads plan campaign search [OPTIONS] --structure <STRUCTURE> --rsa <RS
 | `--rsa <RSA>` | Path to the rsa JSON (`plan rsa` output). Required — supplies ad copy |
 | `--goals <GOALS>` | Path to the goals JSON (`plan goals` output). Optional — sets bidding |
 | `--keywords-plan <KEYWORDS_PLAN>` | Path to the keywords-plan JSON (`plan keywords` output). Optional — supplies seeded negative keywords |
+| `--negatives-file <NEGATIVES_FILE>` | Path to a campaign-negatives JSON list — `[{"text": "...", "match_type": "BROAD\|PHRASE\|EXACT"}]`. Merged into the exported spec's `campaign_negative_keywords` (deduped against the keywords-plan seeds), so global exclusions no longer have to be hand-injected |
 | `--intent <INTENT>` | Which intent-campaign to emit (e.g. commercial). Omit to use the single campaign, or the highest-volume one for a multi-campaign structure |
 | `--campaign-name <CAMPAIGN_NAME>` | Override the campaign name (defaults to the structure's campaign name) |
 | `--landing-page <LANDING_PAGE>` | Landing page URL — overrides the RSA artifact's final_urls for every ad group |

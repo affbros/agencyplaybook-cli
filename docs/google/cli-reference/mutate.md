@@ -152,6 +152,8 @@ Usage: apb-gads mutate apply-plan [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | — |
+| `--allow-edited-plan` | Explicit, audited override: apply an envelope plan even though its contents no longer match its recorded plan_hash (it was hand-edited). Without this, a hash mismatch is a hard error |
+| `--allow-stale-plan` | Explicit, audited override: apply an envelope plan even though a recorded prior value has drifted from the live value since the plan was emitted. Without this, detected drift is a hard error |
 
 <a id="apb-gads-mutate-inverse-plan"></a>
 ### `apb-gads mutate inverse-plan`
@@ -1076,7 +1078,7 @@ Usage: apb-gads mutate campaign-device-modifier-set [OPTIONS] --campaign-id <CAM
 |---|---|
 | `--campaign-id <CAMPAIGN_ID>` | — |
 | `--device <DEVICE>` | DESKTOP \| MOBILE \| TABLET \| CONNECTED_TV \| OTHER |
-| `--bid-modifier <BID_MODIFIER>` | 0.1-10.0; e.g. 0.8 = -20% |
+| `--bid-modifier <BID_MODIFIER>` | 0.1-10.0 (0.0 = exclude/opt-out, e.g. for CONNECTED_TV); e.g. 0.8 = -20% |
 
 <a id="apb-gads-mutate-campaign-ad-schedule-add"></a>
 ### `apb-gads mutate campaign-ad-schedule-add`

@@ -17,7 +17,7 @@ Sprint W — live-execute verification. Opt-in chains that write to a real Googl
 | [`preflight`](#apb-gads-verify-preflight) | Report the live-verify policy shape for the target customer. |
 | [`noop`](#apb-gads-verify-noop) | W2 scaffold probe: exercises the verification state machine end-to-end (lock → manifest → stages → ledger) without touching the Google Ads API. |
 | [`smoke`](#apb-gads-verify-smoke) | W2 server-side gate: submit a synthetic Scandalous-shaped campaign-budget create payload to Google with `validateOnly=true`. |
-| [`search-lifecycle`](#apb-gads-verify-search-lifecycle) | W3 Chain 1: full search-campaign lifecycle. |
+| [`search-lifecycle`](#apb-gads-verify-search-lifecycle) | W3 Chain 1: full search-campaign lifecycle, CampaignLaunchSpec v2 shape. |
 | [`pmax-launch`](#apb-gads-verify-pmax-launch) | W4 Chain 2: full PMAX launch (Path 3 — production-asset reuse). |
 | [`rsa-lifecycle`](#apb-gads-verify-rsa-lifecycle) | P5 Chain 3: full RSA create + refresh lifecycle. |
 | [`bootstrap-pmax-assets`](#apb-gads-verify-bootstrap-pmax-assets) | Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. |
@@ -68,7 +68,7 @@ _No command-specific options — uses only the [global options](README.md#global
 <a id="apb-gads-verify-search-lifecycle"></a>
 ### `apb-gads verify search-lifecycle`
 
-W3 Chain 1: full search-campaign lifecycle. PREFLIGHT → VALIDATE → CREATE (9-op atomic) → VERIFY (17 GAQL assertions) → CLEANUP (9-op atomic remove) → POSTCHECK. Creates a real PAUSED $5/day USA-only SEARCH campaign with one ad group, RSA, 2 keywords, 2 negatives; reads back; atomically removes everything; confirms 0 residual. Total ~8 seconds. Worst-case exposure: $0 (PAUSED)
+W3 Chain 1: full search-campaign lifecycle, CampaignLaunchSpec v2 shape. PREFLIGHT → VALIDATE → CREATE (14-16 op atomic) → VERIFY (24 GAQL assertions) → EDIT → CLEANUP (13-op atomic remove) → POSTCHECK. Creates a real PAUSED $5/day USA-only SEARCH campaign with one ad group, RSA, 2 keywords, 2 negatives PLUS the v2 blocks the `orchestrate campaign-launch` tails write — sitelink + callout asset (attached), ad schedule, device bid modifier, shared-set attach, final-url suffix, network settings; reads each back by resource name; atomically removes everything removable; confirms 0 residual. Total ~15 seconds. Worst-case exposure: $0 (PAUSED)
 
 **Usage**
 

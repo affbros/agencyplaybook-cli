@@ -112,12 +112,76 @@ $B --customer <CID> mutate pmax-audience-signal-attach --asset-group-id <AG> --s
 $B --customer <CID> plan campaign full --business "<desc>" --url https://<domain> --export-dir /tmp/build
 $B validate campaign-spec --from-file /tmp/build/<spec>.json        # exit 3 = fix before launching
 $B --customer <CID> orchestrate campaign-launch --from-file /tmp/build/<spec>.json          # dry-run
+# Server-validate the WHOLE build (head + every tail op) before spending the launch:
+APB_GADS_ALLOW_MUTATIONS=true $B --customer <CID> orchestrate campaign-launch \
+  --from-file /tmp/build/<spec>.json --validate-only --execute      # creates NOTHING
 # PMAX (assets must exist first - asset-create-image / bootstrap):
 $B --customer <CID> plan campaign pmax --business "<desc>" --final-url https://<domain> ... --output /tmp/pmax.json
 $B validate pmax-spec --from-file /tmp/pmax.json
 $B --customer <CID> orchestrate pmax-build --from-file /tmp/pmax.json                        # dry-run
 # Execute only after user approval; entities are born PAUSED either way.
 ```
+
+## W6b — `CampaignLaunchSpec` v2: one spec, a finished campaign (0.1.21+)
+
+A v2 launch spec carries everything an operator configures at build time, so
+`orchestrate campaign-launch` no longer leaves a hand-run checklist behind. v2 is a
+**strict superset** of v1 — every v1 spec still launches unchanged — and the new blocks
+are applied by **eight sequential tail stages** after the head commits:
+
+`ads` → `targeting` → `negatives-extra` → `assets` → `tracking` → `settings` → `goals` → `portfolio-bidding`
+
+| Block | Applied by |
+|---|---|
+| `ad_groups[].rsas[]` (extra RSAs; primary `rsa` also takes `pins`, `path1`, `path2`) | `ads` |
+| `geo_exclude_ids`, `geo_target_type`, `location_modifiers`, `proximity`, `ad_schedules`, `device_modifiers`, `audiences.observation`, `demographics.exclude` | `targeting` |
+| `shared_sets.{create,attach}`, `brand_exclusion` | `negatives-extra` |
+| `assets.{sitelinks,callouts,snippets,call,price,promotion,image_resources}` | `assets` |
+| `tracking.{url_template,final_url_suffix}` | `tracking` |
+| `settings.{search_partners,display_expansion,ad_rotation,url_expansion_opt_out,frequency_cap}` | `settings` |
+| `conversion_goals.{actions,customer_acquisition}` | `goals` |
+| `bidding_strategy.portfolio_resource` | `portfolio-bidding` |
+
+Formats that bite: `demographics.exclude` entries are `"TYPE:VALUE"` (`"AGE_RANGE:AGE_RANGE_18_24"`);
+`conversion_goals.actions` takes either `"<CATEGORY>:<ORIGIN>"` (e.g. `"PURCHASE:WEBSITE"`) or a
+conversion-action resource/id; `rsa.pins` must reference copy present in the same RSA; **max 3 RSAs
+per ad group**. Run `validate campaign-spec` first — it exits 3 and names the offending field.
+
+**Four v2 fields are refused pre-flight** (no mutation surface in this build), loudly, before any
+write: `tracking.custom_params`, `audiences.targeting`, `demographics.include`,
+`conversion_goals.customer_acquisition.value_bid_micros`. The error names the field and the
+workaround.
+
+**⚠️ Version check before handing a v2 spec to a binary you did not build.** `CampaignLaunchSpec`
+is not `deny_unknown_fields` and carries no `schema_version`, so a **0.1.20 or older** binary parses
+a v2 spec happily and **silently drops every v2 block** — you get the v1 skeleton back with no
+error. Confirm `apb-gads --version` ≥ 0.1.21, and check that the output carries
+`spec_summary.v2_blocks`.
+
+**Partial failure and rollback.** A failing tail stage stops the tail and leaves the campaign
+PAUSED (it is born PAUSED, so it cannot spend). The receipt carries `failed_stage`,
+`tail_completed_through` and `tail_resources[]`. **The command still exits 0** — read `.status`
+(`"partial-failure"`), not the exit code. To undo:
+
+```bash
+$B --customer <CID> orchestrate campaign-launch --from-file spec.json --execute > receipt.json
+# on "status": "partial-failure" —
+$B --customer <CID> orchestrate rollback --from-receipt receipt.json                 # dry-run
+APB_GADS_ALLOW_MUTATIONS=true $B --customer <CID> orchestrate rollback \
+  --from-receipt receipt.json --execute
+```
+
+Rollback removes children first and detaches shared sets before removing them. Two things it
+deliberately leaves: a DEVICE campaign criterion (Google answers `CANNOT_REMOVE_CRITERION`; it goes
+away with the campaign) and any created **assets** (v24 `AssetService` has no `remove` — delete them
+in the Google Ads UI). Both are reported, never silently dropped.
+
+**`--validate-only --execute` verdict.** Three op classes cannot be server-validated against the
+head's temp campaign resource — `campaign-update-customer-acquisition` (a separate v24 service),
+`campaign-conversion-goal-set` (composite resource key) and `campaign-brand-list-exclude`
+(eligibility needs a real campaign). They appear in `sequential_tail_steps[].skipped` and the
+top-level verdict is then **`validated-partial`**, never `validated`. All three are validated at
+execute time against the real campaign id.
 
 ## W7 — Wire-shape proof without writing (SERVER_VALIDATED)
 

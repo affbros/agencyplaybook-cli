@@ -20,7 +20,14 @@ surface has been proven and how to verify the rest yourself.
 - **LIVE_VERIFIED** (full create → readback → cleanup proven): SEARCH campaign create + targeting
   (`verify search-lifecycle`), RSA create + refresh (`verify rsa-lifecycle` → covers
   `ad-create` + `ad-update-status`), and atomic PMAX launch (`verify pmax-launch`).
-- **SERVER_VALIDATED**: the large majority of the 116 `mutate` surfaces have been proven against
+  As of **0.1.21** the search-lifecycle chain is a **spec-v2 chain**: alongside the v1
+  budget/campaign/geo/ad-group/RSA/keywords it creates a sitelink + callout asset and their
+  campaign links, an ad schedule, a device bid modifier, a shared-set attach, a
+  `final_url_suffix` and explicit network settings, then reads **all 24 assertions** back by
+  resource name before atomically removing them. So the `assets` / `targeting` /
+  `negatives-extra` / `tracking` / `settings` tail ops of `orchestrate campaign-launch` are
+  LIVE_VERIFIED, not merely server-validated.
+- **SERVER_VALIDATED**: the large majority of the 119 `mutate` surfaces have been proven against
   Google's validator via `--validate-only` — schema + policy correct, no state change. This is the
   fastest way to prove *your* payload before writing.
 - **EXECUTE_SANDBOX**: every other execute-mode write lands in the `$1` `Test-ok-to-delete`

@@ -34,6 +34,7 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
 | `report` | 23 | performance/asset/PMAX/shopping/settings reports | `references/commands/report.md` |
+| `portfolio` | 3 | MCC-wide per-currency roll-ups: `summary` (+`--compare`), `breakdown --dimension device\|network\|campaign_type`, `trend` — sequential fan-out, money never summed across currencies | `references/commands/portfolio.md` |
 | `playbook` | 67 | `list` + **66 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
 | `verdict` | 1 | one decisive verb per campaign (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) from 3 gates | `references/commands/verdict.md`, `references/verdict-framework.md` |
 | `campaign-type-advisor` | 1 | prescriptive engine choice (Search vs PMax vs Demand Gen) for a goal | `references/commands/campaign-type-advisor.md`, `references/campaign-type-selection.md` |
@@ -51,8 +52,8 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `mutate` | 116 | the full gated mutation surface (budgets, keywords, ads, bidding, PMAX, assets, criteria) | `references/commands/mutate.md` |
-| `orchestrate` | 7 | composite flows (`campaign-launch`, `pmax-build`, `ad-refresh`, …) | `references/commands/orchestrate.md` |
+| `mutate` | 119 | the full gated mutation surface (budgets, keywords, ads, bidding, PMAX, assets, criteria) | `references/commands/mutate.md` |
+| `orchestrate` | 8 | composite flows (`campaign-launch` (spec v2, 8 tail stages), `rollback --from-receipt`, `pmax-build`, `ad-refresh`, …) | `references/commands/orchestrate.md` |
 | `changes` | 3 | turn a scored plan into a reviewable changeset and apply it | `references/commands/changes.md` |
 | `sandbox` | 1 | `helper full-flow` — exercises the $1 sandbox write policy | `references/commands/sandbox.md` |
 | `verify` | 9 | live-write verification chains under `LiveVerifyPolicy` | `references/commands/verify.md` |

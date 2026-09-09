@@ -4,7 +4,7 @@
 
 Named, pre-built read reports (search terms, performance, PMAX, etc.).
 
-**Surface:** 👁️ Read-only · **23 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **24 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -22,6 +22,7 @@ Named, pre-built read reports (search terms, performance, PMAX, etc.).
 | [`pmax-asset-group-assets`](#apb-gads-report-pmax-asset-group-assets) |  |
 | [`pmax-asset-group-performance`](#apb-gads-report-pmax-asset-group-performance) |  |
 | [`pmax-placements`](#apb-gads-report-pmax-placements) | PMAX placement + channel-proxy visibility (the black box): where ads ran (performance_max_placement_view, impressions-only — for brand-safety exclusions) aggregated by placement_type, plus PMAX campaign metrics. |
+| [`pmax-network-placements`](#apb-gads-report-pmax-network-placements) | v24.2: performance_max_placement_view segmented by segments.ad_network_type (Search/Display/partner networks) — channel-MIX proxy, sibling of `pmax-placements` (which aggregates the same view by placement_type instead) |
 | [`campaign-settings`](#apb-gads-report-campaign-settings) |  |
 | [`campaign-criteria`](#apb-gads-report-campaign-criteria) |  |
 | [`shared-sets`](#apb-gads-report-shared-sets) |  |
@@ -175,6 +176,23 @@ PMAX placement + channel-proxy visibility (the black box): where ads ran (perfor
 
 ```
 Usage: apb-gads report pmax-placements [OPTIONS]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--limit <LIMIT>` | [default: 50] |
+
+<a id="apb-gads-report-pmax-network-placements"></a>
+### `apb-gads report pmax-network-placements`
+
+v24.2: performance_max_placement_view segmented by segments.ad_network_type (Search/Display/partner networks) — channel-MIX proxy, sibling of `pmax-placements` (which aggregates the same view by placement_type instead)
+
+**Usage**
+
+```
+Usage: apb-gads report pmax-network-placements [OPTIONS]
 ```
 
 **Options** (command-specific; the [global options](README.md#global-options) also apply)
