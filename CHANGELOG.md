@@ -6,6 +6,32 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.5.28] — 2026-09-08 (plan envelope v2: Meta emits it, v1 still applies)
+
+Plan files are now the **shared, versioned document** `apb` and `apb-gads` both speak — plan-envelope-v2 (spec: `ai/specs/plan-envelope-v2/product-spec.md`). `apb` **emits** v2; it **reads** v1 and v2, so nothing you already have stops working.
+
+### Added
+- **`apb-envelope` crate** — one implementation of the plan document (schema, canonical JSON, SHA-256 integrity digest, v1→v2 lift, op vocabularies), dependency-light so BOTH binaries link it. `apb` now builds every Meta plan through it, which is what makes a plan written by one CLI readable by the other, by the API, and by the web page.
+- **`GET /api/v1/plans/:id`** — read one stored plan: the plan record plus an **additive** `envelope`, the stored row rendered as v2 (`schema_version: 2`). Stored rows are untouched on disk/DB and lifted on read, so the API and `apb plan export` hand back the same document. `envelope` is `null` with an `envelope_note` for a plan that has no envelope form (the `cap` bookkeeping plans).
+- **CI gate `check_envelope_vocab.py`** (wired into `rust-quality.yml`) — every `op` an executor can run must exist in `public/data/cli-catalogue.json`, with an allowlist that is empty at introduction. A plan can never name a command the CLI doesn't have.
+- **`rust/scripts/envelope_hash.py`** — verify any plan's integrity hash without a Rust toolchain (`python3 rust/scripts/envelope_hash.py plan.json`).
+
+### Changed
+- **`apb <command> --plan <path>` and `apb plan export` now write `schema_version: 2`.** In the file: `product: "apb"` + `channel: "meta"` (was `product: "meta"`); `account: {"ad_account_id": …}` (was a bare string); `integrity: {hash: "sha256:…", hashed_fields, plan_hash}` (the old top-level `plan_hash` hex survives as `integrity.plan_hash`); actions spell `op` / `target.resource` / `params` (was `action` / `target_id` / `payload`); and the document gains `source`, `summary`, `policy`, `approval`, `execution` blocks. **If you `jq` a plan file, update those paths.** Scripts that only pass the twin through to `apb plan apply` — every script in `scripts/apb/` — are unaffected.
+- **The staleness baseline moved onto its action.** v1's top-level `prior_values[]` is now `actions[].prior`, which sits INSIDE `integrity.hashed_fields` — so the values the apply-time drift gate trusts are still hash-covered, and the unhashed top-level alias is left `null` precisely so it can't be mistaken for the covered copy.
+- **A multi-target plan exports as one action per target** (v2 has no multi-target action; Meta already executes those per target). Re-importing such a plan therefore creates one CREATED plan per target instead of one multi-target plan. Applying the set is equivalent; the plan-id bookkeeping is not.
+- **`plan export` fails loudly** rather than writing a document its own importer would refuse — the realistic cause is a non-integer float in a stored payload (see the number rule below); `--plan` prints the same warning at plan time.
+
+### Compatibility
+- **v1 plans still apply, unchanged.** `apb plan apply --from-file` and `POST /api/v1/plans/import` accept **v1 and v2**; each version is hashed by its own algorithm, and a v1 file imports exactly as it did in 0.5.26/0.5.27.
+- **An older `apb` refuses a v2 file by name** (`envelope_version_unsupported`) instead of silently dropping actions — upgrade `apb` on any shared runner before handing it v2 files. This build applies the same coded refusal to a `schema_version` it doesn't know.
+- **`carried` digests are re-verified, not laundered.** A v2 document whose `integrity.hashed_fields` is empty carries a hash lifted from a v1 file and cannot be recomputed in v2 terms — so import re-checks it with the **v1** algorithm against the v1 document the lift consumed, and refuses a lifted plan that was edited after it was signed with the same error (and the same `--allow-edited-plan` override) an edited v2 plan gets. A digest that passes is still reported as `integrity: "carried … re-verified under v1 rules"`, never `"verified"`, because it covers the v1 document rather than a v2 payload. Re-export the plan for a first-class v2 digest.
+- **Number rule** — a hashed field may not contain a non-integer float. Money travels as integer micros (`amount_micros`) or minor units (`daily_budget` in cents), because Rust, Python and the browser do not agree on the shortest text form of an arbitrary float and the hash has to match in all three.
+- **The envelope still carries no authority** (`rust/docs/SAFETY_MODEL.md`). `approval` is evidence for humans and audit; applying a plan re-runs all five write gates plus the SaaS write-policy/scope checks regardless of what the file says.
+
+### Consumer audit
+Every existing reader of the v1 envelope was inventoried before the switch: the 27 published batch scripts in `rust/scripts/public-scripts/` (only `plan-then-apply.sh` and `budget-rebalance.sh` touch a plan file, and both only locate the JSON twin and hand it to `apb plan apply` — no v1 field is read), the Express middleware (opaque `/api/v1/plans` proxy), the SPA, and the MCP server's `meta_*_plan` tools (they drive plan RECORDS through `/plans/:id/validate`, never the envelope document). **No consumer needed a change** — which is why this ships as a version bump and not a migration.
+
 ## [0.5.27] — 2026-07-16 (publish the distributable batch scripts)
 
 No `apb` command/flag surface change — this release **publishes the batch-script library** to the public repo. On the next `v0.5.27` tag the `release.yml` workflow copies `rust/scripts/public-scripts/` into `affbros/agencyplaybook-cli` under `scripts/apb/` (beside the binaries), and the SPA's new **Scripts** page renders them from a generated catalogue.
