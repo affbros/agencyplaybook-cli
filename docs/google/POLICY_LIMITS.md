@@ -1,4 +1,4 @@
-# Field-level policy limits (Google Ads v24)
+# Field-level policy limits (Google Ads v25)
 
 `apb-gads` validates inputs against Google's field limits **before** the API call and rejects
 out-of-range values locally (the single source of truth is `policy.rs`). Knowing these prevents a

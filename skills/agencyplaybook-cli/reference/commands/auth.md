@@ -1,6 +1,6 @@
 # `apb auth` — Command Reference
 
-11 commands. Auto-generated from the apb binary on 2026-06-18.
+11 commands. Auto-generated from the apb binary on 2026-09-09.
 
 ### `apb auth accounts add`
 
@@ -14,6 +14,7 @@ Bind an ad account to your API key
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
@@ -26,7 +27,7 @@ Bind an ad account to your API key
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth accounts add --execute --allow-domain <HOST> --guardrail-reason <TEXT>
+apb auth accounts add --execute --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb auth accounts list`
@@ -38,6 +39,7 @@ List bound ad accounts
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -51,7 +53,7 @@ List bound ad accounts
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth accounts list --allow-domain <HOST> --guardrail-reason <TEXT>
+apb auth accounts list --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb auth accounts remove`
@@ -66,6 +68,7 @@ Unbind an ad account from your API key
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
@@ -78,7 +81,7 @@ Unbind an ad account from your API key
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth accounts remove --execute --allow-domain <HOST> --guardrail-reason <TEXT>
+apb auth accounts remove --execute --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb auth connect-meta`
@@ -92,6 +95,7 @@ Connect a Meta account via the OAuth device flow (opens a browser)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -105,7 +109,7 @@ Connect a Meta account via the OAuth device flow (opens a browser)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth connect-meta --timeout <TIMEOUT> --allow-domain <HOST>
+apb auth connect-meta --timeout <TIMEOUT> --plan <PATH>
 ```
 
 ### `apb auth keys create`
@@ -120,6 +124,7 @@ Create a new API key
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -133,7 +138,7 @@ Create a new API key
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth keys create --execute --label <LABEL> --allow-domain <HOST>
+apb auth keys create --execute --label <LABEL> --plan <PATH>
 ```
 
 ### `apb auth keys list`
@@ -145,6 +150,7 @@ List all API keys (masked)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -158,7 +164,7 @@ List all API keys (masked)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth keys list --allow-domain <HOST> --guardrail-reason <TEXT>
+apb auth keys list --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb auth keys revoke`
@@ -171,6 +177,7 @@ Revoke an API key immediately
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -184,7 +191,7 @@ Revoke an API key immediately
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth keys revoke --id <ID> --allow-domain <HOST>
+apb auth keys revoke --id <ID> --plan <PATH>
 ```
 
 ### `apb auth keys rotate`
@@ -197,6 +204,7 @@ Rotate an API key (24h grace period)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -210,7 +218,7 @@ Rotate an API key (24h grace period)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth keys rotate --id <ID> --allow-domain <HOST>
+apb auth keys rotate --id <ID> --plan <PATH>
 ```
 
 ### `apb auth login`
@@ -224,6 +232,7 @@ Log in with a SaaS API key
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -249,6 +258,7 @@ Show current plan, tier, scopes, and usage
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -262,7 +272,7 @@ Show current plan, tier, scopes, and usage
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth status --allow-domain <HOST> --guardrail-reason <TEXT>
+apb auth status --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb auth test`
@@ -274,6 +284,7 @@ Test current authentication credentials
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -287,5 +298,5 @@ Test current authentication credentials
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb auth test --allow-domain <HOST> --guardrail-reason <TEXT>
+apb auth test --plan <PATH> --allow-domain <HOST>
 ```

@@ -1,12 +1,12 @@
 # `apb leadgen` — Command Reference
 
-6 commands. Auto-generated from the apb binary on 2026-06-18.
+6 commands. Auto-generated from the apb binary on 2026-09-09.
 
 ### `apb leadgen ad-create`
 
 End-to-end lead-form ad creation (v0.2.0). Validates the campaign objective is `OUTCOME_LEADS`, validates the form belongs to the page, creates a lead-form creative referencing `lead_gen_form_id`, then creates the ad attaching the creative to the ad set. Reverse-pauses on partial failure
 
-**Scope:** `write:leadgen` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:leadgen` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -22,6 +22,7 @@ End-to-end lead-form ad creation (v0.2.0). Validates the campaign objective is `
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -42,7 +43,7 @@ apb leadgen ad-create --execute --name <NAME> --campaign <CAMPAIGN>
 
 Create a new leadgen form. Requires `--spec-file` containing the full form payload (questions, privacy_policy_url, etc.). See `docs/examples/leadgen-form-spec.json`
 
-**Scope:** `write:leadgen` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:leadgen` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -51,6 +52,7 @@ Create a new leadgen form. Requires `--spec-file` containing the full form paylo
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -79,6 +81,7 @@ Get a single leadgen form's details
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -92,7 +95,7 @@ Get a single leadgen form's details
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb leadgen get --id <ID> --allow-domain <HOST>
+apb leadgen get --id <ID> --plan <PATH>
 ```
 
 ### `apb leadgen leads`
@@ -111,6 +114,7 @@ List leads for a form (PII — requires `read:leadgen:export` scope). Includes `
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -144,6 +148,7 @@ Bulk-export leads to CSV (default) or JSON, with optional pagination follow-loop
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -173,6 +178,7 @@ List leadgen forms attached to a Page (auto-discovered if --page-id omitted)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |

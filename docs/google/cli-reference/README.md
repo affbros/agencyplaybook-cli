@@ -6,7 +6,7 @@ This is the **exhaustive, runtime-derived** reference for every command, subcomm
 
 For narrative, examples, and *how to think about* the CLI, see [`../commands.md`](../commands.md) (day-to-day reference), [`../playbooks.md`](../playbooks.md), and [`../mutations.md`](../mutations.md) (the safety model). This directory is the flat, complete enumeration those docs defer to.
 
-**At a glance:** 28 command groups · 290 total commands/subcommands · API version `v24`.
+**At a glance:** 29 command groups · 295 total commands/subcommands · API version `v25`.
 
 ## Global options
 
@@ -51,7 +51,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`keyword`](keyword.md) | 👁️ read | 1 | Keyword reads: list ad-group keyword criteria. |
 | [`negative-keyword`](negative-keyword.md) | 👁️ read | 1 | Negative-keyword reads. |
 | [`asset`](asset.md) | 👁️ read | 1 | Asset reads: list account assets (images, text, video, etc.). |
-| [`mutate`](mutate.md) | ✍️ write | 119 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
+| [`mutate`](mutate.md) | ✍️ write | 123 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
 | [`gaql`](gaql.md) | 👁️ read | 1 | Run ad-hoc Google Ads Query Language (GAQL) against the searchStream endpoint. |
 | [`report`](report.md) | 👁️ read | 24 | Named, pre-built read reports (search terms, performance, PMAX, etc.). |
 | [`portfolio`](portfolio.md) | 👁️ read | 3 | Portfolio reporting — MCC-wide, per-currency roll-ups across every reportable child account (analytics-upgrade-001 S007). |
@@ -69,6 +69,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`export`](export.md) | 👁️ read | 1 | Render an artifact JSON into CSV, JSON, or Markdown. |
 | [`context`](context.md) | 👁️ read | 2 | Per-customer goal/strategy context state. |
 | [`validate`](validate.md) | 👁️ read | 3 | Inspect planning artifacts for launch-readiness. |
+| [`experiment`](experiment.md) | 👁️ read | 1 | Google Ads experiment reads. |
 
 ## Full command index
 
@@ -216,6 +217,10 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads mutate ad-create-demandgen-video-responsive`](mutate.md#apb-gads-mutate-ad-create-demandgen-video-responsive) — Create a DemandGenVideoResponsiveAd (v24).
 - [`apb-gads mutate customer-update-video-brand-safety`](mutate.md#apb-gads-mutate-customer-update-video-brand-safety) — Set customer-level video brand safety (v24).
 - [`apb-gads mutate campaign-update-vtc-optimization`](mutate.md#apb-gads-mutate-campaign-update-vtc-optimization) — Toggle view-through conversion optimization on a campaign.
+- [`apb-gads mutate campaign-update-ai-max`](mutate.md#apb-gads-mutate-campaign-update-ai-max) — Toggle AI Max on a SEARCH (or SHOPPING) campaign — v25.1 `campaign.ai_max_setting.enable_ai_max`.
+- [`apb-gads mutate ad-group-update-ai-max-search-term-matching`](mutate.md#apb-gads-mutate-ad-group-update-ai-max-search-term-matching) — Opt an ad group out of (or back into) AI Max search-term matching — v25.1 `ad_group.ai_max_ad_group_setting.disable_search_term_matching`.
+- [`apb-gads mutate asset-update-synthetic-content`](mutate.md#apb-gads-mutate-asset-update-synthetic-content) — Declare whether an ASSET's content is AI-generated — v25 `asset.synthetic_content_info.advertiser_attestation` (EU AI Act, 2026-08-02).
+- [`apb-gads mutate ad-update-synthetic-content`](mutate.md#apb-gads-mutate-ad-update-synthetic-content) — Declare whether an AD's content is AI-generated — v25 `ad.synthetic_content_info.advertiser_attestation`.
 - [`apb-gads mutate campaign-update-target-impression-share`](mutate.md#apb-gads-mutate-campaign-update-target-impression-share)
 - [`apb-gads mutate campaign-update-customer-acquisition`](mutate.md#apb-gads-mutate-campaign-update-customer-acquisition)
 - [`apb-gads mutate campaign-update-geo-target-type`](mutate.md#apb-gads-mutate-campaign-update-geo-target-type)
@@ -243,7 +248,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads mutate ad-group-asset-detach`](mutate.md#apb-gads-mutate-ad-group-asset-detach)
 - [`apb-gads mutate customer-asset-attach`](mutate.md#apb-gads-mutate-customer-asset-attach)
 - [`apb-gads mutate customer-asset-detach`](mutate.md#apb-gads-mutate-customer-asset-detach)
-- [`apb-gads mutate experiment-create`](mutate.md#apb-gads-mutate-experiment-create)
+- [`apb-gads mutate experiment-create`](mutate.md#apb-gads-mutate-experiment-create) — Create a Google Ads experiment (control + treatment arm) on an existing base campaign
 - [`apb-gads mutate experiment-end`](mutate.md#apb-gads-mutate-experiment-end)
 
 ### `gaql`
@@ -272,9 +277,9 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads report experiments`](report.md#apb-gads-report-experiments)
 - [`apb-gads report ad-approval-status`](report.md#apb-gads-report-ad-approval-status)
 - [`apb-gads report impression-share-detail`](report.md#apb-gads-report-impression-share-detail)
-- [`apb-gads report shopping-products`](report.md#apb-gads-report-shopping-products) — v24 shopping: list products from the account's linked Merchant Center feed.
-- [`apb-gads report shopping-performance`](report.md#apb-gads-report-shopping-performance) — v24 shopping: per-product performance over the resolved lookback window (default 30d; override via --lookback-days).
-- [`apb-gads report cart-data-sales`](report.md#apb-gads-report-cart-data-sales) — v24 CartDataSalesView — segments by product SOLD (not clicked).
+- [`apb-gads report shopping-products`](report.md#apb-gads-report-shopping-products) — Shopping: list products from the account's linked Merchant Center feed.
+- [`apb-gads report shopping-performance`](report.md#apb-gads-report-shopping-performance) — Shopping: per-product performance over the resolved lookback window (default 30d; override via --lookback-days).
+- [`apb-gads report cart-data-sales`](report.md#apb-gads-report-cart-data-sales) — CartDataSalesView — segments by product SOLD (not clicked).
 - [`apb-gads report customer-settings`](report.md#apb-gads-report-customer-settings) — Customer-level settings (v24).
 
 ### `portfolio`
@@ -421,7 +426,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 
 ### `changes`
 
-- [`apb-gads changes from-plan`](changes.md#apb-gads-changes-from-plan) — Convert a scored ActionPlan JSON into a Changeset of raw v24 mutate ops.
+- [`apb-gads changes from-plan`](changes.md#apb-gads-changes-from-plan) — Convert a scored ActionPlan JSON into a Changeset of raw Google Ads mutate ops.
 - [`apb-gads changes apply`](changes.md#apb-gads-changes-apply) — Apply a Changeset.
 - [`apb-gads changes rollback`](changes.md#apb-gads-changes-rollback) — Generate + apply the inverse of a previously-applied changeset, looked up by audit-log id (reuses `mutate inverse-plan`).
 
@@ -447,3 +452,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads validate campaign-spec`](validate.md#apb-gads-validate-campaign-spec) — Validate a CampaignLaunchSpec (from `plan campaign search`) for launch readiness: budget/geo/language/bidding present, every ad group has keywords + a valid RSA (counts, char limits, dupes), match types valid, negatives recommended.
 - [`apb-gads validate pmax-spec`](validate.md#apb-gads-validate-pmax-spec) — Validate a PmaxLaunchPlanSpec (from `plan campaign pmax`) for launch readiness: budget/final_url/geo/language present, PMAX-valid bidding, asset-group content (headline/description counts + lengths, required BUSINESS_NAME + marketing/square images), brand-guidelines + path rules, negatives recommended.
 - [`apb-gads validate demand-gen-spec`](validate.md#apb-gads-validate-demand-gen-spec) — Validate a DemandGenLaunchSpec (from `plan campaign demand-gen`) for launch readiness: campaign/budget/geo/bidding + the Demand Gen video-responsive ad's published v24 minimums (≥1 video, ≥1 logo).
+
+### `experiment`
+
+- [`apb-gads experiment results`](experiment.md#apb-gads-experiment-results) — Read one experiment's outcome: the control arm's metrics, the treatment arm's metrics, and — per metric — Google's point estimate, margin of error and p-value for the difference between them

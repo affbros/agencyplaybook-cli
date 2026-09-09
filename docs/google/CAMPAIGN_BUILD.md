@@ -171,7 +171,7 @@ APB_GADS_ALLOW_MUTATIONS=true apb-gads --customer <CID> \
 Rollback removes children before parents and detaches shared sets before removing them.
 Two things it deliberately leaves behind and reports rather than dropping: a **device
 campaign criterion** (Google refuses to remove one individually — it goes away with the
-campaign) and any **created assets** (the v24 API has no asset-remove operation; delete
+campaign) and any **created assets** (the v25 API has no asset-remove operation; delete
 them in the Google Ads UI).
 
 ### Pre-flight the whole build without creating anything
@@ -210,14 +210,14 @@ Single-asset-group fields (the legacy form the examples use; **or** provide an
 `asset_groups[]` array, not both):
 
 - **`headlines[]`** — **3–15**, each ≤ 30 chars.
-- **`long_headlines[]`** — **≥ 1**, each ≤ 90 chars (v24 `NOT_ENOUGH_LONG_HEADLINE_ASSET` otherwise).
+- **`long_headlines[]`** — **≥ 1**, each ≤ 90 chars (v25 `NOT_ENOUGH_LONG_HEADLINE_ASSET` otherwise).
 - **`descriptions[]`** — **2–5**, each ≤ 90 chars, **and at least one must be < 60 chars** (Google's PMAX short-slot rule).
-- **`business_name`** — **required**, ≤ 25 chars (v24 rejects an asset group with no `BUSINESS_NAME` asset).
+- **`business_name`** — **required**, ≤ 25 chars (v25 rejects an asset group with no `BUSINESS_NAME` asset).
 
 Required-asset facts (all are existing-asset resource names shaped
 `customers/<id>/assets/<id>` — upload before launch):
 
-- **`logo_asset_resources`** — **≥ 1** (1:1 LOGO; v24 `NOT_ENOUGH_LOGO_ASSET` otherwise).
+- **`logo_asset_resources`** — **≥ 1** (1:1 LOGO; v25 `NOT_ENOUGH_LOGO_ASSET` otherwise).
 - **`marketing_image_asset_resources`** — **≥ 1** (1.91:1 MARKETING_IMAGE).
 - **`square_marketing_image_asset_resources`** — **≥ 1** (1:1 SQUARE_MARKETING_IMAGE).
 - `landscape_logo_asset_resources` — optional.

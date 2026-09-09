@@ -95,7 +95,7 @@ $B playbook campaign-bid-strategy-audit | jq '{learning_now, growth_blockers, mi
 $B playbook anomaly-detection --lookback-days 14
 ```
 
-Read the **bid-strategy audit first** — it reads the authoritative v24
+Read the **bid-strategy audit first** — it reads the authoritative v25
 `bidding_strategy_system_status`, and its buckets dictate what you may touch this session:
 `learning_now[]` campaigns are **off-limits** (let them converge), `growth_blockers[]`
 (`LIMITED_BY_BUDGET` / `LIMITED_BY_DATA`) are where the growth plan starts, and `misconfigured[]`
@@ -252,11 +252,11 @@ gates.
 ```bash
 B="apb-gads --pretty --customer <CID>"
 
-# Where PMAX ran (impressions-only) + the channel proxy + an honest list of v24 visibility limits.
+# Where PMAX ran (impressions-only) + the channel proxy + an honest list of v25 visibility limits.
 $B playbook pmax-audit | jq '.diagnostics.findings[].flags'
 $B report pmax-placements --limit 50
 
-# Junk-placement webpage exclusions (the substitute for v24-removed url_expansion controls).
+# Junk-placement webpage exclusions (the substitute for the v24-removed url_expansion controls).
 $B playbook pmax-url-exclusion-audit --output-spec /tmp/spec.json
 $B mutate campaign-negative-webpage-add-bulk --from-file /tmp/spec.json                       # dry-run
 APB_GADS_ALLOW_MUTATIONS=true $B mutate campaign-negative-webpage-add-bulk --from-file /tmp/spec.json --execute
@@ -276,7 +276,7 @@ APB_GADS_ALLOW_MUTATIONS=true $B mutate pmax-audience-signal-attach \
   --asset-group-id <ASSET_GROUP_ID> --signal-type SEARCH_THEME --text "same day delivery" --execute
 ```
 
-`report pmax-placements` is honest about v24's black box — it shows impressions only; per-channel
+`report pmax-placements` is honest about v25's black box — it shows impressions only; per-channel
 spend split is script-only territory — then names the mitigation writes above. Doctrine: one theme
 per asset group (segment by margin/objective, **not by audience signal**); search themes cap at **25
 per asset group** and the CLI fails pre-API on a 26th; final URL expansion is ON by default — opt
@@ -342,7 +342,7 @@ $B orchestrate pmax-build --from-file /tmp/pmax.json
 APB_GADS_ALLOW_MUTATIONS=true $B orchestrate pmax-build --from-file /tmp/pmax.json --execute
 ```
 
-PMAX has hard v24 build requirements that `validate pmax-spec` checks before you launch: a
+PMAX has hard v25 build requirements that `validate pmax-spec` checks before you launch: a
 **non-shared** budget, MAXIMIZE_CONVERSIONS or MAXIMIZE_CONVERSION_VALUE bidding, and per asset
 group ≥ 3 HEADLINE / ≥ 2 DESCRIPTION (one < 60 chars) / BUSINESS_NAME / ≥ 1 MARKETING_IMAGE / ≥ 1
 SQUARE_MARKETING_IMAGE / ≥ 1 LOGO. Assets must exist **before** the asset group references them, so
@@ -366,7 +366,7 @@ $B plan keyword-ideas --seed-site https://www.yourbrand.com --limit 200
 $B plan keyword-historical-metrics --keyword "running shoes" --keyword "marathon trainers" --include-average-cpc
 ```
 
-`plan keyword-ideas` wraps v24 `GenerateKeywordIdeas` (avg monthly searches, competition,
+`plan keyword-ideas` wraps v25 `GenerateKeywordIdeas` (avg monthly searches, competition,
 top-of-page bid ranges) and is read-only — no three-gate safety applies. Default geo is `2840`
 (United States) and default language is `1000` (English); both are repeatable. Use
 `keyword-historical-metrics` when you already have the exact keyword list and want backward-looking

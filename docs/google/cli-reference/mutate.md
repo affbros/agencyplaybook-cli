@@ -4,7 +4,7 @@
 
 Every write surface. Dry-run by default; gated behind the three-gate safety model.
 
-**Surface:** ✍️ **Write-capable** · **119 command(s)** · [← back to index](README.md)
+**Surface:** ✍️ **Write-capable** · **123 command(s)** · [← back to index](README.md)
 
 > ⚠️ Commands here can write to a Google Ads account. Every write is **dry-run by default** and must clear the three independent gates (`--execute` + config + env) plus a per-customer profile or the test sandbox policy. See [`../mutations.md`](../mutations.md).
 
@@ -104,6 +104,10 @@ Every write surface. Dry-run by default; gated behind the three-gate safety mode
 | [`ad-create-demandgen-video-responsive`](#apb-gads-mutate-ad-create-demandgen-video-responsive) | Create a DemandGenVideoResponsiveAd (v24). |
 | [`customer-update-video-brand-safety`](#apb-gads-mutate-customer-update-video-brand-safety) | Set customer-level video brand safety (v24). |
 | [`campaign-update-vtc-optimization`](#apb-gads-mutate-campaign-update-vtc-optimization) | Toggle view-through conversion optimization on a campaign. |
+| [`campaign-update-ai-max`](#apb-gads-mutate-campaign-update-ai-max) | Toggle AI Max on a SEARCH (or SHOPPING) campaign — v25.1 `campaign.ai_max_setting.enable_ai_max`. |
+| [`ad-group-update-ai-max-search-term-matching`](#apb-gads-mutate-ad-group-update-ai-max-search-term-matching) | Opt an ad group out of (or back into) AI Max search-term matching — v25.1 `ad_group.ai_max_ad_group_setting.disable_search_term_matching`. |
+| [`asset-update-synthetic-content`](#apb-gads-mutate-asset-update-synthetic-content) | Declare whether an ASSET's content is AI-generated — v25 `asset.synthetic_content_info.advertiser_attestation` (EU AI Act, 2026-08-02). |
+| [`ad-update-synthetic-content`](#apb-gads-mutate-ad-update-synthetic-content) | Declare whether an AD's content is AI-generated — v25 `ad.synthetic_content_info.advertiser_attestation`. |
 | [`campaign-update-target-impression-share`](#apb-gads-mutate-campaign-update-target-impression-share) |  |
 | [`campaign-update-customer-acquisition`](#apb-gads-mutate-campaign-update-customer-acquisition) |  |
 | [`campaign-update-geo-target-type`](#apb-gads-mutate-campaign-update-geo-target-type) |  |
@@ -131,7 +135,7 @@ Every write surface. Dry-run by default; gated behind the three-gate safety mode
 | [`ad-group-asset-detach`](#apb-gads-mutate-ad-group-asset-detach) |  |
 | [`customer-asset-attach`](#apb-gads-mutate-customer-asset-attach) |  |
 | [`customer-asset-detach`](#apb-gads-mutate-customer-asset-detach) |  |
-| [`experiment-create`](#apb-gads-mutate-experiment-create) |  |
+| [`experiment-create`](#apb-gads-mutate-experiment-create) | Create a Google Ads experiment (control + treatment arm) on an existing base campaign |
 | [`experiment-end`](#apb-gads-mutate-experiment-end) |  |
 
 ---
@@ -257,7 +261,7 @@ Usage: apb-gads mutate campaign-negative-keyword-add-bulk [OPTIONS] --from-file 
 <a id="apb-gads-mutate-campaign-negative-webpage-add-bulk"></a>
 ### `apb-gads mutate campaign-negative-webpage-add-bulk`
 
-Sprint B.3: bulk WEBPAGE negative criterion adds on N campaigns (consumer for `pmax-url-exclusion-audit`). v24 routes webpage exclusions through `campaign_criterion` with type=WEBPAGE + negative=true — per-campaign, not customer-wide (the v24 path `customer_negative_criterion.webpage.*` does not exist). JSON shape: {items:[{campaign_id, criterion_name, conditions: [{operand: URL|CATEGORY|PAGE_TITLE|PAGE_CONTENT|CUSTOM_LABEL, operator: EQUALS|CONTAINS, argument: <string>}, ...] }, ...]}. Conditions on the same item AND together
+Sprint B.3: bulk WEBPAGE negative criterion adds on N campaigns (consumer for `pmax-url-exclusion-audit`). Google routes webpage exclusions through `campaign_criterion` with type=WEBPAGE + negative=true — per-campaign, not customer-wide (the path `customer_negative_criterion.webpage.*` does not exist). JSON shape: {items:[{campaign_id, criterion_name, conditions: [{operand: URL|CATEGORY|PAGE_TITLE|PAGE_CONTENT|CUSTOM_LABEL, operator: EQUALS|CONTAINS, argument: <string>}, ...] }, ...]}. Conditions on the same item AND together
 
 **Usage**
 
@@ -549,7 +553,7 @@ Usage: apb-gads mutate customer-negative-criterion-remove [OPTIONS] --criterion-
 <a id="apb-gads-mutate-customer-negative-criterion-add-bulk"></a>
 ### `apb-gads mutate customer-negative-criterion-add-bulk`
 
-Sprint B.2: bulk variant of `customer-negative-criterion-add` for the KEYWORD path. Reads `{items:[{text, match_type}, ...]}` from a JSON file. Routes through the v24 shared_set + customer_negative_criterion + N×shared_criterion chain (1-3 mutates depending on state). All N shared_criterion entries succeed or fail atomically in the final call. Consumer for `brand-exclusion-audit`'s mutation-ready output
+Sprint B.2: bulk variant of `customer-negative-criterion-add` for the KEYWORD path. Reads `{items:[{text, match_type}, ...]}` from a JSON file. Routes through the shared_set + customer_negative_criterion + N×shared_criterion chain (1-3 mutates depending on state). All N shared_criterion entries succeed or fail atomically in the final call. Consumer for `brand-exclusion-audit`'s mutation-ready output
 
 **Usage**
 
@@ -1012,7 +1016,7 @@ Usage: apb-gads mutate pmax-launch [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | Path to JSON: {name, final_url, budget_micros, headlines:[3-15], long_headlines:[0-5], descriptions:[2-5], business_name?, logo_asset_resources:[..], marketing_image_asset_resources:[1+], square_marketing_image_asset_resources:[1+]} (marketing + square images are existing IMAGE asset resources, required for a valid asset group) |
-| `--legacy-sequential` | Use the pre-v24 sequential path (one mutate per entity). Default is one atomic mutate using v24 negative-ID temp resources — preferred because failure rolls back the whole batch rather than leaving partial state. Retained for one version to let operators compare outputs; will be removed in a later arc |
+| `--legacy-sequential` | Use the legacy sequential path (one mutate per entity). Default is one atomic mutate using negative-ID temp resources — preferred because failure rolls back the whole batch rather than leaving partial state. Retained for one version to let operators compare outputs; will be removed in a later arc |
 
 <a id="apb-gads-mutate-ad-validate"></a>
 ### `apb-gads mutate ad-validate`
@@ -1320,7 +1324,7 @@ Usage: apb-gads mutate campaign-update-bidding-strategy [OPTIONS] --campaign-id 
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | — |
 | `--target-roas <TARGET_ROAS>` | — |
 | `--enhanced-cpc <ENHANCED_CPC>` | [possible values: true, false] |
-| `--cpc-bid-ceiling-micros <CPC_BID_CEILING_MICROS>` | Required for MAXIMIZE_CLICKS: positive CPC bid ceiling in micros (the v24 update path cannot set a no-ceiling Maximize Clicks) |
+| `--cpc-bid-ceiling-micros <CPC_BID_CEILING_MICROS>` | Required for MAXIMIZE_CLICKS: positive CPC bid ceiling in micros (the update path cannot set a no-ceiling Maximize Clicks — verified through v25) |
 
 <a id="apb-gads-mutate-campaign-update-dates"></a>
 ### `apb-gads mutate campaign-update-dates`
@@ -1648,6 +1652,80 @@ Usage: apb-gads mutate campaign-update-vtc-optimization [OPTIONS] --campaign-id 
 | `--campaign-id <CAMPAIGN_ID>` | — |
 | `--enable` | Enable VTC optimization |
 | `--disable` | Disable VTC optimization |
+
+<a id="apb-gads-mutate-campaign-update-ai-max"></a>
+### `apb-gads mutate campaign-update-ai-max`
+
+Toggle AI Max on a SEARCH (or SHOPPING) campaign — v25.1 `campaign.ai_max_setting.enable_ai_max`. AI Max is the master switch: with it off, no AI Max feature serves for the campaign regardless of the sub-settings. On a Search campaign, search-term matching is ON by default once AI Max is enabled and is opted out per ad group with `mutate ad-group-update-ai-max-search-term-matching`.
+
+`ai_max_setting.bundling_required`, `campaign.aca_migration_date_time` and `campaign.broad_match_migration_date_time` are OUTPUT ONLY — read them via `campaign list` / `campaign get` / `playbook campaign-bid-strategy-audit`.
+
+**Usage**
+
+```
+Usage: apb-gads mutate campaign-update-ai-max [OPTIONS] --campaign-id <CAMPAIGN_ID> --enable [<BOOL>]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--campaign-id <CAMPAIGN_ID>` | — |
+| `--enable [<BOOL>]` | true = enable AI Max, false = disable. Bare `--enable` means true |
+
+<a id="apb-gads-mutate-ad-group-update-ai-max-search-term-matching"></a>
+### `apb-gads mutate ad-group-update-ai-max-search-term-matching`
+
+Opt an ad group out of (or back into) AI Max search-term matching — v25.1 `ad_group.ai_max_ad_group_setting.disable_search_term_matching`. Search-term matching is the broad-match / asset-based / landing-page-based reach expansion AI Max enables by default; this is the only writable field on AiMaxAdGroupSetting, and it only takes effect while AI Max is enabled on the parent campaign
+
+**Usage**
+
+```
+Usage: apb-gads mutate ad-group-update-ai-max-search-term-matching [OPTIONS] --ad-group-id <AD_GROUP_ID> --disable [<BOOL>]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--ad-group-id <AD_GROUP_ID>` | — |
+| `--disable [<BOOL>]` | true = DISABLE search-term matching (narrower reach), false = allow it. Bare `--disable` means true [possible values: true, false] |
+
+<a id="apb-gads-mutate-asset-update-synthetic-content"></a>
+### `apb-gads mutate asset-update-synthetic-content`
+
+Declare whether an ASSET's content is AI-generated — v25 `asset.synthetic_content_info.advertiser_attestation` (EU AI Act, 2026-08-02). v24.2 exposed the field read-only (and GAQL-blocked); v25 makes the advertiser attestation mutable. Eligible asset types: IMAGE, MEDIA_BUNDLE, YOUTUBE_VIDEO. `system_attestation` (Google's own verdict) stays OUTPUT ONLY and is never written here
+
+**Usage**
+
+```
+Usage: apb-gads mutate asset-update-synthetic-content [OPTIONS] --asset-id <ASSET_ID> --ai-generated [<BOOL>]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--asset-id <ASSET_ID>` | — |
+| `--ai-generated [<BOOL>]` | true = IS_SYNTHETIC, false = NOT_SYNTHETIC. Bare `--ai-generated` means true [possible values: true, false] |
+
+<a id="apb-gads-mutate-ad-update-synthetic-content"></a>
+### `apb-gads mutate ad-update-synthetic-content`
+
+Declare whether an AD's content is AI-generated — v25 `ad.synthetic_content_info.advertiser_attestation`. Ad-level counterpart of `asset-update-synthetic-content`. Eligible ad types: HTML5_UPLOAD_AD, DYNAMIC_HTML5_AD, IMAGE_AD
+
+**Usage**
+
+```
+Usage: apb-gads mutate ad-update-synthetic-content [OPTIONS] --ad-id <AD_ID> --ai-generated [<BOOL>]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--ad-id <AD_ID>` | — |
+| `--ai-generated [<BOOL>]` | true = IS_SYNTHETIC, false = NOT_SYNTHETIC. Bare `--ai-generated` means true [possible values: true, false] |
 
 <a id="apb-gads-mutate-campaign-update-target-impression-share"></a>
 ### `apb-gads mutate campaign-update-target-impression-share`
@@ -2124,6 +2202,14 @@ Usage: apb-gads mutate customer-asset-detach [OPTIONS] --asset-id <ASSET_ID> --f
 <a id="apb-gads-mutate-experiment-create"></a>
 ### `apb-gads mutate experiment-create`
 
+Create a Google Ads experiment (control + treatment arm) on an existing base campaign.
+
+`--type` selects the product/feature the experiment tests. It accepts every value of the Google Ads API v25 `ExperimentType` enum and defaults to `SEARCH_CUSTOM`, which is what this command hardcoded before v25 — so omitting the flag reproduces the previous wire shape exactly.
+
+Accepted values (case- and dash-insensitive): DISPLAY_AND_VIDEO_360, AD_VARIATION, YOUTUBE_CUSTOM, DISPLAY_CUSTOM, SEARCH_CUSTOM, DISPLAY_AUTOMATED_BIDDING_STRATEGY, SEARCH_AUTOMATED_BIDDING_STRATEGY, SHOPPING_AUTOMATED_BIDDING_STRATEGY, SMART_MATCHING (deprecated by Google), HOTEL_CUSTOM, OPTIMIZE_ASSETS, ADOPT_AI_MAX, ADOPT_BROAD_MATCH_KEYWORDS, PMAX_REPLACEMENT_SHOPPING, COMPARE_CAMPAIGNS, PMAX_TEXT_CUSTOMIZATION_FINAL_URL_EXPANSION. An unknown value is rejected locally, before any API call, and the error names every accepted value.
+
+Dry-run by default; subject to the three-gate safety model. The experiment is created in SETUP status — a separate Schedule call (not wrapped by this CLI) starts it running.
+
 **Usage**
 
 ```
@@ -2138,6 +2224,7 @@ Usage: apb-gads mutate experiment-create [OPTIONS] --base-campaign-id <BASE_CAMP
 | `--name <NAME>` | Experiment base name (sandbox tag appended automatically) |
 | `--suffix <SUFFIX>` | Suffix appended to treatment campaign name (e.g. '-exp') |
 | `--traffic-split <TRAFFIC_SPLIT>` | 1-99; percent of traffic routed to the treatment arm |
+| `--type <EXPERIMENT_TYPE>` | Google Ads API v25 ExperimentType (default SEARCH_CUSTOM). e.g. ADOPT_AI_MAX, ADOPT_BROAD_MATCH_KEYWORDS, OPTIMIZE_ASSETS, PMAX_REPLACEMENT_SHOPPING, COMPARE_CAMPAIGNS |
 
 <a id="apb-gads-mutate-experiment-end"></a>
 ### `apb-gads mutate experiment-end`

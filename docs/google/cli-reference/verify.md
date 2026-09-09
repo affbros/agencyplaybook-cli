@@ -107,7 +107,7 @@ _No command-specific options — uses only the [global options](README.md#global
 <a id="apb-gads-verify-bootstrap-pmax-assets"></a>
 ### `apb-gads verify bootstrap-pmax-assets`
 
-Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. Uploads 3 images (logo / marketing / square-marketing) and creates 7 text assets (1 BUSINESS_NAME + 3 HEADLINE + 1 LONG_HEADLINE + 2 DESCRIPTION). Standalone assets persist (v24 AssetService has no remove); Google de-dups by content (re-run safe — same IDs returned). Emits a `yaml_paste_block` ready for `safety.profiles.<id>.live_verify_policy:`
+Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. Uploads 3 images (logo / marketing / square-marketing) and creates 7 text assets (1 BUSINESS_NAME + 3 HEADLINE + 1 LONG_HEADLINE + 2 DESCRIPTION). Standalone assets persist (AssetService has no remove op — verified through v25); Google de-dups by content (re-run safe — same IDs returned). Emits a `yaml_paste_block` ready for `safety.profiles.<id>.live_verify_policy:`
 
 **Usage**
 

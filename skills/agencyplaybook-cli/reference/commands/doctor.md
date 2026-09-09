@@ -1,6 +1,6 @@
 # `apb doctor` — Command Reference
 
-4 commands. Auto-generated from the apb binary on 2026-06-18.
+4 commands. Auto-generated from the apb binary on 2026-09-09.
 
 ### `apb doctor api-compat`
 
@@ -11,6 +11,7 @@ Verify API version compatibility
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -24,7 +25,7 @@ Verify API version compatibility
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb doctor api-compat --allow-domain <HOST> --guardrail-reason <TEXT>
+apb doctor api-compat --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb doctor check`
@@ -36,6 +37,7 @@ Run all diagnostic checks
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -49,7 +51,7 @@ Run all diagnostic checks
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb doctor check --allow-domain <HOST> --guardrail-reason <TEXT>
+apb doctor check --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb doctor quota`
@@ -61,6 +63,7 @@ Check rate-limit / quota status
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -74,7 +77,7 @@ Check rate-limit / quota status
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb doctor quota --allow-domain <HOST> --guardrail-reason <TEXT>
+apb doctor quota --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb doctor validate-only-matrix`
@@ -86,6 +89,7 @@ Validate the feature-support matrix only
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -99,5 +103,5 @@ Validate the feature-support matrix only
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb doctor validate-only-matrix --allow-domain <HOST> --guardrail-reason <TEXT>
+apb doctor validate-only-matrix --plan <PATH> --allow-domain <HOST>
 ```

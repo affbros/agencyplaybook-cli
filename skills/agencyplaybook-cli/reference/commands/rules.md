@@ -1,12 +1,12 @@
 # `apb rules` — Command Reference
 
-11 commands. Auto-generated from the apb binary on 2026-06-18.
+11 commands. Auto-generated from the apb binary on 2026-09-09.
 
 ### `apb rules create`
 
 Create a rule from a JSON spec file
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:rules` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -15,6 +15,7 @@ Create a rule from a JSON spec file
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -35,7 +36,7 @@ apb rules create --execute --name <NAME> --spec-file <SPEC_FILE>
 
 Delete a rule (requires --confirm-destructive)
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:rules` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -43,6 +44,7 @@ Delete a rule (requires --confirm-destructive)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -56,14 +58,14 @@ Delete a rule (requires --confirm-destructive)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules delete --execute --confirm-destructive --id <ID> --allow-domain <HOST>
+apb rules delete --execute --confirm-destructive --id <ID> --plan <PATH>
 ```
 
 ### `apb rules disable`
 
 Disable an active rule
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:rules` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -71,6 +73,7 @@ Disable an active rule
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -84,14 +87,14 @@ Disable an active rule
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules disable --execute --id <ID> --allow-domain <HOST>
+apb rules disable --execute --id <ID> --plan <PATH>
 ```
 
 ### `apb rules enable`
 
 Enable a disabled rule
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:rules` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -99,6 +102,7 @@ Enable a disabled rule
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -112,14 +116,14 @@ Enable a disabled rule
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules enable --execute --id <ID> --allow-domain <HOST>
+apb rules enable --execute --id <ID> --plan <PATH>
 ```
 
 ### `apb rules execute`
 
 Manually execute a scheduled rule
 
-**Scope:** `write:rules` · **Min tier:** agency
+**Scope:** `write:rules` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -127,6 +131,7 @@ Manually execute a scheduled rule
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -140,14 +145,14 @@ Manually execute a scheduled rule
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules execute --id <ID> --allow-domain <HOST>
+apb rules execute --id <ID> --plan <PATH>
 ```
 
 ### `apb rules get`
 
 Get a specific rule by ID
 
-**Scope:** `read:rules` · **Min tier:** agency
+**Scope:** `read:rules` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -155,6 +160,7 @@ Get a specific rule by ID
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -168,20 +174,21 @@ Get a specific rule by ID
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules get --id <ID> --allow-domain <HOST>
+apb rules get --id <ID> --plan <PATH>
 ```
 
 ### `apb rules list`
 
 List all automated rules
 
-**Scope:** `read:rules` · **Min tier:** agency
+**Scope:** `read:rules` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -195,14 +202,14 @@ List all automated rules
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules list --allow-domain <HOST> --guardrail-reason <TEXT>
+apb rules list --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb rules preview`
 
 Preview which entities a rule would affect
 
-**Scope:** `write:rules` · **Min tier:** agency
+**Scope:** `write:rules` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
@@ -210,6 +217,7 @@ Preview which entities a rule would affect
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -223,14 +231,14 @@ Preview which entities a rule would affect
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules preview --id <ID> --allow-domain <HOST>
+apb rules preview --id <ID> --plan <PATH>
 ```
 
 ### `apb rules templates apply`
 
 Apply a template to create a rule
 
-**Scope:** `read:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `read:rules` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -241,6 +249,7 @@ Apply a template to create a rule
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -261,13 +270,14 @@ apb rules templates apply --execute --name <NAME> --threshold <THRESHOLD>
 
 List available templates
 
-**Scope:** `read:rules` · **Min tier:** agency
+**Scope:** `read:rules` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -281,14 +291,14 @@ List available templates
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb rules templates list --allow-domain <HOST> --guardrail-reason <TEXT>
+apb rules templates list --plan <PATH> --allow-domain <HOST>
 ```
 
 ### `apb rules update`
 
 Update an existing rule
 
-**Scope:** `write:rules` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:rules` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -298,6 +308,7 @@ Update an existing rule
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |

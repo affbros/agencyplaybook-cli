@@ -1,14 +1,14 @@
 ---
 name: agencyplaybook-cli
 description: |
-  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 265 commands across 39 domains.
+  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 267 commands across 39 domains.
 
   USE WHEN user says "apb", "agencyplaybook cli", "agencyplaybook", "meta campaign automation", "meta ads via cli", "campaign create", "campaign update", "campaign delete", "duplicate campaign", "scale campaign", "pause campaign", "budget update", "ad set targeting", "creative upload", "audience upload", "lookalike audience", "custom audience", "fatigue check", "waste audit", "health score", "weekly digest", "learning accelerator", "playbook diagnostic", "plan execute", "plan validate", "report insights", "compare periods", "split test", "rules engine", "automation rule", "catalog product set", "custom conversion", "leadgen forms", "pixel health", "CAPI dual signal", "growth score", "retargeting compression", "saturation audit", "broad targeting audit", "no-touch compliance", "consolidation advisor", "ROAS recovery", "anomaly detect", "reset rebuild", "scale roadmap", "rebalance", "daypart audit", "placement audit", "creative mix", "event hierarchy", "duplicate detect", "event downgrade ladder", "andromeda", "dataset clone-plan", "sync diff", "alias create", or otherwise needs to programmatically manage Meta ad accounts via the `apb` CLI.
 ---
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-06-18 from the live binary — 265 commands across 39 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-09-09 from the live binary — 267 commands across 39 domains.
 
 ## Routing
 
@@ -168,6 +168,22 @@ Rules:
 - `META_OAUTH=DISABLED` **without** `APB_API_KEY` is refused — the CLI won't run ungated off a bare local token. Set the key, or unset `META_OAUTH` to use `apb` as a standalone Meta tool.
 - The account you target must be reachable by your local token — check with `apb account current` (shows reachability), then switch with `apb account use <profile|act_...>`. For multiple accounts, save profiles that also carry each account's token: `apb account profile add <name> --account act_... --token-env <ENV_VAR>`, then `apb account use <name>` flips account + token together.
 - If an admin disables your user/key, the next call is rejected (a ~30s resolve cache applies; `rm ~/.apb/tenant_context.json` to force an immediate re-check).
+
+## Batch scripts (the watchful eye)
+
+A downloadable library of thin bash wrappers around `apb` encodes how a disciplined operator runs an account: **watch constantly, change rarely, no decision without sufficient data.** They are samples users run with their own credentials — the intelligence stays in the binary; each script is auditable in 60 seconds.
+
+Three cadence tiers plus a shared library:
+
+- **Tier 1 — Watchdogs** (daily, strictly read-only): `watch-account-pulse.sh`, `watch-budget-pacing.sh`, `watch-policy-flags.sh`, `watch-tracking-health.sh`, `watch-learning-phase.sh`, `watch-fatigue.sh`, `watch-anomalies.sh`. They observe and alert (exit 10 = attention items) and never propose a change — a daily finding is flagged for the weekly review.
+- **Tier 2 — Opportunity scans** (weekly, read-only analysis): `scan-scaling-readiness.sh`, `scan-waste.sh`, `scan-audience-health.sh`, `scan-creative-refresh.sh`, `scan-structure-hygiene.sh`, `scan-query-mining.sh`, plus `check-sufficiency.sh`. Anything actionable renders as a plan document, gated by the data-sufficiency floor and a cooldown check.
+- **Tier 3 — Reviews** (weekly/monthly, the only tier that proposes): `weekly-review.sh`, `monthly-strategic-review.sh`, `budget-rebalance.sh`, and `plan-then-apply.sh`.
+- **Audit bundles** (`audit-full.sh` + sectioned `audit-*.sh`) run every read-only diagnostic playbook into a timestamped results dir.
+- **Shared library** (`lib/common.sh`, `lib/sufficiency.sh`, `lib/cooldown.sh`) and the tunable `thresholds.conf` — defaults mirror the binary's own compiled constants so scripts and playbooks agree on what "enough data" means.
+
+**Safety posture:** shipped scripts **never** write. The single sanctioned write path is `plan-then-apply.sh`, which is interactive — it opens a plan document and makes you type the apply command's confirmation yourself. Every proposed change is a plan document you (or a client) read and approve before anything touches the account.
+
+**Where to get them:** the in-app **Scripts** page (`/scripts`), or the public repo under `scripts/apb/` (<https://github.com/affbros/agencyplaybook-cli/tree/main/scripts/apb>). The `/scripts` page reads a live catalogue, so each card's description, cadence, and safety badge come straight from the script's own manifest header.
 
 ## Updating this skill
 

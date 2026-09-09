@@ -1,12 +1,12 @@
 # `apb catalog` — Command Reference
 
-10 commands. Auto-generated from the apb binary on 2026-06-18.
+10 commands. Auto-generated from the apb binary on 2026-09-09.
 
 ### `apb catalog create`
 
 Create a new product catalog
 
-**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:catalogs` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -16,6 +16,7 @@ Create a new product catalog
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -44,6 +45,7 @@ Get a single catalog's details
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -57,7 +59,7 @@ Get a single catalog's details
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb catalog get --id <ID> --allow-domain <HOST>
+apb catalog get --id <ID> --plan <PATH>
 ```
 
 ### `apb catalog list`
@@ -72,6 +74,7 @@ List product catalogs owned by the connected business(es)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -85,7 +88,7 @@ List product catalogs owned by the connected business(es)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb catalog list --limit <LIMIT> --allow-domain <HOST>
+apb catalog list --limit <LIMIT> --plan <PATH>
 ```
 
 ### `apb catalog product-feeds`
@@ -100,6 +103,7 @@ List product feeds for a catalog (monitor stale / failed feed uploads)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -113,14 +117,14 @@ List product feeds for a catalog (monitor stale / failed feed uploads)
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb catalog product-feeds --id <ID> --allow-domain <HOST>
+apb catalog product-feeds --id <ID> --plan <PATH>
 ```
 
 ### `apb catalog product-set-create`
 
 Create a product set within a catalog
 
-**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:catalogs` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -130,6 +134,7 @@ Create a product set within a catalog
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -150,7 +155,7 @@ apb catalog product-set-create --execute --catalog-id <CATALOG_ID> --name <NAME>
 
 Hard-delete a product set (irreversible). Requires `--confirm-destructive`
 
-**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:catalogs` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -158,6 +163,7 @@ Hard-delete a product set (irreversible). Requires `--confirm-destructive`
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -171,14 +177,14 @@ Hard-delete a product set (irreversible). Requires `--confirm-destructive`
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb catalog product-set-delete --execute --confirm-destructive --id <ID> --allow-domain <HOST>
+apb catalog product-set-delete --execute --confirm-destructive --id <ID> --plan <PATH>
 ```
 
 ### `apb catalog product-set-update`
 
 Update an existing product set (any subset of fields)
 
-**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:catalogs` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -188,6 +194,7 @@ Update an existing product set (any subset of fields)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -217,6 +224,7 @@ List product sets in a catalog (filtered subsets used for DPA targeting)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -247,6 +255,7 @@ List products in a catalog
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -267,7 +276,7 @@ apb catalog products --id <ID> --limit <LIMIT>
 
 Update catalog fields (currently only `name` is mutable post-create)
 
-**Scope:** `write:catalogs` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:catalogs` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -276,6 +285,7 @@ Update catalog fields (currently only `name` is mutable post-create)
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |

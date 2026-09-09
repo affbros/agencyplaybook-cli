@@ -40,6 +40,26 @@ apb campaign delete --id @old-test --execute --confirm-destructive --json
 
 ---
 
+## Pagination & pre-emptive throttling (large accounts)
+
+**Avoid silent truncation.** For the high-volume list reads — `campaign list`, `adset list`, `ad list`, `creative list`, `audience list` — `--limit` is the **page size**, not a total cap. A bare `list` returns only the first page, so an agent iterating an account with more rows than `--limit` will silently miss the rest. Two flags close this (july2-platform-polish-001 A3.2):
+
+| Flag | Effect |
+|---|---|
+| `--all` | Follow `paging.cursors.after` until the account is fully drained and return the complete set. **Use this in agent loops** so you never truncate. |
+| `--after <cursor>` | Fetch exactly one page starting from a `paging.cursors.after` cursor (manual paging / resuming). |
+
+```bash
+apb ad list --all --status ACTIVE --json        # complete active-ad set, no truncation
+apb audience list --all --json
+```
+
+In `--json` mode the output stays a stable bare array (no envelope change); the "next page" cursor hint is human-mode only. `catalog products` keeps its own single-page `--after`; `leadgen leads-export` has its own follow-loop.
+
+**Pre-emptive throttle is ON by default** (july2-platform-polish-001 A3.1): a large `--all` sweep automatically pre-sleeps when Meta's rolling usage crosses the soft/hard thresholds (60/80%), so agent loops don't walk into a 429 cascade. It only ever *delays* — it never fails a correct request. Opt out for max-speed scripts with `APB_NO_THROTTLE=1` (the legacy `APB_THROTTLE=0` also disables it).
+
+---
+
 ## Exit Codes
 
 Every failure maps to a documented exit code. Scripts and CI runners can branch on these without parsing stderr:
@@ -253,6 +273,66 @@ apb campaign update \
 # "changes": {...}, "blocked_reasons": [...]}) and exits 0.
 # Use this in PR previews so reviewers can see the projected change.
 ```
+
+### Plan it, don't do it (`--plan`) — a reviewable artifact for approval gates
+
+`--plan <path>` runs the full dry-run pipeline and writes a human plan document
+(`<path>.md`) plus a re-playable, SHA-256-hashed machine plan (`<path>.json`) —
+zero API mutation. It is the offline analogue of the MCP preview→approve→execute
+handshake: an agent (or CI job) emits the plan, a human reviews the `.md`, and the
+`.json` is applied later via the `plan apply --from-file` subcommand. Cannot be
+combined with `--execute` (hard error).
+
+```bash
+# A budget change, captured as a plan a reviewer can approve — no write.
+apb adset update-budget \
+  --id @spring-adset \
+  --daily-budget 50 \
+  --account act_123 \
+  --no-input --plan artifacts/scale.md
+# Writes artifacts/scale.md + artifacts/scale.md.json, exits 0, mutates nothing.
+# stderr: "apb: --plan wrote machine plan (1 action(s)) → artifacts/scale.md.json"
+
+# A diagnostic playbook, converted into a proposed change set:
+apb playbook waste-audit --account act_123 --no-input --plan artifacts/waste.md
+# rebalance / waste-audit / fatigue-index derive actions from findings;
+# other playbooks write the doc with a "not yet plannable" section (no JSON twin).
+```
+
+Coverage: the mutation cohort (`campaign update-status|duplicate|delete`,
+`adset update-budget|update-targeting|delete`, `ad update-status|create|delete`,
+`creative create-image|create-video`) and the `rebalance` / `waste-audit` /
+`fatigue-index` playbooks emit machine plans. Other mutating commands run a normal
+dry-run and note `not yet plannable`; pure reads note `nothing to plan`. The plan
+file carries no authority — apb's full 5-layer write gate + SaaS write-policy/scope
+are re-enforced at apply time.
+
+### Apply a plan from a file (`plan apply --from-file`)
+
+Apply the `.json` twin back through the plan framework. Dry-run by default
+(import + validate + preview, zero mutation); `--execute` plus the four env/CLI
+write gates applies it. Exit codes follow the standard table (`0` dry-run OK,
+`4` write-blocked-with-`--execute`, `2` validation error for a tampered/stale
+file without its override).
+
+```bash
+# Preview in CI — imports + validates, sends nothing, exit 0
+apb plan apply --from-file artifacts/scale.md.json --no-input --json
+
+# Apply in a gated deploy step
+APB_ALLOW_MUTATIONS=true ALLOW_WRITES=true READ_ONLY=false \
+  apb plan apply --from-file artifacts/scale.md.json --execute --no-input --json
+```
+
+The plan file is untrusted input. `plan apply` re-checks the integrity **hash**
+(a hand-edited file is refused unless `--allow-edited-plan`) and re-reads recorded
+prior values for a **staleness** check (a drifted file is refused unless
+`--allow-stale-plan`); delete-class / blast-radius-5 actions additionally require
+`--confirm-destructive`. A gads plan file, or one from a newer apb, is rejected.
+`plan export --id <plan-id> --out <path>` serializes a stored plan back to a
+portable file that round-trips through `plan apply`. HTTP parity:
+`POST /api/v1/plans/import` (import + validate only; execution stays on
+`POST /api/v1/plans/:id/execute[-safe]`).
 
 ### Gated mutation in a deployment job
 

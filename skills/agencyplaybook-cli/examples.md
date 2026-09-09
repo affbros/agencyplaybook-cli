@@ -152,7 +152,14 @@ for i in 1 2 3; do
 done
 ```
 
-To pre-empt throttling entirely on high-fanout agent loops, opt into the preemptive throttle: `export APB_THROTTLE=1`.
+The pre-emptive throttle is **on by default** — high-fanout agent loops automatically pre-sleep before Meta's usage ceiling, so you rarely see a 429 at all. It only ever delays; it never fails a correct request. Disable it for max-speed scripts with `export APB_NO_THROTTLE=1`.
+
+Listing large accounts: `--limit` is the page size, not a cap. Pass `--all` on `campaign list` / `adset list` / `ad list` / `creative list` / `audience list` to follow cursors and get the complete set (no silent first-page truncation); `--after <cursor>` fetches one page manually.
+
+```bash
+apb ad list --all --status ACTIVE --json           # every active ad, not just the first page
+apb audience list --all --json
+```
 
 ## 12. Catalog product set CRUD (DPA / Advantage+ Shopping)
 

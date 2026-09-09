@@ -91,4 +91,4 @@ do **not** manage a yaml — the broker supplies the token.
   a metric, nor metrics without a resource field.
 - **Empty playbook results** usually mean no activity in the default window — retry with
   `--lookback-days 365`.
-- **v24 is pinned** — don't assume newer fields exist; the CLI rejects out-of-range inputs pre-API.
+- **v25 is pinned** — don't assume newer fields exist; the CLI rejects out-of-range inputs pre-API.

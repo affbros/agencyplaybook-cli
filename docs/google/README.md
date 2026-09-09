@@ -1,8 +1,8 @@
 # apb-gads — Google Ads CLI documentation
 
 Operator-grade Google Ads + Performance Max management from the command line.
-**286 commands across 27 groups** — 116 gated mutations, 66 diagnostic playbooks, 23 reports —
-every write dry-run by default behind a three-gate safety model. Google Ads API **v24**.
+**295 commands across 29 groups** — 123 gated mutations, 66 diagnostic playbooks, 24 reports —
+every write dry-run by default behind a three-gate safety model. Google Ads API **v25**.
 
 `apb-gads` is the Google Ads sibling of `apb` (the Meta CLI). It connects through your
 AgencyPlaybook account (the Google Ads add-on) and is driven by the same `APB_API_KEY`.

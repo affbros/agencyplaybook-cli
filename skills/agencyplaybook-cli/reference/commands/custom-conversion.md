@@ -1,12 +1,12 @@
 # `apb custom-conversion` — Command Reference
 
-5 commands. Auto-generated from the apb binary on 2026-06-18.
+5 commands. Auto-generated from the apb binary on 2026-09-09.
 
 ### `apb custom-conversion create`
 
 Create a new custom conversion. Requires `--name`, `--custom-event-type`, and `--rule` (URL-match JSON expression). `event_source_id` (the pixel) is auto-discovered if not provided
 
-**Scope:** `write:custom-conversions` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:custom-conversions` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -20,6 +20,7 @@ Create a new custom conversion. Requires `--name`, `--custom-event-type`, and `-
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -40,7 +41,7 @@ apb custom-conversion create --execute --name <NAME> --custom-event-type <CUSTOM
 
 Hard-delete a custom conversion (irreversible). Requires `--confirm-destructive`. Cannot delete a conversion currently set as `--promoted-object` on any active adset; detach first
 
-**Scope:** `write:custom-conversions` · **Min tier:** agency · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
+**Scope:** `write:custom-conversions` · **Min tier:** professional · **Write op** (requires `--execute`) · **Destructive** (requires `--confirm-destructive`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -48,6 +49,7 @@ Hard-delete a custom conversion (irreversible). Requires `--confirm-destructive`
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -61,7 +63,7 @@ Hard-delete a custom conversion (irreversible). Requires `--confirm-destructive`
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb custom-conversion delete --execute --confirm-destructive --id <ID> --allow-domain <HOST>
+apb custom-conversion delete --execute --confirm-destructive --id <ID> --plan <PATH>
 ```
 
 ### `apb custom-conversion get`
@@ -76,6 +78,7 @@ Get a single custom conversion's details
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -89,7 +92,7 @@ Get a single custom conversion's details
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb custom-conversion get --id <ID> --allow-domain <HOST>
+apb custom-conversion get --id <ID> --plan <PATH>
 ```
 
 ### `apb custom-conversion list`
@@ -104,6 +107,7 @@ List custom conversions for the connected ad account
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -117,14 +121,14 @@ List custom conversions for the connected ad account
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb custom-conversion list --limit <LIMIT> --allow-domain <HOST>
+apb custom-conversion list --limit <LIMIT> --plan <PATH>
 ```
 
 ### `apb custom-conversion update`
 
 Update mutable fields. Note: Meta freezes `rule`, `custom_event_type`, and `event_source_id` at create time — only `name`, `description`, and `default_conversion_value` are mutable post-create
 
-**Scope:** `write:custom-conversions` · **Min tier:** agency · **Write op** (requires `--execute`)
+**Scope:** `write:custom-conversions` · **Min tier:** professional · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
@@ -135,6 +139,7 @@ Update mutable fields. Note: Meta freezes `rule`, `custom_event_type`, and `even
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
+| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |

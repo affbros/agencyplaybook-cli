@@ -21,23 +21,23 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 | `read:playbooks:full` | · | · | ✓ | ✓ | ✓ |
 | `read:reports` | ✓ | ✓ | ✓ | ✓ | ✓ |
 | `read:reports:advanced` | · | ✓ | ✓ | ✓ | ✓ |
-| `read:rules` | · | · | ✓ | ✓ | ✓ |
+| `read:rules` | · | ✓ | ✓ | ✓ | ✓ |
 | `read:search` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `write:audience-data` | · | · | ✓ | ✓ | ✓ |
+| `write:audience-data` | · | ✓ | ✓ | ✓ | ✓ |
 | `write:automation` | · | · | · | ✓ | ✓ |
-| `write:budgets` | · | · | ✓ | ✓ | ✓ |
-| `write:campaigns` | · | · | ✓ | ✓ | ✓ |
-| `write:catalogs` | · | · | ✓ | ✓ | ✓ |
-| `write:custom-conversions` | · | · | ✓ | ✓ | ✓ |
-| `write:leadgen` | · | · | ✓ | ✓ | ✓ |
-| `write:rules` | · | · | ✓ | ✓ | ✓ |
+| `write:budgets` | · | ✓ | ✓ | ✓ | ✓ |
+| `write:campaigns` | · | ✓ | ✓ | ✓ | ✓ |
+| `write:catalogs` | · | ✓ | ✓ | ✓ | ✓ |
+| `write:custom-conversions` | · | ✓ | ✓ | ✓ | ✓ |
+| `write:leadgen` | · | ✓ | ✓ | ✓ | ✓ |
+| `write:rules` | · | ✓ | ✓ | ✓ | ✓ |
 | `admin:duplicate` | · | · | · | ✓ | ✓ |
 | `admin:split-test` | · | · | · | ✓ | ✓ |
 | `admin:sync` | · | · | · | ✓ | ✓ |
 
 | | Starter | Professional | Agency | Enterprise | Free Enterprise |
 |---|:-:|:-:|:-:|:-:|:-:|
-| **Scopes** | 4 | 11 | 23 | 27 | 27 |
+| **Scopes** | 4 | 19 | 23 | 27 | 27 |
 | **Rate limit (rpm)** | 60 | 300 | 600 | 1000 | 1000 |
 
 `·` = not granted. Scopes marked *(API-only)* gate HTTP-API features that have no `apb` command. Your tier is set by your subscription plan.
@@ -67,7 +67,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb audience list`
 - `apb audience overlap`
 
-### `read:campaigns` (40 commands)
+### `read:campaigns` (41 commands)
 
 - `apb account current`
 - `apb account info-detailed`
@@ -95,6 +95,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb creative upload-video-status`
 - `apb library search`
 - `apb plan doctor`
+- `apb plan export`
 - `apb plan list`
 - `apb policy profile set`
 - `apb policy profile show`
@@ -282,7 +283,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
 - `apb budget simulate`
 
-### `write:campaigns` (49 commands)
+### `write:campaigns` (50 commands)
 
 - `apb ad create`
 - `apb ad create-multi`
@@ -322,6 +323,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb creative update`
 - `apb creative upload-image`
 - `apb creative upload-video`
+- `apb plan apply`
 - `apb plan approve-batch`
 - `apb plan canary`
 - `apb plan cap`

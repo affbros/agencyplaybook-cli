@@ -27,7 +27,7 @@ Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaS
 <a id="apb-gads-plan-keyword-ideas"></a>
 ### `apb-gads plan keyword-ideas`
 
-Generate keyword ideas from seeds (keywords, URL, or site). Wraps v24 KeywordPlanIdeaService.GenerateKeywordIdeas. Returns avg monthly searches, competition level/index, and top-of-page bid ranges
+Generate keyword ideas from seeds (keywords, URL, or site). Wraps KeywordPlanIdeaService.GenerateKeywordIdeas. Returns avg monthly searches, competition level/index, and top-of-page bid ranges
 
 **Usage**
 
@@ -52,7 +52,7 @@ Usage: apb-gads plan keyword-ideas [OPTIONS]
 <a id="apb-gads-plan-keyword-historical-metrics"></a>
 ### `apb-gads plan keyword-historical-metrics`
 
-Historical metrics for a fixed keyword list. Wraps v24 KeywordPlanIdeaService.GenerateKeywordHistoricalMetrics. Returns backward-looking search volume + competition + bid metrics, and optional per-month search volume series
+Historical metrics for a fixed keyword list. Wraps KeywordPlanIdeaService.GenerateKeywordHistoricalMetrics. Returns backward-looking search volume + competition + bid metrics, and optional per-month search volume series
 
 **Usage**
 

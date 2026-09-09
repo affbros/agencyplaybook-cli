@@ -1,6 +1,6 @@
 # Capability matrix — what's proven, and how to trust a write
 
-A `200` / exit-0 from a mutation is **not** proof the change persisted. Some Google Ads v24 fields
+A `200` / exit-0 from a mutation is **not** proof the change persisted. Some Google Ads v25 fields
 are accepted but silently not applied, write-only, or frozen at create. **Never claim a write
 landed from the response alone — confirm by readback.** This reference tells you how strongly each
 surface has been proven and how to verify the rest yourself.
@@ -20,7 +20,7 @@ surface has been proven and how to verify the rest yourself.
 - **LIVE_VERIFIED** (full create → readback → cleanup proven): SEARCH campaign create + targeting
   (`verify search-lifecycle`), RSA create + refresh (`verify rsa-lifecycle` → covers
   `ad-create` + `ad-update-status`), and atomic PMAX launch (`verify pmax-launch`).
-- **SERVER_VALIDATED**: the large majority of the 116 `mutate` surfaces have been proven against
+- **SERVER_VALIDATED**: the large majority of the 123 `mutate` surfaces have been proven against
   Google's validator via `--validate-only` — schema + policy correct, no state change. This is the
   fastest way to prove *your* payload before writing.
 - **EXECUTE_SANDBOX**: every other execute-mode write lands in the `$1` `Test-ok-to-delete`

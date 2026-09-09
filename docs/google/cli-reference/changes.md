@@ -14,7 +14,7 @@ Artifact pipeline — turn a scored ActionPlan (from `plan from-audit`) into a r
 
 | Subcommand | Summary |
 |---|---|
-| [`from-plan`](#apb-gads-changes-from-plan) | Convert a scored ActionPlan JSON into a Changeset of raw v24 mutate ops. |
+| [`from-plan`](#apb-gads-changes-from-plan) | Convert a scored ActionPlan JSON into a Changeset of raw Google Ads mutate ops. |
 | [`apply`](#apb-gads-changes-apply) | Apply a Changeset. |
 | [`rollback`](#apb-gads-changes-rollback) | Generate + apply the inverse of a previously-applied changeset, looked up by audit-log id (reuses `mutate inverse-plan`). |
 
@@ -23,7 +23,7 @@ Artifact pipeline — turn a scored ActionPlan (from `plan from-audit`) into a r
 <a id="apb-gads-changes-from-plan"></a>
 ### `apb-gads changes from-plan`
 
-Convert a scored ActionPlan JSON into a Changeset of raw v24 mutate ops. Pure transform — no write. Only auto-applicable actions are staged unless `--include-review` is set
+Convert a scored ActionPlan JSON into a Changeset of raw Google Ads mutate ops. Pure transform — no write. Only auto-applicable actions are staged unless `--include-review` is set
 
 **Usage**
 

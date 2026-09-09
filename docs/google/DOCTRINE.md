@@ -2,7 +2,7 @@
 
 Confidence tags: **[G]** = official Google docs · **[E]** = expert/practitioner
 consensus (PPC Mastery, Optmyzr/Vallaeys, ZATO, SavvyRevenue) · **[LV]** =
-live-verified against the v24 API by this project.
+live-verified against the v25 API by this project.
 
 ## 1. Smart Bidding: "bid adjustments are dead"
 
@@ -44,7 +44,7 @@ values & ≥~50 conv/mo → Max Conv Value → tROAS.
 - Search: ~50 conversions / 3 conversion cycles to converge [G answer/13020501];
   PMAX ~4-6 weeks [E].
 - Authoritative status: `campaign.bidding_strategy_system_status` [G, **selectable
-  in v24 — LV**]. Values: `ENABLED` (converged), `LEARNING_NEW`,
+  in v25 — LV**]. Values: `ENABLED` (converged), `LEARNING_NEW`,
   `LEARNING_SETTING_CHANGE`, `LEARNING_BUDGET_CHANGE`, `LEARNING_COMPOSITION_CHANGE`,
   `LEARNING_CONVERSION_*_CHANGE`, `LIMITED_BY_BUDGET`, `LIMITED_BY_DATA`,
   `MISCONFIGURED_*`. PMAX campaigns expose a real status too (not UNAVAILABLE) [LV].
@@ -95,19 +95,19 @@ All [E, high confidence — large-N, replicated]:
 - **Negative keywords**: campaign-level up to 10,000 (Mar-2025), account-level
   1,000. They block Search & Shopping only — Display/YouTube junk needs placement +
   topic exclusions [G]. Webpage exclusions route through `campaign_criterion`
-  type=WEBPAGE (v24 has no customer-level webpage path) [LV].
+  type=WEBPAGE (v25 has no customer-level webpage path) [LV].
 - **Final URL expansion is ON by default** — turn off for lead-gen/LP control via
-  `mutate campaign-update-url-expansion-opt-out` (v24: `asset_automation_settings`,
+  `mutate campaign-update-url-expansion-opt-out` (v25: `asset_automation_settings`,
   the old boolean is gone) [LV].
 - **Visibility limits** [LV]: `performance_max_placement_view` = impressions only
   (brand-safety surface); per-channel spend split + brand-traffic share are NOT in
-  the v24 API (script-only territory) — `report pmax-placements` is honest about
+  the v25 API (script-only territory) — `report pmax-placements` is honest about
   this and lists mitigation writes.
 - **Cannibalization**: 91% of accounts show Search↔PMAX overlap; on overlapping
   exact terms Search converts ~3× better (CVR 18.91% vs 6.17%) [E, Optmyzr 503
   accounts]. Mitigate: brand exclusions + dedicated brand Search + negatives +
   keep Search eligible.
-- **Hard v24 build facts** [LV]: PMAX needs a non-shared budget (shared AND
+- **Hard v25 build facts** [LV]: PMAX needs a non-shared budget (shared AND
   portfolio strategies rejected); bidding at create = MAXIMIZE_CONVERSIONS
   (+optional tCPA) or MAXIMIZE_CONVERSION_VALUE (+optional tROAS) only; per asset
   group ≥3 HEADLINE, ≥1 LONG_HEADLINE, ≥2 DESCRIPTION (one <60 chars), BUSINESS_NAME,
