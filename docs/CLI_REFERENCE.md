@@ -1,8 +1,8 @@
 # CLI Reference
 
-Command reference for `apb` (Rust). **34 command domains, 246 leaf commands** (verified 2026-05-30 via `tasks/ci/api-parity/baseline.json`; mirrored to `public/data/cli-catalogue.json`).
+Command reference for `apb` (Rust). **39 command domains · 267 leaf commands** (apb 0.5.28; verified 2026-09-09 against the binary-generated `public/data/cli-catalogue.json`; parity-gated by `tasks/ci/api-parity/baseline.json`). 38 are sectioned below; `meta` (internal `meta cache` / `meta status` utility) is intentionally undocumented here.
 
-> **Doc currency**: Headline counts match the parity baseline. The per-command sections below were last fully audited prior to campaign-management-completion (S001–S008, 2026-04-25 → 2026-04-26), which added ~40 leaves across `catalog`, `product-set`, `custom-conversion`, `leadgen`, `audience users-add/users-remove`, `account instagram-accounts/instagram-media`, `creative create-collection`, plus generic `adset update` and the `--special-ad-categories` / `--objective` enum flags on campaign create. Subsequent releases added pre-flight guards (v0.1.15–v0.1.20): see SAFETY_MODEL.md ("Pre-flight guards on mutations") and the `adset create`/`update` sections. **Those new commands + guard semantics are NOT yet fully documented here** — see the workstream summary at `../ai/evals/campaign-management-completion/workstream-summary.md` and `../ai/evals/pacing-scheduling-alignment/sprint-001-eval.md` for the canonical lists. Run `apb --help` and `apb <domain> --help` for current authoritative usage.
+> **Doc currency** (refreshed 2026-09-09 → apb 0.5.28 / 267 leaves): every CLI leaf command is covered. Most have a dedicated `### ` heading; the grouped `pixel`, `creative create-*`, and `account profile` families are documented narratively under their domain section (allowlisted in `tasks/ci/api-parity/baseline.json::approved_undocumented_cli`). **Cross-cutting flags** — `--execute`, the `--guardrails` / `--allow-*` override family, `--ignore-cooldown`, `--json`, `--account`, … — are documented **once** under [Global Flags](#global-flags) rather than repeated in every command's table; the targeting-builder flags live under [`adset create`](#adset-create-write). For the always-authoritative, exhaustive flag set of any command, run `apb <domain> <cmd> --help`. CI (`check_cli_parity.py --docs-strict`) fails if this file documents a command the binary doesn't expose, or omits one without an allowlist entry.
 
 ---
 
@@ -15,23 +15,56 @@ These flags are available on every command. For unattended / CI / AI-agent usage
 | `--json` | bool | Output as machine-readable JSON (default: human-readable table) |
 | `--execute` | bool | Apply changes to the Meta API (required for all writes) |
 | `--dry-run` | bool | Preview only, never mutate (informational — writes are dry-run by default) |
+| `--plan <PATH>` | string | **Plan it, don't do it.** Runs the full dry-run pipeline and writes `<PATH>.md` (human plan document) + `<PATH>.json` (re-playable machine plan, SHA-256-hashed). No API mutation. Cannot be combined with `--execute`. Covers the mutation cohort (campaign/adset/ad/creative writes) and the `rebalance` / `waste-audit` / `fatigue-index` playbooks; other commands note that they're not yet plannable. Apply the JSON twin via `apb plan apply --from-file` (ships in v0.5.26). See [Plan-first (`--plan`)](#plan-first---plan). |
 | `--confirm-destructive` | bool | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | string | Target a specific ad account (overrides default). Format: `act_XXXXXXXXX` |
 | `--no-input` | bool | Promise that the CLI will never prompt. Required for CI/cron/agent execution. Does **not** imply approval — mutations still need `--execute`. |
 | `--debug` | bool | Enable debug-level tracing to stderr. Honors `RUST_LOG` if already set. Token / OAuth secrets are sanitized before logging. |
 | `--no-color` | bool | Disable ANSI color in output. Also honors `NO_COLOR=1` and `CLICOLOR=0` env vars. |
+| `--guardrails` | string | Override the guardrail enforcement mode for this command: `on`/`block`, `warn`, or `off`. Highest precedence over ENV + the stored profile. See [`guardrails`](#36-guardrails). |
+| `--allow-domain` | string | Waive the guardrail for one off-allowlist final-URL host (repeatable). Requires `--guardrail-reason`. |
+| `--allow-brand` | bool | Waive the guardrail's canonical-brand / blocked-term copy checks. Requires `--guardrail-reason`. |
+| `--allow-budget` | bool | Waive the guardrail's daily-budget cap / currency check. Requires `--guardrail-reason`. |
+| `--guardrail-reason` | string | Justification recorded in the audit log when any `--allow-*` override is used. Required with any override. |
+| `--ignore-cooldown` | bool | Bypass the CLI's post-429 cooldown short-circuit — attempt the call even if the local cooldown file marks the account as on a post-rate-limit cooldown window. For CI/cron once you've confirmed the limit reset (`meta-429-mitigation-001`). |
 
 ### Account resolution precedence
 
-The ad account a command targets is resolved in this order (first non-empty wins). `apb` prints the chosen account and its source to stderr, e.g. `[apb] account: act_… (source: env META_AD_ACCOUNT_ID)`:
+The ad account a command targets is resolved as follows. `apb` prints the chosen account and its source to stderr, e.g. `[apb] account: act_… (source: tenant default)`:
 
-1. **`--account act_…` flag** — explicit, per-invocation.
-2. **`META_AD_ACCOUNT_ID`** — from your shell env or the `.env` in the directory you ran `apb` from (or `~/.apb/.env`).
-3. **`~/.apb/config.json` `default_account`** — the persisted global default written by `apb account set-default` (a fallback only).
-4. **SaaS tenant default** — for `APB_API_KEY` users, the account on the resolved tenant.
-5. **Auto-discovery** — when exactly one ad account is reachable.
+1. **`--account act_…` flag** — explicit, per-invocation. Always wins.
+2. **`META_AD_ACCOUNT_ID`** — from your shell env or the `.env` in the directory you ran `apb` from (or `~/.apb/.env`). An explicit per-project pin.
 
-> The explicit `.env` value (2) **overrides** the persisted global `~/.apb/config.json` (3). When they differ, `apb` prints a loud `note:` naming both, so the override is never silent. Change the global default with `apb account set-default --account act_…`. *(Precedence corrected in v0.2.1 — previously the hidden global config silently outranked `.env`.)*
+After those, the order depends on mode:
+
+- **SaaS mode** (`APB_API_KEY` set — a tenant is resolved): the key's identity governs.
+  3. **SaaS tenant default** — the account on the resolved tenant, if it has one.
+  4. **Auto-discovery** — if your token can reach **exactly one** ad account, it's used automatically; if it can reach several, `apb` lists them and asks you to choose (`--account` or set a default) rather than guessing.
+
+  The machine-global `~/.apb/config.json` `default_account` is **not consulted in SaaS mode** — a stale default set under one key must never mis-target another key (it previously did, surfacing as a confusing Meta permission error). Pin a SaaS account with `--account` or `META_AD_ACCOUNT_ID`.
+
+- **Legacy / BYO mode** (no `APB_API_KEY`):
+  3. **`~/.apb/config.json` `default_account`** — the persisted global default written by `apb account set-default` (`--clear` to remove it).
+  4. **Auto-discovery** — when exactly one ad account is reachable.
+
+> In legacy mode the explicit `.env` value (2) **overrides** the persisted global (3); when they differ `apb` prints a loud `note:`. *(`.env` > global corrected in v0.2.1; the SaaS re-rank — tenant + token discovery outrank the machine-global default — added in v0.5.2.)*
+
+### Plan-first (`--plan`)
+
+`--plan <PATH>` means **"plan it, don't do it."** It runs the command exactly as a bare dry-run (all validators + guardrails + write-gate previews fire), performs **no** API mutation, and writes two artifacts:
+
+- **`<PATH>.json`** — the machine plan: a **plan-envelope-v2** document (`schema_version: 2`, `product: "apb"`, `channel: "meta"`, `binary_version`, `account: {ad_account_id}`, `created_at`, `integrity`) wrapping `actions[]`. Each action carries the plan-framework fields — dotted `op` slug, `target.resource`, Meta `params`, `blast_radius`, `destructive`, and its staleness baseline in `prior`. `integrity.hash` is the `sha256:<hex>` digest over the canonical JSON of `integrity.hashed_fields`, the integrity primitive the apply path re-checks; `integrity.plan_hash` is kept as a bare-hex alias for v1 readers. **Every Meta producer writes v2 as of `apb 0.5.28`; the readers still accept v1** — see [USAGE_GUIDE.md § Plan envelope v2](USAGE_GUIDE.md).
+- **`<PATH>.md`** — a human plan document (header, summary, actions table, projected impact for playbooks, guardrails & gates, rollback, how-to-apply, staleness) a person or client can read and approve.
+
+Path-twin rule: a `.md` path keeps its name and appends `.json` (`scale.md` → `scale.md` + `scale.md.json`); any other path gets both suffixes (`scale` → `scale.md` + `scale.json`).
+
+**`--plan` and `--execute` cannot be combined** (hard error naming both). Coverage in this release:
+
+- **Mutation cohort** — `campaign update-status` / `duplicate` / `delete`, `adset update-budget` / `update-targeting` / `delete`, `ad update-status` / `create` / `delete`, `creative create-image` / `create-video` → one plan action per command.
+- **Playbook cohort** — `playbook rebalance` (budget reallocation), `waste-audit` (pause flagged entities), `fatigue-index` (pause dead/fatigued ads) → actions derived from findings, with the playbook's projected-impact numbers.
+- **Everything else** — other mutating commands run a normal dry-run and print `not yet plannable — no plan files written`; pure reads print `nothing to plan`; other playbooks write a doc with their summary + a "not yet plannable" section (no JSON twin).
+
+Apply a plan with `apb plan apply --from-file <PATH>.json --execute` — **ships in v0.5.26**. The plan file is never authority: apb's 5-layer write gate (`--execute`, `READ_ONLY`, `ALLOW_WRITES`, `APB_ALLOW_MUTATIONS`, `--confirm-destructive`) plus SaaS write-policy/scope are re-enforced at apply time regardless of what the file says.
 
 ### Naming uploaded assets
 
@@ -272,17 +305,19 @@ Returns `{id, name, account_status, currency, timezone_name}` per account. Sourc
 
 ### `account set-default`
 
-Set the default ad account for subsequent CLI commands. Writes to `~/.apb/config.json::default_account`. Subsequent commands without `--account` use this value before falling back to env-var or auto-discovery.
+Set (or clear) the persisted global default ad account. Writes to `~/.apb/config.json::default_account`.
 
 ```
-apb account set-default --account <act_xxxxx> [--json]
+apb account set-default --account <act_xxxxx> [--json]   # set
+apb account set-default --clear [--json]                 # remove
 ```
 
 | Flag | Type | Description |
 |------|------|-------------|
-| `--account` | string | Account ID (must include the `act_` prefix) |
+| `--account` | string | Account ID (must include the `act_` prefix). Required unless `--clear`. |
+| `--clear` | flag | Remove the persisted global default instead of setting one. |
 
-This is a local-only operation — no API call. Pair with `apb account list` to discover the right ID. For name-based switching that also carries the token, prefer `account use` + profiles (below).
+Local-only — no API call. **Scope note:** this global default is consulted only in **legacy/BYO mode** (no `APB_API_KEY`). In **SaaS mode** the key's tenant + token-discovery govern (see *Account resolution precedence*), so a stale global default can't mis-target a SaaS key — pin a SaaS account with `--account` or `META_AD_ACCOUNT_ID`. Pair with `apb account list` to find the right ID; for name-based switching that also carries the token, prefer `account use` + profiles (below).
 
 ### `account use` (cli-account-switching)
 
@@ -406,14 +441,16 @@ Campaign CRUD and helpers.
 ### `campaign list`
 
 ```
-apb campaign list [--account act_xxx] [--limit N] [--status STATUS] [--since DATE] [--until DATE] [--json]
+apb campaign list [--account act_xxx] [--limit N] [--status STATUS] [--since DATE] [--until DATE] [--after CURSOR] [--all] [--json]
 ```
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
-| `--limit` | u32 | 25 | Max campaigns to return |
+| `--limit` | u32 | 25 | Max campaigns per page |
 | `--account` | string | auto | Ad account override |
 | `--status` | string | — | Filter by effective status (e.g. `ACTIVE`, `PAUSED`) |
+| `--after` | string | — | Fetch one page starting from this `paging.cursors.after` cursor |
+| `--all` | bool | false | Follow cursors and return every page (avoids first-page truncation on large accounts) |
 | `--since` | string | — | Show campaigns created or modified on/after this date (`YYYY-MM-DD` or relative e.g. `30d`) |
 | `--until` | string | — | Show campaigns created or modified on/before this date (`YYYY-MM-DD` or relative e.g. `7d`) |
 
@@ -454,6 +491,11 @@ apb campaign create --name <name> --objective <ODAX_ENUM> [--status PAUSED] [--d
 | `--special-ad-categories` | CSV | — | Required by Meta for housing/credit/employment/social-issue verticals. Comma-separated, e.g. `--special-ad-categories HOUSING,CREDIT`. Serialized as a JSON array to Meta. |
 | `--special-ad-category-country` | CSV | — | ISO country codes scoping the categories, e.g. `--special-ad-category-country US`. **Required by Meta when a special ad category is set** — the CLI fails loud if categories are present without it. |
 | `--budget-sharing` | bool | auto | Maps to Meta's `is_adset_budget_sharing_enabled`. **Omit and the CLI sends `false` automatically for ABO campaigns** (no `--daily-budget`/`--lifetime-budget`), which Meta now requires (else error subcode 4834011). Pass `--budget-sharing true` to let ad sets share 20% of their budget. When a campaign budget is set, the field is omitted unless you pass it explicitly. |
+| `--spend-cap` | f64 | — | Campaign spend cap in USD (Meta `spend_cap`). |
+| `--start-time` | ISO 8601 | — | Campaign flight start (Meta `start_time`), e.g. `2026-07-01T00:00:00-0700`. |
+| `--stop-time` | ISO 8601 | — | Campaign flight end (Meta `stop_time`). |
+| `--promoted-object` | JSON | — | Campaign-level promoted object JSON (rare; objective-specific campaigns). |
+| `--extra-fields` | JSON | — | Escape hatch: raw JSON object merged into the create body. **Bypasses validation**; fails loud on a key collision. |
 | `--spec-file` | string | — | JSON spec file (CLI flags override spec values). `special_ad_categories` in the spec accepts both array and CSV-string form; `is_adset_budget_sharing_enabled`/`budget_sharing` in the spec is honored. |
 
 DRY-RUN by default. Requires all 4 write gates open.
@@ -465,6 +507,8 @@ apb campaign update-status --id <id> --status <PAUSED|ACTIVE|DELETED|ARCHIVED> [
 ```
 
 **Valid statuses:** `PAUSED`, `ACTIVE`, `DELETED`, `ARCHIVED`. `DELETED` and `ARCHIVED` transitions require `--confirm-destructive`.
+
+> **Legacy Advantage+ guard.** If the target campaign is a legacy ASC (`smart_promotion_type=AUTOMATED_SHOPPING_ADS`) or AAC (`SMART_APP_PROMOTION`) campaign, the command fails loud with a validation error **before any Graph call** (even in dry-run) — Meta disabled API updates to ASC/AAC campaigns on all versions (2026-05-19); remaining legacy campaigns will be PAUSED at v26 (~Sep 2026); Existing Customer Budget Cap campaigns stay editable until v26. This turns Meta's raw 400 into an actionable message. Run `apb playbook advantage-adoption` for the migration path.
 
 ### `campaign delete` (WRITE, IRREVERSIBLE)
 
@@ -492,6 +536,8 @@ apb campaign update --id <id> [--name <name>] [--daily-budget <usd>] [--lifetime
 
 Update campaign settings (name, budgets, bid strategy, status). Budget changes exceeding 200% and destructive status changes require `--confirm-destructive`.
 
+> **Legacy Advantage+ guard.** Updates to a legacy ASC (`AUTOMATED_SHOPPING_ADS`) or AAC (`SMART_APP_PROMOTION`) campaign fail loud **before any Graph call** (in dry-run too) — Meta disabled these updates on all API versions (2026-05-19); legacy campaigns are PAUSED at v26 (~Sep 2026); Existing Customer Budget Cap campaigns stay editable until v26. See `apb playbook advantage-adoption`.
+
 | Flag | Type | Description |
 |------|------|-------------|
 | `--special-ad-categories` | CSV | Comma-separated list. **Note**: Meta rejects empty arrays on update (clearing requires recreate); pass nothing to leave unchanged. |
@@ -513,6 +559,8 @@ apb campaign duplicate --id <id> [--name "..."] [--execute] [--json]
 ```
 
 Clones the full tree: campaign -> adsets -> ads. All new entities start as PAUSED. Targeting specs are sanitized (removes `age_range`, ensures `targeting_automation.advantage_audience`).
+
+> **Legacy Advantage+ guard.** Duplicating a legacy ASC (`AUTOMATED_SHOPPING_ADS`) or AAC (`SMART_APP_PROMOTION`) campaign fails loud **before any Graph call** — Meta disabled `POST /{campaign-id}/copies` for these types on all API versions (2026-05-19). The same guard fires on the plan-capture path (`--plan`). Legacy campaigns are PAUSED at v26 (~Sep 2026); Existing Customer Budget Cap campaigns stay editable until v26. See `apb playbook advantage-adoption`.
 
 ### `campaign pacing`
 
@@ -623,13 +671,15 @@ Ad set operations.
 ### `adset list`
 
 ```
-apb adset list [--campaign <id>] [--limit N] [--json]
+apb adset list [--campaign <id>] [--limit N] [--after CURSOR] [--all] [--json]
 ```
 
 | Flag | Type | Default | Description |
 |------|------|---------|-------------|
 | `--campaign` | string | — | Scope to a campaign |
-| `--limit` | u32 | 25 | Max results |
+| `--limit` | u32 | 25 | Max results per page |
+| `--after` | string | — | Fetch one page starting from this `paging.cursors.after` cursor |
+| `--all` | bool | false | Follow cursors and return every page |
 
 **API fields:** id, name, status, effective_status, campaign_id, daily_budget, lifetime_budget, optimization_goal, bid_strategy
 
@@ -777,8 +827,10 @@ Ad-level operations.
 ### `ad list`
 
 ```
-apb ad list [--adset <id>] [--limit N] [--json]
+apb ad list [--adset <id>] [--campaign <id>] [--limit N] [--after CURSOR] [--all] [--json]
 ```
+
+`--after <cursor>` fetches one page from a `paging.cursors.after` cursor; `--all` follows cursors until every page is drained.
 
 **API fields:** id, name, status, effective_status, adset_id, campaign_id, creative.id
 
@@ -858,6 +910,8 @@ Creative management.
 
 Every `creative create-*` and `creative update` command runs a format auditor before any write. The auditor traverses the spec and detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / product_set_id / etc.) — the failure mode that surfaced as the Scandalous Coffee incident on 2026-05-23. See [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md) for the full 11-variant risk taxonomy.
 
+**AI-disclosure advisory (v0.5.24, july9-meta-compliance-001 A3):** every audit — dry-run and `--execute` alike — also surfaces one non-fatal, non-blocking INFO line reminding the operator that Meta requires the AI-disclosure toggle (Ad Library transparency label) if any visual asset in the creative is AI-generated. apb cannot detect AI-generated imagery from the Graph API, so this is an operator-confirmed reminder, not an enforced check — it never blocks `--execute` and has no `--allow-*` flag. Surfaces in the `format_audit.advisories` array of the JSON response alongside `findings`.
+
 Audit flags (flatten into all 6 commands below):
 
 | Flag | Default | Effect |
@@ -879,8 +933,10 @@ Audit flags (flatten into all 6 commands below):
 ### `creative list`
 
 ```
-apb creative list [--account act_xxx] [--limit N] [--json]
+apb creative list [--account act_xxx] [--limit N] [--after CURSOR] [--all] [--json]
 ```
+
+`--after <cursor>` fetches one page from a `paging.cursors.after` cursor; `--all` follows cursors until every page is drained.
 
 ### `creative get`
 
@@ -1120,10 +1176,10 @@ Custom audience management.
 ### `audience list`
 
 ```
-apb audience list [--account act_xxx] [--limit N] [--json]
+apb audience list [--account act_xxx] [--limit N] [--after CURSOR] [--all] [--json]
 ```
 
-Lists custom audiences.
+Lists custom audiences. `--after <cursor>` fetches one page from a `paging.cursors.after` cursor; `--all` follows cursors until every page is drained.
 
 ### `audience get`
 
@@ -1489,7 +1545,7 @@ Starts an async report job. Returns `job_id`.
 apb report insights-async status --job-id <id> [--json]
 ```
 
-Returns `async_status`, `async_percent_completion`.
+Returns `async_status`, `async_percent_completion`. On a failed job (`async_status: "Job Failed"`, Graph API v25+) the response also carries `error_code`, `error_message`, `error_subcode`, `error_user_title`, `error_user_msg`; human-mode output prints the user-facing title/message prominently, `--json` returns the full object as-is. Fields are absent (not null) on a successful/in-progress job, so existing `--json` consumers are unaffected. Note: `error_code` changed type `uint` → `int` in v25 — not a concern here since we deserialize as a generic JSON value.
 
 ### `report insights-async fetch`
 
@@ -1637,17 +1693,18 @@ Agency-grade diagnostics with impact forecasting. Each playbook returns a 0-100 
 apb playbook evaluate [--days N] [--campaign <id>] [--scope account|campaign] [--json]
 ```
 
-Evaluates 9 playbook triggers:
+Returns one row per ad set, each tagged with a single recommended **play** (the
+field `play` in the JSON output) plus its supporting metrics (`spend`, `ctr_pct`,
+`conversions`, `roas`, `frequency`). The play is the first matching rule, in order:
 
-1. **creative_fatigue** — frequency > 2.5 or high-frequency adsets exist
-2. **mid_funnel_optimization** — ATC dropoff > 85% or checkout dropoff > 75%
-3. **audience_expansion** — frequency > 2.0 with good CVR and ROAS
-4. **offer_testing** — low purchase CVR with high traffic and intent
-5. **landing_page_optimization** — LP-to-ATC rate < 5% with 200+ LPVs
-6. **cost_control** — high CPA adsets or ROAS < 1.0
-7. **budget_scaling** — high ROAS adsets with ROAS > 1.5
-8. **hook_testing** — hook rate < 25% with 10K+ impressions
-9. **scaling_headroom** — low frequency + ROAS > 2.0 + 30+ purchases/week
+1. **SCALE** — meaningful spend, CTR above the scale threshold, and conversions above the minimum (clear winner — push budget).
+2. **FATIGUE_RESET** — frequency above the high-frequency threshold (audience over-served — refresh creative / reset).
+3. **CREATIVE_REFRESH** — CTR below the low-CTR threshold with non-trivial spend (creative is the bottleneck).
+4. **WAIT_FOR_SIGNAL** — spend still below the learning-signal floor (too early to judge — let it gather data).
+5. **MAINTAIN** — none of the above; performing acceptably, leave it alone.
+
+Thresholds come from `apb-core/src/common.rs` (`MEANINGFUL_SPEND_USD`, `SCALE_CTR_PCT`,
+`SCALE_CONVERSION_MIN`, `HIGH_FREQUENCY`, `LOW_CTR_PCT`, `LOW_SPEND_SIGNAL_USD`).
 
 ### `playbook health-score`
 
@@ -1780,7 +1837,7 @@ Targeting overlap detection across ad sets in different campaigns. Compares targ
 apb playbook catalog [--json]
 ```
 
-Returns the full playbook directory with slug, display name, pillar, description, and default `--days` value for each of the 24 playbooks. Drives UI filter chips and grouped listings.
+Returns the full playbook directory with slug, display name, pillar, description, and default `--days` value for each of the 32 playbooks. Drives UI filter chips and grouped listings.
 
 **Output:** `{ version, total: 24, pillars: [learning, signal, scaling, turnaround], playbooks: [...] }`
 
@@ -1878,6 +1935,76 @@ When NOT triggered, returns a clean "no rebuild needed" verdict with the underly
 
 ---
 
+### `playbook creative-velocity` *(new — Signal pillar)*
+
+```
+apb playbook creative-velocity [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 30 days. Measures whether the account is feeding enough fresh creative and whether tests produce winners. Joins the ads list (for `created_time` — an ad-object field, not an insights field) with ad-level insights, then reports: **net-new ads/week** (vs the healthy cadence), **% of spend on creative <30d old**, **single-creative dependency** (top ad's spend share), **creative win-rate** (new ads beating the account-median CPA), and **refresh runway** (weeks of fresh inventory at the recommended cadence). Flags accounts `starving_for_fresh_creative`.
+
+### `playbook video-engagement` *(new — Signal pillar)*
+
+```
+apb playbook video-engagement [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 14 days. Diagnoses where video creative loses viewers. One ad-level insights pass filtered to video creatives (by presence of video metrics), deriving **hook rate** (plays ÷ impressions), **hold rate** (thruplay ÷ plays), the **retention curve** (p25→p100 as % of plays), and the **retention cliff** (which third leaks). Separates a **weak hook** (few start/hold) from a **weak payoff/CTA** (strong retention, low link CTR), per video.
+
+### `playbook funnel-leak` *(new — Signal pillar)*
+
+```
+apb playbook funnel-leak [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 14 days. Locates the leakiest conversion-funnel stage. Account-level insights → stage counts from the `actions` array (impressions → link-clicks → landing-page-views → add-to-cart → initiate-checkout → purchase, summed across pixel+omni aliases) → per-stage conversion rates vs floors. Reports the **single highest-leverage stage** plus its likely attribution (creative/targeting, landing page, product/offer, cart friction, or checkout friction).
+
+### `playbook signal-quality` *(new — Signal pillar)*
+
+```
+apb playbook signal-quality [--json]
+```
+
+Structural (no time window). The **quality** sibling of `capi-dual-signal` (which measures coverage). Per pixel: standard-event coverage breadth (PageView/ViewContent/AddToCart/InitiateCheckout/Purchase), CAPI server/web split, advanced-matching richness, and `match_rate_approx` when Meta returns it (≥0). When match rate is gated (`-1`), the auto-matching-breadth + coverage proxy carries the read (graceful degrade, never fails). Output names the specific events/identifiers to add.
+
+### `playbook delivery-pacing` *(new — Scaling pillar)*
+
+```
+apb playbook delivery-pacing [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 7 days. Diagnoses why ad sets aren't spending. Per active ad set: window spend vs expected pace (`daily_budget × days`, or the lifetime spent-fraction), then a **cause classification** — *budget-capped* (delivering fully; raise budget), *learning-limited* (`learning_stage_info`), or *under-delivering* (bid too low / audience too small). Bounded (no per-adset `delivery_estimate` calls).
+
+### `playbook bid-strategy` *(new — Scaling pillar)*
+
+```
+apb playbook bid-strategy [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 30 days. Audits each spending ad set's `bid_strategy` / `bid_amount` / `bid_constraints` against realized CPA/ROAS. Flags **COST_CAP set below an achievable CPA** (throttling), **uncapped LOWEST_COST on a scaled budget** (no efficiency guardrail), and **MIN_ROAS floor misses** (realized ROAS below the floor). Emits a per-adset verdict + recommended strategy/cap.
+
+### `playbook segment-performance` *(new — Signal pillar)*
+
+```
+apb playbook segment-performance [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 30 days. One `/insights` call per breakdown (device_platform, publisher_platform, age, gender). Flags **high-CPM waste segments** (CPM > account-average × threshold) per dimension. **iOS limit:** conversion metrics are reliable only on device/placement/country; age & gender are delivery-efficiency only. For waste segments on AGE/GENDER/DEVICE_PLATFORM it emits a **ready-to-attach `value_rule` bid-down spec** (advisory — attach via `apb value-rule create` after review).
+
+### `playbook advantage-adoption` *(new — Scaling pillar)*
+
+```
+apb playbook advantage-adoption [--days N] [--since YYYY-MM-DD|Nd] [--json]
+```
+
+Default window 30 days. **Advisory** audit of Meta's go-forward Advantage+ structure: campaign `smart_promotion_type` distribution (Advantage+ `GUIDED_CREATION` vs legacy `AUTOMATED_SHOPPING_ADS` vs manual), Advantage+ Audience adoption across ad sets (`targeting.targeting_automation.advantage_audience`), and a list of manual sales campaigns that are **migration candidates**. Never writes — ASC *creation* was removed in Marketing API v25.
+
+When any live legacy ASC campaign is present (`findings.legacy_asc_campaigns > 0`), the result adds:
+- **`deadline_advisory`** (top-level string) — states that Meta disabled API updates to ASC/AAC campaigns on all versions (2026-05-19), that legacy campaigns are PAUSED at v26 (~Sep 2026), and that Existing Customer Budget Cap campaigns stay editable until v26. Same facts the `campaign update`/`duplicate` write guard fails loud with. `null` when no legacy ASC is present.
+- **`findings.legacy_asc_details`** — a per-campaign list (`campaign_id`, `campaign_name`, `objective`, `smart_promotion_type`) of the live legacy ASC campaigns, so you can act on them directly.
+
+---
+
 ### Enhanced playbooks (additive changes)
 
 **`playbook scale-roadmap`** now emits two additional incremental scaling tiers (`+20%`, `+30%`) with `path: "incremental"`, plus a `path` field on every existing tier (`incremental` for ≤1.2x, `duplication` for 1.5x+). Campaigns with any LEARNING_LIMITED adset auto-force ALL their tiers to `path: incremental` to avoid resetting Meta's learning timer.
@@ -1888,11 +2015,11 @@ When NOT triggered, returns a clean "no rebuild needed" verdict with the underly
 
 ### Pillar field on every playbook
 
-Every playbook response now carries a `pillar` field: `"learning" | "signal" | "scaling" | "turnaround"`. The 24 playbooks distribute as:
+Every playbook response now carries a `pillar` field: `"learning" | "signal" | "scaling" | "turnaround"`. The 32 playbooks distribute as:
 
 - **Learning (5):** launch-check, learning-accelerator, event-downgrade-ladder, no-touch-compliance, consolidation-advisor
-- **Signal (8):** fatigue-index, saturation, creative-mix, placement-audit, duplicate-detect, broad-targeting-audit, event-hierarchy-audit, capi-dual-signal
-- **Scaling (7):** waste-audit, rebalance, weekly-digest, daypart, scale-roadmap, cbo-vs-abo-audit, retargeting-compression
+- **Signal (13):** fatigue-index, saturation, creative-mix, placement-audit, duplicate-detect, broad-targeting-audit, event-hierarchy-audit, capi-dual-signal, creative-velocity, video-engagement, funnel-leak, signal-quality, segment-performance
+- **Scaling (10):** waste-audit, rebalance, weekly-digest, daypart, scale-roadmap, cbo-vs-abo-audit, retargeting-compression, delivery-pacing, bid-strategy, advantage-adoption
 - **Turnaround (4):** health-score, roas-recovery, anomaly-detect, reset-rebuild-advisor
 
 ---
@@ -2214,6 +2341,45 @@ Execute-safe the first matching plan as a canary deployment.
 apb plan list [--status <filter>] [--json]
 ```
 
+### `plan cap` (WRITE)
+
+```
+apb plan cap --campaign <name|@alias|id> --until "<metric><op><value>" [--execute] [--json]
+```
+
+Conditional cap — **freeze** a campaign (pause it) and hold until a release condition clears. `--until` is **required** and validated (fail-fast on a malformed expression): `<metric><op><value>` where metric ∈ `roas | cpa | conv | spend`, e.g. `"roas>=3.0"`. Dry-run by default; `--execute` performs the pause and stores the release condition (a `CAPPED` plan). Re-check open caps with `plan check-caps`. decision-verdict-001 S003.
+
+### `plan check-caps` (WRITE)
+
+```
+apb plan check-caps [--days N] [--execute] [--json]
+```
+
+Re-evaluate every open cap against current metrics and **promote** (un-pause) the campaigns whose release condition has cleared. `--days` sets the lookback for the re-check (default 30). Dry-run by default; `--execute` performs the promotions.
+
+### `plan apply` (WRITE)
+
+```
+apb plan apply --from-file <plan.json> [--execute] [--confirm-destructive] [--allow-edited-plan] [--allow-stale-plan] [--json]
+```
+
+Apply a plan-first envelope from a file (produced by the global `--plan <path>` flag or by `plan export`). Imports every envelope action into the state store as a CREATED plan, validates it, and previews — **zero mutation by default**. Pass `--execute` (plus the four env/CLI write gates) to apply; delete-class / blast-radius-5 actions additionally require `--confirm-destructive`. Multi-action envelopes apply sequentially, stop-on-first-failure.
+
+The plan file is **untrusted input** and is gated before anything runs:
+- **Schema** — `schema_version` must be `2` (what `apb 0.5.28+` writes) **or** `1` (older envelopes are still accepted and lifted to v2 on import); anything else is refused by name (`envelope_version_unsupported` → "upgrade apb") rather than silently dropping actions. The product must be Meta — v2 `product: "apb"` + `channel: "meta"`, or v1 `product: "meta"` (a Google plan is rejected with a cross-product message); `actions[]` non-empty.
+- **Integrity** — the recorded digest is recomputed (v2 `integrity.hash` over `integrity.hashed_fields`; v1 `plan_hash` over the compact JSON with `plan_hash` removed — a v2 document lifted from v1 carries an empty `hashed_fields` and is re-verified with the v1 algorithm). A mismatch or missing hash is refused (naming both hashes) unless `--allow-edited-plan` (explicit, audited).
+- **Staleness** — when the envelope carries `prior_values`, each recorded field is re-read live; any drift (or a field that can't be re-read → drift-unknown) is refused unless `--allow-stale-plan` (explicit, audited).
+
+The plan hash and any overrides are recorded in the execution trail. plan-first-cli-001 S4.
+
+### `plan export`
+
+```
+apb plan export --id <plan-id> --out <path>
+```
+
+Serialize a stored plan (see `plan list`) to a portable, hash-verified plan-first envelope file, re-appliable via `plan apply --from-file`. Read-only (no Meta call). Round-trips with `--plan` / `plan create`. plan-first-cli-001 S4.
+
 ---
 
 ## 22. policy
@@ -2268,10 +2434,10 @@ Explicit adset-level learning-state classifier with threshold gaps.
 ### `dataset clone-plan`
 
 ```
-apb dataset clone-plan --source <campaign_id> [--name ...] [--json]
+apb dataset clone-plan --plan-id <campaign_id> [--name ...] [--source ...] [--json]
 ```
 
-Read-only clone payload map (no writes).
+Read-only clone payload map (no writes). **Flag-name note:** despite its name, `--plan-id` takes a **campaign ID**, not a plan ID — it's resolved via the same campaign-id lookup as other `dataset` commands (`resolve_campaign_id`). This is a known misnomer; a rename to `--campaign` (or an alias) is tracked as a followup rather than fixed here (renaming the flag is a `.rs` change, out of scope for this docs-only sprint). `--source` is accepted but currently unused by the handler — don't rely on it.
 
 ### `dataset bundle`
 
@@ -3086,3 +3252,136 @@ apb value-rule delete --id <value_rule_set_id> --execute --confirm-destructive [
 ```
 
 Destructive — requires `--confirm-destructive`. See the deletion note above (Meta may reject API deletion on some accounts).
+
+## 35. agency
+
+Agency — the **BYO-token cross-channel portfolio** (Agency tier). These run **server-side** over the SaaS API (`/api/v1/saas/agency/*`); the agency's Meta/Google tokens never touch the CLI host. Requires `APB_API_KEY` (an Agency-tier key); the server enforces the tier (`agencyTierOnly`) — a non-agency key returns a clear `agency_tier_required` error. The Meta system-user token enumerates every ad account partner-shared into its Business Manager; Google accounts come from the connected Google Ads add-on.
+
+**Required scope**: `read:playbooks:full` (client-side hint; the authoritative gate is the server's Agency-tier check).
+
+### `agency connect-meta`
+
+```
+apb agency connect-meta --token <META_SYSTEM_USER_TOKEN>
+```
+
+Validate + store a Meta **system-user** access token (with `ads_read`) server-side (`POST /saas/agency/meta-token`). Prints the connected account count + `meta_user_id`, or a clear error (invalid token / zero ad accounts). Pipe the token from a secret store to keep it out of shell history, e.g. `--token "$(cat token.txt)"`. The token is encrypted at rest; it is never logged or returned.
+
+### `agency accounts`
+
+```
+apb agency accounts [--json]
+```
+
+List the ad accounts the connected token(s) can see (`GET /saas/agency/accounts`) — `account_id`, name, currency, status, owning business.
+
+### `agency portfolio`
+
+```
+apb agency portfolio [--days <n>] [--channel meta|google|all] [--compare] [--json]
+```
+
+Cross-channel per-account roll-up (`GET /saas/agency/portfolio`): per-currency totals (never FX-summed) + per-account rows with the **server verdict** (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD). `--compare` adds the prior-period spend Δ; `--channel` filters to one channel; `--days` sets the lookback (default 30).
+
+---
+
+## 36. guardrails
+
+Local, CLI-native **write guardrails** — risk-proportional mistake-prevention for trusted operators + AI agents (wrong landing domain, off-brand copy, over-cap budget). A per-account profile lives at `~/.apb/guardrails.json` and the CLI enforces it on guarded write commands. This is **not** an adversarial boundary (scope / tier / account access stay server-side); a stated, audited override is always available. **No HTTP API equivalent** — the config + check are entirely local. agency-guardrails-001 Phase 2a.
+
+**Required scope**: none (local config + dry-check; no Meta call).
+
+**What's enforced.** On a real write (`--execute`) to `creative create-*`, `adset create` / `adset update-budget`, and `campaign create` / `campaign update` / `campaign compose-from-spec`, the CLI extracts the final URLs, ad copy, and daily budget and checks them against the profile. Mode `block` (default) refuses the write with **exit code 4** before any Meta call; `warn` prints the violations and proceeds; `off` skips. With no profile for the account, nothing is enforced (backward compatible).
+
+**Resolution precedence** (highest first): the `--guardrails on|warn|off` flag → `APB_GUARDRAIL_*` env vars → `~/.apb/guardrails.json` → none. Override flags (`--allow-domain`/`--allow-brand`/`--allow-budget`, each requiring `--guardrail-reason`) are documented under [Global Flags](#global-flags); every override is written to `logs/apb.jsonl`.
+
+### `guardrails set`
+
+```
+apb guardrails set --account act_123 \
+  [--allowed-domains "client.com,shop.client.com"] \
+  [--canonical-brands "ClientCo"] \
+  [--blocked-terms "competitor,placeholder"] \
+  [--max-daily-budget 500] [--currency USD] \
+  [--enforcement block|warn|off]
+```
+
+Create or update the stored profile for an account (partial updates merge onto the existing profile). Domains match the host or any subdomain; `--max-daily-budget` is in major currency units (e.g. `500` = $500/day); `--enforcement` defaults to `block`. Written `0600` inside `~/.apb` (`0700`).
+
+### `guardrails show`
+
+```
+apb guardrails show [--account act_123] [--json]
+```
+
+Show the resolved profile (file + ENV + `--guardrails` flag) and the raw stored profile for an account, or list every stored profile when `--account` is omitted.
+
+### `guardrails test`
+
+```
+apb guardrails test --account act_123 [--link <url>]… [--copy <text>]… [--budget <amount>] [--currency USD] [--json]
+```
+
+Dry-check a hypothetical write against the resolved profile — **no API call, never errors** (even on a block verdict). Prints the decision plus the enforced + overridden violations. Applies the same `--allow-*` overrides a real command would.
+
+### `guardrails clear`
+
+```
+apb guardrails clear --account act_123
+```
+
+Remove the stored profile for an account.
+
+---
+
+## 37. verdict
+
+Per-campaign **decision verdict** — exactly one verb per campaign (**SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT**) derived from three gates (Efficiency · Delivery + headroom · Quality). Read-only, ranked by spend. Provide `--target-roas` or `--target-cpa` to arm the Efficiency gate (CPA-first if both are given). decision-verdict-001.
+
+**Required scope**: `read:playbooks:full` (Agency tier).
+
+### `verdict`
+
+```
+apb verdict [--days N | --since <date>] [--target-roas R | --target-cpa C] [--min-age-days 30] [--min-conversions 50] [--queue] [--include-paused] [--json]
+```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--days` | int | 30 | Lookback window in days |
+| `--since` | string | — | Alternative to `--days`: `YYYY-MM-DD` or relative (e.g. `30d`) |
+| `--target-roas` | float | — | Target ROAS for the Efficiency gate |
+| `--target-cpa` | float | — | Target CPA (USD) for the Efficiency gate (takes precedence over `--target-roas`) |
+| `--min-age-days` | int | 30 | Maturity floor — minimum campaign age before it is judged |
+| `--min-conversions` | int | 50 | Maturity floor — minimum conversions before it is judged |
+| `--queue` | flag | off | Rank verdicts into a decision queue (\$ impact/day + next-action command + reallocation hint) |
+| `--include-paused` | flag | off | Also judge PAUSED campaigns (reactivation / post-mortem lens) |
+
+HTTP equivalent: `GET /api/v1/verdict`.
+
+---
+
+## 38. portfolio
+
+Cross-channel **portfolio verdict** — ranks Meta **and** Google campaigns by the same gate-verdict (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT), with a per-channel rollup + a cross-channel reallocation hint. **Server-side**: requires a resolved SaaS tenant (`APB_API_KEY`). `--include-google` adds Google Ads when the add-on is connected (degrades to Meta-only otherwise). decision-verdict-001.
+
+**Required scope**: `read:playbooks:full` (Agency tier).
+
+### `portfolio`
+
+```
+apb portfolio [--days N | --since <date>] [--target-roas R | --target-cpa C] [--min-age-days 30] [--min-conversions 50] [--include-google] [--include-paused] [--json]
+```
+
+| Flag | Type | Default | Description |
+|------|------|---------|-------------|
+| `--days` | int | 30 | Lookback window in days |
+| `--since` | string | — | Alternative to `--days`: `YYYY-MM-DD` or relative (e.g. `30d`) |
+| `--target-roas` | float | — | Target ROAS for the Efficiency gate |
+| `--target-cpa` | float | — | Target CPA (USD) for the Efficiency gate |
+| `--min-age-days` | int | 30 | Maturity floor — minimum campaign age before it is judged |
+| `--min-conversions` | int | 50 | Maturity floor — minimum conversions before it is judged |
+| `--include-google` | flag | off | Include Google Ads (requires the Google Ads add-on; Meta-only otherwise) |
+| `--include-paused` | flag | off | Also include PAUSED campaigns (reactivation / post-mortem lens) on both channels |
+
+HTTP equivalent: `GET /api/v1/portfolio` (server-side).

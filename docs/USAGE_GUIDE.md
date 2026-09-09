@@ -115,6 +115,22 @@ apb metrics compute --days 7 --level campaign --json
 apb growth score --days 30 --json
 ```
 
+### Workflow 1a: Listing everything on a large account (pagination)
+
+The high-volume list reads — `campaign list`, `adset list`, `ad list`, `creative list`, `audience list` — page with `--after`/`--all` (july2-platform-polish-001 A3.2). `--limit` is the **page size**, not a hard cap, so on an account with more than `--limit` rows a bare `list` shows only the first page.
+
+```bash
+# Get EVERYTHING (the CLI follows paging.cursors.after until the account is drained)
+apb campaign list --all --json
+apb ad list --all --status ACTIVE --json
+
+# Manual paging: grab one page, then resume from the printed cursor
+apb adset list --limit 100 --json          # human mode prints: next page: --after <cursor>
+apb adset list --limit 100 --after <cursor> --json
+```
+
+Pre-emptive throttling is **on by default** (A3.1), so a big `--all` sweep automatically backs off before it trips Meta's 429 ceiling; add `APB_NO_THROTTLE=1` to opt out.
+
 ### Workflow 2: Learning Phase Analysis
 
 ```bash
@@ -145,6 +161,131 @@ apb budget simulate --shift-from 120200001 --shift-to 120200002 --pct 20 --days 
 
 # Scale forecast
 apb dataset scale-forecast --budget 100 --days 30 --campaign 120213456789 --json
+```
+
+### Workflow 3a: Plan it, don't do it (`--plan`)
+
+Capture a would-be change as a reviewable plan — a human plan document plus a
+re-playable, hashed machine plan — without touching the Meta API. Perfect for a
+client-approval step or a PR review gate. `--plan` cannot be combined with
+`--execute`.
+
+```bash
+# Budget change → scale.md (read this) + scale.md.json (apply this later)
+apb adset update-budget --id @spring-adset --daily-budget 50 --plan scale.md
+
+# Turn a diagnostic playbook into a proposed change set
+apb playbook rebalance --days 14 --plan rebalance.md      # budget reallocation
+apb playbook waste-audit --days 14 --plan waste.md        # pause flagged entities
+
+# Apply after review:
+#   apb plan apply --from-file scale.md.json --execute
+```
+
+Cohort commands (campaign/adset/ad/creative writes) and the `rebalance` /
+`waste-audit` / `fatigue-index` playbooks emit a JSON twin; other playbooks and
+other mutating commands write a document noting they're not yet plannable, and
+pure reads print `nothing to plan`. Update-class actions embed a `prior_values`
+staleness baseline (the doc's Actions table shows **current → new**).
+
+### Workflow 3b: Apply a plan from a file (`plan apply`)
+
+Take the `<path>.json` twin from `--plan` (or from `plan export`) and apply it
+back through the plan framework. Dry-run by default (imports + validates +
+previews, zero mutation); `--execute` plus the write gates applies it.
+
+```bash
+# Preview: import + validate, send nothing
+apb plan apply --from-file scale.md.json --json
+
+# Apply after review (all four env/CLI write gates still required)
+APB_ALLOW_MUTATIONS=true ALLOW_WRITES=true READ_ONLY=false \
+  apb plan apply --from-file scale.md.json --execute
+
+# Delete-class / blast-radius-5 actions also need --confirm-destructive
+apb plan apply --from-file cleanup.json --execute --confirm-destructive
+```
+
+The plan file is untrusted input: `plan apply` re-checks the integrity **hash**
+(refuses a hand-edited file without `--allow-edited-plan`) and re-reads recorded
+prior values for a **staleness** check (refuses a drifted file without
+`--allow-stale-plan`). A gads plan file, or one from a newer apb, is rejected
+with a clear message.
+
+Both envelope versions apply. A v1 file (pre-0.5.28) is hashed and imported
+exactly as it always was; a v2 file imports one plan per `actions[]` entry. One
+edge case is checked rather than waved through: a v2 document whose
+`integrity.hashed_fields` is empty carries a digest lifted from a v1 file and
+cannot be recomputed in v2 terms, so `plan apply` re-verifies it with the **v1**
+algorithm against the v1 document the lift consumed. A lifted plan edited after
+it was signed is refused exactly like any hand-edited plan (`--allow-edited-plan`
+overrides, explicitly and audited); one that passes reports `integrity: "carried
+… re-verified under v1 rules"`, never plain `verified`, because the digest covers
+the v1 document. Re-export it to get a first-class v2 digest.
+
+Export a stored plan (from `plan create` / `--plan`) back to a portable file:
+
+```bash
+apb plan export --id plan_abc123 --out plan.json
+apb plan apply --from-file plan.json --json          # round-trips
+```
+
+`plan export` writes v2. Re-exporting an imported plan reproduces the same
+`integrity.hash` — only `created_at` differs, and it is not a hashed field.
+
+### Plan envelope v2 — why budgets travel as integers
+
+Plan files are moving to a shared, versioned document — **plan envelope v2** —
+that `apb` and `apb-gads` both produce and consume, so the same plan can be
+rendered by the web UI, verified by a script, and executed by either CLI.
+**As of `apb 0.5.28` every Meta producer writes `schema_version: 2`** — `--plan`,
+`plan export`, and the API's `GET /plans/:id`. Both readers stayed backwards
+compatible: `plan apply` / `POST /plans/import` accept **v1 and v2**, so a plan
+file written by an older binary still applies unchanged. The reverse is
+deliberately not true — an **older** binary handed a v2 file refuses it by name
+(`envelope_version_unsupported`) rather than silently dropping actions, so
+upgrade `apb` before handing v2 files to a shared runner.
+
+What changed in the file you read:
+
+| v1 | v2 (0.5.28+) |
+|---|---|
+| `product: "meta"` | `product: "apb"` + `channel: "meta"` |
+| `account: "act_…"` | `account: {"ad_account_id": "act_…"}` |
+| `plan_hash: "<hex>"` (top level) | `integrity: {hash: "sha256:<hex>", hashed_fields: […], plan_hash: "<hex>"}` |
+| `actions[].action` / `.target_id` / `.payload` | `actions[].op` / `.target.resource` / `.params` |
+| `actions[]` with `target_ids: [a, b]` | one action per target (Meta executes them per target anyway) |
+| top-level `prior_values[]` | `actions[].prior` — inside `hashed_fields`, so the staleness baseline stays hash-covered |
+| — | `source`, `summary`, `policy`, `approval`, `execution` blocks |
+
+`jq` recipes that read a plan file need the right-hand spellings; scripts that
+only pass the twin through to `apb plan apply` (every script in
+`rust/scripts/public-scripts/`) are unaffected.
+
+The `approval` block is evidence for humans and audit — **it carries no
+authority.** Applying a plan re-runs all five write gates regardless of what the
+file says (see `rust/docs/SAFETY_MODEL.md`).
+
+One rule matters when you hand-write or post-process a plan file:
+
+> **A hashed field may not contain a non-integer float.** Money and budgets
+> travel as integer micros (`amount_micros`) or minor units (`daily_budget` in
+> cents) — never `12.34`.
+
+The envelope's integrity hash is SHA-256 over canonical JSON (keys sorted, no
+whitespace, UTF-8), and it has to come out identical in Rust, in the Python
+reference (`rust/scripts/envelope_hash.py`, which CI and the web page use), and
+in the browser. Those runtimes do not agree on the shortest text form of an
+arbitrary float (`1e+30` vs `1e30`), so a fractional float in a hashed field is
+rejected at validation time with a message naming the field, instead of
+producing a hash that verifies in one place and fails in another. Floats
+elsewhere in the document (e.g. `source.context_snapshot.target_roas`) are fine
+— they are not hashed.
+
+Verify any envelope's hash without a Rust toolchain:
+
+```bash
+python3 rust/scripts/envelope_hash.py plan.json      # prints the hash + OK / MISMATCH
 ```
 
 ### Workflow 4: Targeting Research
@@ -503,7 +644,7 @@ apb dataset pixel-quality --days 30 --json
 
 ### Workflow 14: Playbook Catalog by Pillar
 
-The catalog returns all 24 playbooks grouped by pillar (`learning`, `signal`, `scaling`, `turnaround`):
+The catalog returns all 32 playbooks grouped by pillar (`learning`, `signal`, `scaling`, `turnaround`):
 
 ```bash
 apb playbook catalog --json | jq '.playbooks | group_by(.pillar)'
@@ -515,6 +656,16 @@ Run a single playbook by slug:
 apb playbook health-score --days 30 --json
 apb playbook event-downgrade-ladder --days 90 --json
 apb playbook reset-rebuild-advisor --days 90 --json
+```
+
+**Creative intelligence (Signal pillar):**
+
+```bash
+# Are you starving for fresh creative? Refresh runway + single-creative dependency.
+apb playbook creative-velocity --days 30 --json | jq '.findings | {new_per_week, starving_for_fresh_creative, refresh_runway_weeks, single_creative_dependency_pct}'
+
+# Where does each video leak — the hook or the payoff?
+apb playbook video-engagement --days 14 --json | jq '.findings.videos[] | {ad_name, score, retention_cliff, diagnosis}'
 ```
 
 ---
@@ -690,6 +841,76 @@ wiring can be verified before `--execute`. `adset list` rows also include
 For full manual control, pass Meta's schedule JSON directly with
 `--adset-schedule '<json|file>'` (it overrides `--daypart-hours`).
 
+### Agency cross-channel portfolio (BYO token, Agency tier)
+
+Run the cross-channel agency portfolio from the CLI — every client ad account
+the agency's Meta system-user token sees, plus Google Ads (add-on), with one
+gate-verdict per account. These run **server-side** over the SaaS API, so no
+Meta/Google token touches the CLI host; they need an Agency-tier `APB_API_KEY`.
+
+```bash
+# 1. Connect a Meta system-user token (validated + stored server-side, encrypted)
+apb agency connect-meta --token "$(cat meta-system-user-token.txt)"
+
+# 2. See what the token can roll up
+apb agency accounts --json
+
+# 3. Cross-channel roll-up: per-currency totals + per-account verdicts
+apb agency portfolio --days 30 --compare              # all channels
+apb agency portfolio --channel meta --json            # Meta only, machine-readable
+```
+
+Each account row carries the server **verdict** (SCALE / OPTIMIZE / TIGHTEN /
+CAP / HOLD) and money is grouped per currency (never FX-summed). A non-Agency
+key returns a clear `agency_tier_required` error.
+
+---
+
+## Agency guardrails — catch wrong-domain / off-brand / over-budget writes
+
+When you (or an AI agent) drive `apb` across multiple client accounts, the danger
+is the *wrong* change on the *wrong* client. Author a per-account guardrail profile
+once and the CLI enforces it locally on every guarded write — refusing an off-domain
+landing page, off-brand copy, or an over-cap budget *before* the Meta call.
+
+```bash
+# 1. Author the client's profile (stored at ~/.apb/guardrails.json, 0600).
+apb guardrails set --account act_123 \
+  --allowed-domains "client.com,shop.client.com" \
+  --canonical-brands "ClientCo" \
+  --blocked-terms "competitor" \
+  --max-daily-budget 500 --currency USD \
+  --enforcement block            # block (default) | warn | off
+
+# 2. Preview any write without touching Meta (never errors):
+apb guardrails test --account act_123 --link https://wrong.com/lp --budget 9000
+# → decision: block, with the domain + budget violations.
+
+# 3. A real write that violates the profile is refused with exit code 4
+#    BEFORE any Meta call:
+apb creative create-image-simple --account act_123 --name Promo \
+  --page-id 456 --image hero.jpg --url https://wrong.com/lp \
+  --body "ClientCo spring sale" --execute
+# → ✖ guardrail BLOCK (act_123): final URL host 'wrong.com' is not in the allowed domains
+#   exit 4
+
+# 4. Override one legitimate exception — a reason is mandatory and audited:
+apb creative create-image-simple --account act_123 --name Promo \
+  --page-id 456 --image hero.jpg --url https://wrong.com/lp \
+  --body "ClientCo spring sale" \
+  --allow-domain wrong.com --guardrail-reason "client-approved microsite" --execute
+```
+
+Enforcement covers `creative create-*`, `adset create` / `update-budget`, and
+`campaign create` / `update` / `compose-from-spec` (compose specs are walked for
+every final URL, copy line, and daily budget). Precedence: `--guardrails on|warn|off`
+flag → `APB_GUARDRAIL_*` env → the stored profile → none. Overrides
+(`--allow-domain`/`--allow-brand`/`--allow-budget`, each needing `--guardrail-reason`)
+are written to `logs/apb.jsonl`. With no profile for the account, nothing is enforced.
+
+The companion agency operating doctrine (plan-vs-direct, the four checks,
+batch-at-scale review) is the `agency-guardrails` reference in the Claude skill.
+
 ---
 
 ## Unattended Execution
@@ -854,6 +1075,28 @@ Run `sync pull` to capture a fresh snapshot:
 ```bash
 apb sync pull --json
 ```
+
+### Wrong account targeted, stale results, or you just (re)connected / switched accounts
+
+The CLI caches Meta responses, post-429 cooldown markers, and the resolved tenant context
+(token + account) under `$APB_HOME` (default `~/.apb`). After connecting Meta, switching the
+default account, or a token change, a stale cache can make the CLI target the wrong account or
+return stale data. Refresh it:
+
+```bash
+apb meta cache --clear     # drops cached responses + cooldown markers + the cached tenant
+                           # context, forcing a clean token + account re-resolve next run
+```
+
+Then confirm what the CLI now resolves to:
+
+```bash
+apb account current        # shows active_account + which accounts the token reaches
+apb meta status            # Meta backpressure + cooldown state
+```
+
+This is the first thing to try whenever `apb` seems to be acting on the wrong account or showing
+data that doesn't match Ads Manager.
 
 ---
 
