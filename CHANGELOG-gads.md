@@ -4,7 +4,135 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
-## [Unreleased]
+## [0.2.0] — 2026-09-09 (Google Ads API v25 · AI Max · synthetic-content attestation · typed experiments · plan-envelope v2)
+
+**A minor bump, not a patch:** the Google Ads API pin moves v24 → **v25** (a BREAKING wire change for
+customer-acquisition goals), and `mutate apply-plan` starts accepting a new plan-document generation.
+Surface grows to **295 commands across 29 groups · 123 gated mutations · 66 playbooks · 24 reports**
+(was 290 / 28 / 119 / 66 / 24).
+
+### 🔴 BREAKING — Google Ads API pinned to v25, and the `Goal` migration
+
+- **Google Ads API pinned to v25** (was v24; `crates/ads-core/src/config.rs::api_version()`). v24 stays
+  served by Google until **May 2027**; override per-account with `api_version:` in `google-ads.yaml`.
+  For every command except the one below, the CLI surface is unchanged — same commands, same flags,
+  same enum spellings.
+- **`mutate campaign-update-customer-acquisition` migrated to the v25 unified goals schema.** v25
+  removed `CustomerLifecycleGoal` / `CampaignLifecycleGoal`, their services, and the
+  `CustomerAcquisitionOptimizationMode` enum; the v24 endpoint
+  `campaignLifecycleGoal:configureCampaignLifecycleGoals` now returns **HTTP 404** (proven live: same
+  body, same credentials, v24 → 200, v25 → 404). The command — and the `orchestrate campaign-launch` /
+  `orchestrate pmax-build` customer-acquisition tail — is now a **two-step** sequence:
+  `customers/{cid}/Goals:mutate` resolves (or provisions) the account-level `NEW_CUSTOMER_ACQUISITION`
+  `Goal`, then `customers/{cid}/CampaignGoalConfigs:mutate` creates or updates the campaign link.
+  - 🔴 **The REST collections are Capitalized** — `Goals:mutate` and `CampaignGoalConfigs:mutate`,
+    unlike every other Google Ads collection. The lowercase spellings 404. Pinned by a unit test.
+  - `--optimization-mode` keeps the v24 vocabulary and is mapped on the wire:
+    `TARGET_ALL_EQUALLY` / `BID_HIGHER_FOR_NEW_CUSTOMER` → `TARGET_ALL`,
+    `TARGET_NEW_CUSTOMER` → `TARGET_SPECIFIC`.
+  - 🔴 `GoalService` has **no remove operation** — an account-level Goal this command provisions is
+    **permanent** on that account. The campaign link (`CampaignGoalConfig`) *is* removable.
+  - The `precondition_advisory` now rides on **every** mode (v24 exempted `TARGET_ALL_EQUALLY`): v25
+    deleted the error enum that owned `CUSTOMER_ACQUISITION_MISSING_EXISTING_CUSTOMER_DEFINITION`, so a
+    missing existing-customer definition arrives as an unmapped `requestError: UNKNOWN` / "The error
+    code is not in this version".
+  - Dry-run output is now a two-entry `steps[]` plan (was a single `operation`), still I/O-free.
+
+Delta doc with the live-probe evidence, the REST-path quirks and the not-yet-adopted v25 additions:
+`rust/gads/docs/tasks/2026-09-v25-delta.md`.
+
+### Added
+
+- **AI Max** (v25.1). Reads on `campaign list` / `campaign get`:
+  `campaign.ai_max_setting.enable_ai_max`, `.bundling_required`, `campaign.aca_migration_date_time`,
+  `campaign.broad_match_migration_date_time`; on `ad-group list`:
+  `ad_group.ai_max_ad_group_setting.disable_search_term_matching`. Two new gated mutations:
+  - `mutate campaign-update-ai-max --campaign-id <id> --enable {true|false}`
+  - `mutate ad-group-update-ai-max-search-term-matching --ad-group-id <id> --disable {true|false}`
+  - `playbook campaign-bid-strategy-audit` gained the **auto-migration guardrail**: per-campaign
+    `ai_max_enabled` / `aca_migration_date_time` / `broad_match_migration_date_time`, and a non-null
+    timestamp emits a HIGH `ai_max_migrations[]` finding — Google moved an ACA/BROAD_MATCH campaign onto
+    AI Max without an operator request.
+- **Synthetic-content attestation** (v25; EU AI Act, in force 2026-08-02). Two new gated mutations
+  writing `*.synthetic_content_info.advertiser_attestation`:
+  - `mutate asset-update-synthetic-content --asset-id <id> --ai-generated {true|false}` (IMAGE,
+    MEDIA_BUNDLE, YOUTUBE_VIDEO)
+  - `mutate ad-update-synthetic-content --ad-id <id> --ai-generated {true|false}` (HTML5_UPLOAD_AD,
+    DYNAMIC_HTML5_AD, IMAGE_AD)
+  - 🔴 Two live-proven wire rules Google documents nowhere: `advertiser_attestation.source` is **not
+    optional** (`status` alone is rejected `fieldError: INVALID_VALUE` at `…source`, so the CLI always
+    emits `source: ADVERTISER_ATTESTED`), and the update mask must name **both** leaves — a
+    parent-message mask is rejected `fieldMaskError: FIELD_HAS_SUBFIELDS`.
+  - `system_attestation` (Google's own verdict) stays OUTPUT ONLY and is never written.
+- **`mutate experiment-create --type <ExperimentType>`** — accepts every member of the v25
+  `ExperimentType` enum (`SEARCH_CUSTOM`, `ADOPT_AI_MAX`, `ADOPT_BROAD_MATCH_KEYWORDS`,
+  `OPTIMIZE_ASSETS`, `PMAX_REPLACEMENT_SHOPPING`, `COMPARE_CAMPAIGNS`,
+  `PMAX_TEXT_CUSTOMIZATION_FINAL_URL_EXPANSION`, and the classic types), case- and dash-insensitively.
+  **Defaults to `SEARCH_CUSTOM`** — the value the command hardcoded before v25 — so omitting the flag
+  reproduces the previous wire shape byte-for-byte. An unknown value is rejected locally, before any
+  API call, naming every accepted value.
+  - 🔴 **The create `status` is type-dependent and undocumented.** Live-probed against every enum
+    member: the classic types must be created `SETUP`; `ADOPT_AI_MAX`, `ADOPT_BROAD_MATCH_KEYWORDS`,
+    `OPTIMIZE_ASSETS`, `SMART_MATCHING`, `COMPARE_CAMPAIGNS`,
+    `PMAX_TEXT_CUSTOMIZATION_FINAL_URL_EXPANSION` and `DISPLAY_AND_VIDEO_360` must be created
+    `ENABLED`. The wrong one is `experimentError: INVALID_STATUS`, which names neither the right
+    status nor the fact that it depends on the type. The CLI picks it and reports `create_status`.
+  - 🔴 `Experiment.suffix` is `IMMUTABLE_FIELD` for `PMAX_REPLACEMENT_SHOPPING` and
+    `PMAX_TEXT_CUSTOMIZATION_FINAL_URL_EXPANSION`; for those two the CLI does not send it and says so
+    (`suffix_sent: false` plus a note) rather than dropping operator input silently.
+- **`experiment results --experiment-id <id>`** — a new read-only group (`experiment`). Returns the
+  control arm's metrics, the treatment arm's metrics and, per metric, Google's `point_estimate`,
+  `margin_of_error` and `p_value`, plus `significant` (p < 0.05) and the arm/campaign/traffic-split
+  layout. An unknown id answers `found: false` with a note — not an error — so scripts branch on the
+  JSON. 🔴 The experiment-statistics metrics are selectable **only** on the `experiment` resource;
+  `campaign` and `experiment_arm` reject them with `PROHIBITED_METRIC_IN_SELECT_OR_WHERE_CLAUSE`.
+- **`mutate apply-plan` accepts a plan-envelope **v2** document** (`schema_version: 2`) alongside v1
+  envelopes and legacy no-schema plans. Validation is delegated to the shared `apb-envelope` crate that
+  `apb` also links, so the two CLIs cannot drift: strict field parsing, the identity/channel match,
+  unique action ids, blast radius 0..5, `temp_ref` only inside an `atomic_group`, implied
+  `requires_confirm`, an acyclic `depends_on` graph, and the `integrity.hash` digest. The document is
+  then lifted into the existing apply path, so there is exactly **one** submit path for all three plan
+  generations, and the hash + staleness gates keep their existing `--allow-edited-plan` /
+  `--allow-stale-plan` overrides. `schema_version: 3` is refused with "upgrade apb-gads".
+  - A **carried** v1 digest (a lifted plan, `integrity.hashed_fields` empty) is **refused**, not
+    reported verified — apb-gads cannot re-verify it under v1 rules and will not treat an unverifiable
+    hash as verified. Re-emit the plan, or re-stamp it as a native v2 envelope.
+  - Plan **emission** stays v1 (`--plan` is unchanged) — v2 emission is a later phase.
+  - Linking `apb-envelope` does not change the binary's dynamic dependencies (`ldd` identical
+    before/after): the crate depends only on serde/serde_json/sha2/chrono/thiserror by contract.
+- **`playbook conversion-value-tier-audit` gained a value-RULE arm** (v25 `metrics.original_conversion_value`,
+  the unadjusted biddable value): per-campaign `value_rule_inflation[]` = adjusted − original, flagged
+  above 10%, with `campaigns_analyzed_for_inflation` and `value_rule_inflation_threshold_pct`. Money is
+  never summed across currencies — each finding carries its own `currency_code` and is compared only to
+  that campaign's own baseline.
+- **`playbook device-performance` now also emits `mobile_device_platform_rows[]`** (+ a `_note`) from
+  `segments.mobile_device_platform`, additively rather than as the `--by-platform` swap. It has to be a
+  second query: v25 rejects that segment alongside `segments.device` **and** alongside the
+  impression/cost-class metrics (`PROHIBITED_SEGMENT_WITH_METRIC_IN_SELECT_OR_WHERE_CLAUSE`). Supported
+  companions are `conversions`, `conversions_value`, `all_conversions`, `all_conversions_value` — there
+  is no cost in that block, by Google's rule, and the recommendation text says so.
+
+### Changed
+
+- Operator-visible JSON: the negative-keyword-list routing key `v24_routing` is now version-agnostic
+  `api_routing`.
+- `scripts/gen_cli_docs.py` reads the default API version from `Config::api_version()` instead of a
+  hardcoded `v24`, so a future pin bump can't leave the generated reference claiming the old version.
+
+### Security
+
+- 🔴 **`scripts/qa_smoke.sh` is now fail-closed.** It refuses to start (exit 2) unless *all* of:
+  `APB_API_KEY` is empty/unset, an explicit `--config` is supplied whose file carries
+  `safety.allow_writes: false`, and the target customer reports `customer.test_account = true`. There is
+  no override flag, by design. The first two checks are I/O-free; the identity probe is the only
+  pre-flight network call. A second hole was closed in the same change: every `run_case` invoked a bare
+  `$BIN` with no `--config`, so a caller who passed a write-blocking config would have had it discarded
+  (dotenv walks the cwd ancestors, finds a repo `.env`, and SaaS-resolves) — the vetted config is now
+  bound to every case. Context and impact: `ai/specs/incidents/2026-09-09-qa-smoke-prod-writes/INCIDENT.md`.
+- Docs that described the harness as "read-only by construction" were corrected in all four places that
+  said so (`AGENTS.md`, `rust/gads/AGENTS.md`, `rust/gads/CLAUDE.md`,
+  `docs/tasks/version-bump-checklist.md`), and the version-bump checklist's step 8 now runs
+  `scripts/sandbox-check.sh --google`, which is identity-gated on `test_account`.
 
 ## [0.1.21] — 2026-09-09 (CampaignLaunchSpec v2 + orchestrator tail stages)
 
