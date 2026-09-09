@@ -155,7 +155,7 @@ _No command-specific options — uses only the [global options](README.md#global
 <a id="apb-gads-orchestrate-rollback"></a>
 ### `apb-gads orchestrate rollback`
 
-Rollback: accept a list of resource names (or a campaign-launch receipt) and submit a single atomic remove batch. Supported: campaigns, adGroups, adGroupAds, adGroupCriteria, campaignBudgets, campaignCriteria, campaignAssets, campaignSharedSets, sharedSets, sharedCriteria. Assets are flagged as unsupported (AssetService has no remove op as of v24 — remove via Google Ads UI)
+Rollback: accept a list of resource names (or a campaign-launch receipt) and submit a single atomic remove batch. Supported: campaigns, adGroups, adGroupAds, adGroupCriteria, campaignBudgets, campaignCriteria, campaignAssets, campaignSharedSets, sharedSets, sharedCriteria. Assets are flagged as unsupported (AssetService has no remove op — verified through v25; remove via the Google Ads UI)
 
 **Usage**
 

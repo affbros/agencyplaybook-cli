@@ -1,6 +1,6 @@
 # apb-gads command index
 
-**286 leaf commands across 27 groups** (Google Ads API v24). Per-group flag references live in
+**295 leaf commands across 29 groups** (Google Ads API v25). Per-group flag references live in
 `references/commands/<group>.md` (generated from the binary — the accurate per-param source). The
 live registry is `apb-gads --help` and `apb-gads playbook list`.
 
@@ -33,7 +33,8 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `report` | 23 | performance/asset/PMAX/shopping/settings reports | `references/commands/report.md` |
+| `report` | 24 | performance/asset/PMAX/shopping/settings reports | `references/commands/report.md` |
+| `experiment` | 1 | `results --experiment-id` — one experiment's outcome: control vs treatment metrics + point estimate / margin of error / p-value per metric. Read-only, no gates. | `references/commands/experiment.md` |
 | `portfolio` | 3 | MCC-wide per-currency roll-ups: `summary` (+`--compare`), `breakdown --dimension device\|network\|campaign_type`, `trend` — sequential fan-out, money never summed across currencies | `references/commands/portfolio.md` |
 | `playbook` | 67 | `list` + **66 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
 | `verdict` | 1 | one decisive verb per campaign (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) from 3 gates | `references/commands/verdict.md`, `references/verdict-framework.md` |
@@ -52,7 +53,7 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `mutate` | 119 | the full gated mutation surface (budgets, keywords, ads, bidding, PMAX, assets, criteria) | `references/commands/mutate.md` |
+| `mutate` | 123 | the full gated mutation surface (budgets, keywords, ads, bidding, PMAX, assets, criteria, **AI Max**, **synthetic-content attestation**) | `references/commands/mutate.md` |
 | `orchestrate` | 8 | composite flows (`campaign-launch` (spec v2, 8 tail stages), `rollback --from-receipt`, `pmax-build`, `ad-refresh`, …) | `references/commands/orchestrate.md` |
 | `changes` | 3 | turn a scored plan into a reviewable changeset and apply it | `references/commands/changes.md` |
 | `sandbox` | 1 | `helper full-flow` — exercises the $1 sandbox write policy | `references/commands/sandbox.md` |

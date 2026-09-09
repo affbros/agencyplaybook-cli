@@ -1,7 +1,7 @@
 ---
 name: agencyplaybook-cli-google
 description: |
-  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 116 gated mutations; run raw GAQL; schedule read-only audits. Covers all 290 commands across 28 groups against Google Ads API v24.
+  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 123 gated mutations; run raw GAQL; schedule read-only audits. Covers all 295 commands across 29 groups against Google Ads API v25.
 
   USE WHEN the user mentions Google Ads, "apb-gads", "gads", "google ads cli", "agencyplaybook google", "apb google", PMAX / Performance Max, RSA / responsive search ads, smart bidding, tCPA / tROAS / target CPA / target ROAS, learning phase, search themes, brand exclusions, negative keywords, keyword planning, conversion value rules, bid adjustments / bid modifiers, account health, waste audit, scaling ad spend, campaign launch, ad-strength / ad rotation, quality score, impression share, dayparting, geo/device performance, GAQL, or wants ANY Google Ads account read, audit, plan, report, or change — even if they don't name the CLI. NOT for Meta/Facebook/Instagram ads (use the agencyplaybook-cli skill) or generic SEO.
 ---
@@ -12,15 +12,15 @@ Drive the `apb-gads` CLI — a safe, triple-gated Rust Google Ads operator tool 
 judgment layer it doesn't ship with: which lever for which situation, in what order, framed
 for growth, and never at the cost of a converged Smart-Bidding campaign.
 
-**Division of labor.** The CLI owns the mechanics: **290 commands across 28 groups** —
-116 gated mutations, 66 diagnostic playbooks, 23 reports, MCC-wide portfolio roll-ups — every
+**Division of labor.** The CLI owns the mechanics: **295 commands across 29 groups** —
+123 gated mutations, 66 diagnostic playbooks, 24 reports, MCC-wide portfolio roll-ups — every
 write dry-run by default behind three independent gates, every response JSON. This skill owns
 the *operating model*. Never reimplement what the CLI does; orchestrate it, and read the
 references below for depth.
 
-> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 28 groups · 290 leaf
-> commands · 116 `mutate` subcommands · 66 playbooks (6 sections) · 23 reports · Google Ads
-> **API v24**. The runtime is the source of truth — when a doc and the binary disagree, the binary wins.
+> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 29 groups · 295 leaf
+> commands · 123 `mutate` subcommands · 66 playbooks (6 sections) · 24 reports · Google Ads
+> **API v25**. The runtime is the source of truth — when a doc and the binary disagree, the binary wins.
 
 ## Routing — open the right reference for the task
 
@@ -39,7 +39,7 @@ Load `references/` files **as needed** (progressive disclosure — don't read th
 | Operate safely across MULTIPLE client accounts ("set guardrails per client", "run changes across all accounts safely", "did I edit the wrong customer?") | `references/agency-guardrails.md` (two-dial model, per-write right-customer/domain/brand/budget checks, batch review-the-exceptions, override/boundary rules) |
 | Tier/scope/entitlement questions ("why 403?", "what does Agency unlock?") | `references/scopes.md` |
 | Field-level limits (RSA char counts, PMAX assets, bid-modifier ranges) | `references/policy-limits.md` |
-| "Will this write actually stick? is this field mutable in v24?" | `references/capability-matrix.md` |
+| "Will this write actually stick? is this field mutable in v25?" | `references/capability-matrix.md` |
 | CI/CD or agent automation (exit codes, `--validate-only`, JSON, `--output`) | `references/automation.md` |
 | The full command index | `commands.md` |
 
@@ -105,7 +105,7 @@ playbook account-health → playbook campaign-bid-strategy-audit → growth scal
 → (if Search present) playbook rsa-quality-audit
 ```
 
-`campaign-bid-strategy-audit` reads the **authoritative** v24 `bidding_strategy_system_status`
+`campaign-bid-strategy-audit` reads the **authoritative** v25 `bidding_strategy_system_status`
 enum — trust its `learning_now[]` / `growth_blockers[]` / `misconfigured[]` buckets over any
 heuristic. `LEARNING_*` = hands off; `LIMITED_BY_BUDGET`/`LIMITED_BY_DATA` = scale or consolidate;
 `MISCONFIGURED_*` = fix configuration first. Two traps: status is **independent of
@@ -191,7 +191,7 @@ apb-gads mutate apply-plan --from-file waste.md.json --execute
 - **JSON is the contract.** Read specific keys with `jq` rather than dumping whole playbook
   envelopes (they carry large raw GAQL arrays). The high-value keys per command are in
   `references/workflows.md`.
-- **Never claim a write persisted from a `200`/exit-0 alone.** Some v24 fields are accepted but
+- **Never claim a write persisted from a `200`/exit-0 alone.** Some v25 fields are accepted but
   silently not applied, write-only, or frozen at create. Before asserting a field changed, check
   `references/capability-matrix.md` (DRY_RUN / SERVER_VALIDATED / LIVE_VERIFIED per surface) and,
   for anything `accepted_unverified`, run a follow-up read (`<entity> get` / `report …` / `gaql`)
@@ -229,7 +229,7 @@ cover it — see `references/scopes.md` for the full matrix and the upgrade path
   residue (`gaql` for non-REMOVED `Test-ok-to-delete*`) before creating, and clean up when done.
 - **When a guard blocks a write, report it — never handcraft a workaround.** There is no bypass
   flag by design.
-- **v24 is pinned.** Don't assume v25+ fields exist; the CLI rejects out-of-range inputs pre-API.
+- **v25 is pinned** (bumped from v24 on 2026-09-08; v24 stays served by Google until May 2027). Don't assume v26+ fields exist; the CLI rejects out-of-range inputs pre-API. 🔴 The v25 bump is **BREAKING** for customer-acquisition goals — see `references/capability-matrix.md` § Goal migration.
 
 ## Batch scripts (the watchful eye)
 
@@ -260,7 +260,7 @@ Three cadence tiers plus a shared library:
 | `references/safety-model.md` | Three-gate write model, sandbox/profile policy, capability tiers |
 | `references/scopes.md` | The 7 Google add-on scopes × tier matrix |
 | `references/policy-limits.md` | Field-level limits (RSA / PMAX / extensions / URLs / bid modifiers) |
-| `references/capability-matrix.md` | What v24 supports / what's been verified per mutation surface |
+| `references/capability-matrix.md` | What v25 supports / what's been verified per mutation surface |
 | `references/automation.md` | Exit codes, `--validate-only`, JSON contract, CI/agent patterns, self-hosting |
 | `commands.md` | The 27-group command index |
 | `examples.md` | Numbered canonical workflows (copy-paste, dry-run-first) |
