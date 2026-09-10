@@ -5,8 +5,8 @@ description: |
   Ads (Search / PMAX / Demand Gen) or Meta build: keyword research, account structure, grounded
   ad copy, negatives, geo / schedule / device / audience targeting, assets, bidding and goals —
   emitted as the artifacts the `apb-gads` / `apb` CLIs and the AgencyPlaybook plan pipeline
-  consume (CampaignLaunchSpec today, CampaignBuildSpec v2 + Plan envelope once campaign-build-001
-  ships). It is a THIN orchestration layer: research and structure come from the CLI, ad copy
+  consume (CampaignLaunchSpec, CampaignBuildSpec v2 / CampaignComposeSpec v2 + Plan envelope v2 —
+  `recipe build` ships on both channels: Google sprint-g04, Meta sprint-m02). It is a THIN orchestration layer: research and structure come from the CLI, ad copy
   comes from the layered `ad-creative` + `ad-copy-verification-standard` skills under
   AgencyPlaybook's own copy doctrine, and every write goes through the CLI's gates and the
   Plan envelope — this skill never writes to an ad account directly. Dry-run by default; nothing
@@ -116,10 +116,10 @@ Always, in this order (matches the CLI's plan-first format):
    (shared sets, campaign-level, brand) · assets · safety verdicts (`validate`, `launch-check`,
    `smart-bidding-readiness`, sandbox policy) · **"Nothing launched"** unless it was.
 2. **Artifacts written**: `briefs/<slug>.yaml`, `research/`, `build/{structure,rsa,goals,spec}.json`,
-   `build/plan.md`, `build/post-launch.md`, and — after `campaign-build-001` S2 — `plan.json`
-   (Plan envelope) and `editor/*.csv`.
-3. **Deploy options**, stated plainly: CLI `--execute` (born PAUSED) · import `plan.json` into
-   AgencyPlaybook (Meta today; Google after S3) · MCP `gads_build_campaign_spec → validate → preview
+   `build/plan.md`, `build/post-launch.md`, plus `plan.json` (Plan envelope) and `plan.html` — on
+   Google also `editor/*.csv` (Meta has no Ads-Editor format, so a Meta build writes none).
+3. **Deploy options**, stated plainly: CLI `--execute` (born PAUSED — `recipe build --execute` on
+   both channels) · import `plan.json` into AgencyPlaybook (Meta today; Google after S3) · MCP `gads_build_campaign_spec → validate → preview
    → human YES → apply → verify` · Google Ads Editor CSV.
 4. **Open questions / what you couldn't verify** — named, not buried.
 

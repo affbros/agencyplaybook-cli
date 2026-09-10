@@ -1,9 +1,13 @@
 # CLI handoff — exact sequences, artifact paths, deploy paths
 
-Two eras. **Today** = what the shipped binaries accept (verified 2026-09-08 against `apb-gads 0.1.20`).
-**After campaign-build-001** = `recipe build` + `CampaignBuildSpec v2` + Plan envelope (spec:
-`ai/specs/campaign-build-001/product-spec.md`). Don't use "after" commands until the CHANGELOG says
-they shipped.
+**Today** = what the shipped binaries accept (verified 2026-09-09 against `apb-gads 0.2.0`, dep-phase2
+sprint-g05). `recipe build` (`CampaignBuildSpec v2` + Plan envelope v2, spec:
+`ai/specs/campaign-build-001/product-spec.md`) shipped in sprint-g04; the Editor CSV bundle
+(`recipe build --format editor-csv|all`, `plan export --format editor-csv`) shipped in sprint-g05 —
+both eras below are current, use whichever fits the brief. The v1 `plan campaign search` →
+`orchestrate campaign-launch` sequence still works unchanged and is the right choice for a spec you
+want to hand-edit stage by stage; `recipe build` is the right choice for a whole-campaign brief in
+one shot.
 
 Conventions used below: `$G` = `apb-gads --config <yaml> --customer <id>` (in-repo runs need a leading
 `APB_API_KEY=` or SaaS-resolve hijacks `--config`); `$B` = the brief; artifacts under `build/`.
@@ -80,24 +84,50 @@ customer acquisition. Assets (logos/images/videos) must pre-exist — `verify bo
 on the sandbox. Demand Gen: `plan campaign demand-gen` → `validate demand-gen-spec` →
 `orchestrate demand-gen-build`.
 
-## Today — Meta (`apb`)
+## Today — Meta, whole-campaign brief (`apb recipe build`)
 
-`apb campaign compose-from-spec --spec-file spec.json` (campaign → adsets → creatives → ads; presets
-via `campaign preset`); `--plan out.md` for plan-first; `apb plan export --id <plan>` → envelope →
-`POST /api/v1/plans/import` → `/validate` → `/execute` in AgencyPlaybook. Example spec:
-`rust/docs/examples/compose-spec.json`. The Meta **sandbox cannot create creatives** — validate
-creative structure only; the write chain there stops at campaign + ad set.
-
-## After campaign-build-001 (do not use until shipped)
+`recipe build` shipped on the Meta lane in sprint-m02 (`apb 0.5.28`) — the Meta twin of the Google
+sequence above, same brief shape with `channel: meta`:
 
 ```bash
-$G recipe build --brief briefs/<slug>.yaml --out build/            # research → spec.v2.json → plan.json + plan.md + editor/ + research/
-$G recipe build --spec build/spec.v2.json                          # re-run a hand-edited spec
-$G recipe build --brief … --execute                                 # after YES; born PAUSED
+apb context show || apb context init --mode target_cpa --target-cpa 18.00 --brand-term "<brand>"
+apb recipe describe build                                  # the decision rules — quote, don't paraphrase
+apb recipe build --brief briefs/<slug>.yaml --out build/   # spec.v2.json + plan.json + plan.md + plan.html + preview.html + summary.json
+apb plan export --from-file build/plan.json --format html --fonts web --out review.html
+# launch (born PAUSED, four gates) …
+READ_ONLY=false ALLOW_WRITES=true APB_ALLOW_MUTATIONS=true apb recipe build --brief briefs/<slug>.yaml --out build/ --execute
+# … or hand build/plan.json to AgencyPlaybook: POST /api/v1/plans/import → /validate → /execute
 ```
-Then `plan.json` (Plan envelope v2) imports via `POST /api/v1/gads/plans/import` (S3) and shows in
-the web app's Plans page (S4). The brief's `targeting` / `negatives` / `assets` / `settings` blocks are
-carried natively — `post-launch.md` disappears.
+
+Rollback: `build/launch.json.rollback_envelope` → `apb plan apply --from-file rollback.json --execute
+--confirm-destructive`. **No Editor CSV on Meta** — there is no Ads-Editor import format, and
+`summary.json` says so rather than faking one.
+
+Annotated reference brief: `rust/tests/fixtures/brief-sandbox-meta.yaml`. Guide: `rust/docs/recipes.md`.
+
+## Today — Meta, stage-by-stage (`compose-from-spec`)
+
+`apb campaign compose-from-spec --spec-file spec.json` (campaign → adsets → creatives → ads; presets
+via `campaign preset`); `--plan out.md` (or `out.html`) for plan-first; `apb plan export --id <plan>` →
+envelope → `POST /api/v1/plans/import` → `/validate` → `/execute` in AgencyPlaybook. Example spec:
+`rust/docs/examples/compose-spec.json`. The Meta **sandbox cannot create creatives** — validate
+creative structure only; the write chain there stops at campaign + ad set (a sandbox `--execute`
+ends `PARTIAL`, which is the expected outcome).
+
+## Today — Google Search, whole-campaign brief (`recipe build`)
+
+```bash
+$G recipe build --brief briefs/<slug>.yaml --out build/             # research → spec.v2.json → plan.json + plan.md + plan.html + editor/*.csv + research/
+$G recipe build --spec build/spec.v2.json                           # re-run a hand-edited spec
+$G recipe build --brief briefs/<slug>.yaml --format editor-csv --out build/   # ONLY the Editor CSV bundle
+$G plan export --from-file build/plan.json --format editor-csv --out build/  # re-export from an existing plan.json, read-only
+$G recipe build --brief … --execute                                  # after YES; born PAUSED
+```
+`plan.json` (Plan envelope v2) imports via `POST /api/v1/gads/plans/import` (S3) and shows in the web
+app's Plans page (S4). The brief's `targeting` / `negatives` / `assets` / `settings` blocks are carried
+natively — `post-launch.md` disappears. `build/editor/*.csv` (sprint-g05) is the same plan rendered in
+Google Ads Editor's own import column layout — hand it to a client who wants to review or hand-tune
+in Editor before launch; it is a READ artifact only, `--execute` never touches it.
 
 ## MCP sequence (agent-driven, either era)
 
@@ -112,5 +142,5 @@ carried natively — `post-launch.md` disappears.
 briefs/<slug>.yaml            research/keywords.json        build/structure.json   build/rsa.json
 build/goals.json              build/spec.json (v1) | spec.v2.json                 build/plan.md
 build/copy-sources.md         build/post-launch.md (today only)                    build/validate.json
-build/plan.json (after S2)    build/editor/*.csv (after S2)                        launch.json (after --execute)
+build/plan.json                build/editor/*.csv (sprint-g05)                     launch.json (after --execute)
 ```
