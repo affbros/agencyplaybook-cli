@@ -1,20 +1,27 @@
-# `apb guardrails` — Command Reference
+# `apb experiment` — Command Reference
 
 4 commands. Auto-generated from the apb binary on 2026-09-10.
 
-### `apb guardrails clear`
+### `apb experiment create`
 
-Remove the stored guardrail profile for an account
+Create a campaign-level A/B experiment from a base campaign. Resolves the base campaign's first ad set/ad as the control variant, splits traffic by `--traffic-split` (treatment %), and — when `--treatment-plan` is given — applies that plan's actions to the treatment arm once it exists (wraps `split-test create`)
+
+**Scope:** `admin:split-test` · **Min tier:** enterprise · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account whose profile to remove (e.g. act_123). Required |
+| `--base-campaign-id` | `<BASE_CAMPAIGN_ID>` |  |
+| `--traffic-split` | `<TRAFFIC_SPLIT>` | Treatment arm's traffic share, 1..99 (control gets the rest) [default: 50] |
+| `--treatment-plan` | `<TREATMENT_PLAN>` | A plan-envelope-v2 JSON file whose `actions[]` are applied to the treatment campaign after creation (`experiments/-1` temp ref) |
+| `--hypothesis` | `<HYPOTHESIS>` |  |
+| `--duration-days` | `<DURATION_DAYS>` | [default: 14] |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -26,30 +33,25 @@ Remove the stored guardrail profile for an account
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails clear --plan <PATH> --fonts <MODE>
+apb experiment create --execute --base-campaign-id <BASE_CAMPAIGN_ID> --traffic-split <TRAFFIC_SPLIT>
 ```
 
-### `apb guardrails set`
+### `apb experiment end`
 
-Create or update the stored guardrail profile for an account in `~/.apb/guardrails.json`. Re-running replaces the listed fields
+End the experiment without promoting either arm — an envelope action when `--plan` is given, executable via `plan apply --from-file`
 
-**Write op** (requires `--execute`)
+**Scope:** `admin:split-test` · **Min tier:** enterprise
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account the profile applies to (e.g. act_123). Required |
-| `--allowed-domains` | `<ALLOWED_DOMAINS>` | Allowed final-URL hosts (comma-separated; a host matches it or any subdomain). Replaces the stored list |
-| `--canonical-brands` | `<CANONICAL_BRANDS>` | Canonical brand terms — ad copy must contain at least one (comma-separated). Replaces the stored list |
-| `--blocked-terms` | `<BLOCKED_TERMS>` | Blocked terms — ad copy must contain none (comma-separated). Replaces the stored list |
-| `--max-daily-budget` | `<MAX_DAILY_BUDGET>` | Daily-budget cap in major currency units (e.g. 50 = $50/day) |
-| `--currency` | `<CURRENCY>` | Currency code for the budget cap (e.g. USD). Optional |
-| `--enforcement` | `<ENFORCEMENT>` | Enforcement mode: on/block (default), warn, or off |
+| `--id` | `<ID>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -61,22 +63,25 @@ Create or update the stored guardrail profile for an account in `~/.apb/guardrai
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails set --execute --allowed-domains <ALLOWED_DOMAINS> --canonical-brands <CANONICAL_BRANDS>
+apb experiment end --id <ID> --plan <PATH>
 ```
 
-### `apb guardrails show`
+### `apb experiment promote`
 
-Show the resolved guardrail profile for an account (file + ENV + flags), or all stored profiles when `--account` is omitted
+Promote the experiment's treatment arm — an envelope action when `--plan` is given, executable via `plan apply --from-file`
+
+**Scope:** `admin:split-test` · **Min tier:** enterprise · **Write op** (requires `--execute`)
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account (e.g. act_123). Omit to list every stored profile |
+| `--id` | `<ID>` |  |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -88,26 +93,27 @@ Show the resolved guardrail profile for an account (file + ENV + flags), or all 
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails show --plan <PATH> --fonts <MODE>
+apb experiment promote --execute --id <ID> --plan <PATH>
 ```
 
-### `apb guardrails test`
+### `apb experiment results`
 
-Dry-check a hypothetical write against the resolved profile (no API call): pass a candidate landing URL, copy, and/or daily budget and see the verdict
+Verdict: control vs. treatment lift, CI, p-value, and WINNER|LOSER|INCONCLUSIVE(+days_needed) per `metric_policy.experiment.{p_value,min_runtime_days}`
+
+**Scope:** `admin:split-test` · **Min tier:** enterprise
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account to resolve the profile for (e.g. act_123). Required |
-| `--link` | `<LINKS>` | Candidate final/landing URL to check (repeatable) |
-| `--copy` | `<COPIES>` | Candidate ad copy to check (repeatable) |
-| `--budget` | `<BUDGET>` | Candidate daily budget in major currency units (e.g. 50 = $50/day) |
-| `--currency` | `<CURRENCY>` | Currency of the candidate budget (e.g. USD) |
+| `--id` | `<ID>` |  |
+| `--metric` | `<METRIC>` | [default: conversions] |
+| `--confidence` | `<CONFIDENCE>` | [default: 0.95] |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -119,5 +125,5 @@ Dry-check a hypothetical write against the resolved profile (no API call): pass 
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails test --link <LINKS> --copy <COPIES>
+apb experiment results --id <ID> --metric <METRIC>
 ```

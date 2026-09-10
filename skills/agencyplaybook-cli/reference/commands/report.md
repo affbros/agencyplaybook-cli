@@ -1,6 +1,6 @@
 # `apb report` — Command Reference
 
-12 commands. Auto-generated from the apb binary on 2026-09-09.
+12 commands. Auto-generated from the apb binary on 2026-09-10.
 
 ### `apb report breakdown`
 
@@ -21,6 +21,7 @@ Pull insights with breakdowns
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
@@ -52,6 +53,7 @@ Compare metrics between two time periods
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -95,6 +97,7 @@ Pull insights synchronously
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
@@ -124,6 +127,7 @@ Fetch completed async insights
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -160,6 +164,7 @@ Start an async insights job
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
@@ -188,6 +193,7 @@ Check async insights job status
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -227,6 +233,7 @@ Pull insights with arbitrary metric fields
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -255,6 +262,7 @@ List available report presets
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -268,7 +276,7 @@ List available report presets
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb report presets list --plan <PATH> --allow-domain <HOST>
+apb report presets list --plan <PATH> --fonts <MODE>
 ```
 
 ### `apb report presets run`
@@ -288,6 +296,7 @@ Run a preset by name
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -316,6 +325,7 @@ List saved report profiles
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -329,7 +339,7 @@ List saved report profiles
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb report profile list --plan <PATH> --allow-domain <HOST>
+apb report profile list --plan <PATH> --fonts <MODE>
 ```
 
 ### `apb report profile run`
@@ -347,6 +357,7 @@ Run a saved profile
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
@@ -382,6 +393,7 @@ Save a report profile
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |

@@ -1,14 +1,14 @@
 ---
 name: agencyplaybook-cli
 description: |
-  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 267 commands across 39 domains.
+  AgencyPlaybook CLI (`apb`) — command-line automation for Meta (Facebook/Instagram) ad campaigns: list, create, update, duplicate, and delete campaigns/adsets/ads/creatives; run diagnostic playbooks (health-score, waste-audit, fatigue-index, weekly-digest, learning-accelerator and 20+ more); build and execute multi-entity plans with dry-run-first safety; manage audiences (custom + lookalike + PII upload); explore targeting interests/behaviors; configure pixels and CAPI; manage rules, split-tests, catalogs, custom conversions, and leadgen forms. Covers all 279 commands across 42 domains.
 
   USE WHEN user says "apb", "agencyplaybook cli", "agencyplaybook", "meta campaign automation", "meta ads via cli", "campaign create", "campaign update", "campaign delete", "duplicate campaign", "scale campaign", "pause campaign", "budget update", "ad set targeting", "creative upload", "audience upload", "lookalike audience", "custom audience", "fatigue check", "waste audit", "health score", "weekly digest", "learning accelerator", "playbook diagnostic", "plan execute", "plan validate", "report insights", "compare periods", "split test", "rules engine", "automation rule", "catalog product set", "custom conversion", "leadgen forms", "pixel health", "CAPI dual signal", "growth score", "retargeting compression", "saturation audit", "broad targeting audit", "no-touch compliance", "consolidation advisor", "ROAS recovery", "anomaly detect", "reset rebuild", "scale roadmap", "rebalance", "daypart audit", "placement audit", "creative mix", "event hierarchy", "duplicate detect", "event downgrade ladder", "andromeda", "dataset clone-plan", "sync diff", "alias create", or otherwise needs to programmatically manage Meta ad accounts via the `apb` CLI.
 ---
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-09-09 from the live binary — 267 commands across 39 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-09-10 from the live binary — 279 commands across 42 domains.
 
 ## Routing
 
@@ -86,7 +86,15 @@ The create/update result also carries a soft **`advisories[]`** array (v0.1.20, 
 
 9. **Built-in compose presets** (v0.2.0). `apb campaign compose-from-spec --preset <sales-video|sales-carousel|lead-form|catalog-sales|reels-video|stories-video>` produces full campaign + adset + creative + ad stacks from operator-friendly args (`--campaign-name`, `--page-id`, `--daily-budget`, plus per-preset extras). Built-in presets take precedence over user-saved presets; **collision = fail-loud** with a shadowing error (exit 2).
 
+11. **Compose spec v2** (`"schema_version": 2`). `campaign compose-from-spec` accepts brief-shaped blocks (`targeting_brief`, `creative_brief`, `advantage`, `placements`, `schedule`, `bidding`) that the binary compiles into the literal Meta payloads, plus `audiences[]` / `lead_forms[]` pre-stages and a `rules[]` tail. **Always run `--print-compiled` first** — it makes zero API calls and prints the exact `targeting` / `asset_feed_spec` that will be POSTed, plus `compile_warnings[]`. Three things bite: `advantage.audience` (0|1) is **required** in v2 (Meta v26 needs the flag explicit); supplying both a literal and its brief (`targeting`+`targeting_brief`, `creative`+`creative_brief`) is a **fail-loud error, never a merge**; and rollback can **delete** created rules/audiences but a created lead-gen form is **not deletable by API** — it lands in `rollback.not_reversible` for a human. See `examples.md` § 8.
+
 10. **Name uploaded assets** (v0.2.2). Whenever the CLI uploads an image/video from a local file, the asset is named by the file's basename (filename + extension) by default. Override it: `creative upload-image --name`, `creative upload-video --name` (+ `--title` for the display title, which defaults to the name), and per-asset `--image-name` / `--video-name` / `--thumbnail-name` / `--hero-image-name` on the `create-*` builders — distinct from each builder's `--name`, which is the *creative* name. A hash or pre-uploaded ID passed instead of a file path is used as-is.
+
+12. **Plan a whole build, then apply it** (campaign-build-001 M1b — ships with the next `apb` release). `apb campaign compose-from-spec --spec-file brief.json --plan build.json` writes the build as a plan-envelope-v2 document — ordered `campaign.create` → `adset.create` → `creative.create` → `ad.create` actions, children bound to parents with `{{ref:aN}}` temp references, the account as `{{account}}/campaigns`, and the typed spec preserved in `source.context_snapshot`. Zero mutation. `apb plan apply --from-file build.json --execute` (+ the four write gates) runs it in that atomic order and returns `status` (`EXECUTED`/`PARTIAL`/`FAILED`), `completed_through`, and a `rollback_envelope` that deletes exactly what was created, children first — feed it back through `plan apply --execute --confirm-destructive`. **A create plan needs no `--confirm-destructive`; its rollback always does.** Never hand-edit `{{ref:…}}` / `{{account}}`, and put explicit pixel/page ids in any spec you intend to plan (`"auto"` needs a live lookup a plan can't make — the CLI warns).
+
+13. **Advantage+ switches on a live ad set** (campaign-build-001 M1b). `apb adset update --id <id> --advantage-audience on|off` sets `targeting_automation.advantage_audience`; `--advantage-placements on` applies the `advantage-plus` preset. Both are a read-modify-write over the live targeting, so nothing else is dropped. There is **no `--advantage-placements off`** (manual placements = an explicit set: use `adset update-targeting --placements <preset>`), and neither switch can be combined with the other `adset update` fields in one call — a mixed invocation fails loud naming the clashes.
+
+14. **Merge two plans behind the learning-window guard** (planning-001 sprint-m03). `apb plan merge --from a.json --from b.json --out merged.json [--plan merged.html]` folds N plans into one — dedupes byte-identical actions, isolates a contradictory bidding/targeting/budget change on the same target as an unresolved `conflicts[]` entry (never auto-picked), ranks the rest (`--mode growth|efficiency`), and — for any bidding/targeting-or-optimization-goal/budget change on an ad set whose live `learning_stage_info.status` is `LEARNING` — inserts a `wait-for-status` step ahead of it. `plan apply --from-file merged.json --execute` re-checks that status live and **skips** (never fails, never blocks the rest of the plan) anything still gated; `plan validate --from-file merged.json` is the read-only twin — check `.status` (`"waiting-on-learning"` when everything is still gated) and `.waiting`/`.expired` before applying. `--offline` skips the live status read (conservative: everything gated resolves Unknown, not "clear").
 
 The remaining Meta rejections are account-state rules the CLI can't pre-check (business verification, page permissions, pixel custom-event validity, etc.) — those still bounce on `--execute`.
 
@@ -123,8 +131,34 @@ See `commands.md` for the domain index; per-command detail lives in `reference/c
 - **report, coverage, metrics, learning** — reporting
 - **playbook, growth, action, budget, ask** — diagnostics & recommendations
 - **plan** — multi-step mutation orchestration with on-disk rollback blueprints
+- **recipe, context** — composed, context-driven operations (`recipe build` = brief → launch-ready campaign) and the per-account goal/brand document they read
 - **rules, split-test, sync, duplicate, andromeda, alias** — automation & workflow
 - **pixel, dataset, library, search, policy** — utility
+
+## Building a new campaign — always plan first
+
+To build a campaign from a brief, use the **`recipe build`** verb rather than
+hand-assembling a compose spec:
+
+```bash
+apb recipe describe <name>               # `build` — prints the decision rules; quote them, don't paraphrase
+apb recipe build --brief brief.yaml --out build/ --format all
+```
+
+It writes `build/{spec.v2.json, plan.json, plan.md, plan.html, preview.html, summary.json}` and
+launches nothing. Show the user `plan.html` (or the summary), then either apply
+`plan.json` (`apb plan apply --from-file build/plan.json --execute`, four write gates, born
+PAUSED) or hand it to AgencyPlaybook for approval. Rollback comes from
+`launch.json.rollback_envelope`.
+
+Rules to honour when you write a brief:
+
+- `copy.provider: agent` means **you** write the copy into the brief; the binary refuses to
+  back-fill it. Empty > inaccurate.
+- Every build is born PAUSED; `safety.born_paused: false` is refused.
+- Meta has no Ads-Editor export, so a Meta build writes no Editor CSV.
+- Per-account goals and brand terms live in `apb context init|show` (a local file, no Graph
+  call). A recipe reads it for defaults; it never overrides what the brief states.
 
 ## Tier-aware planning
 

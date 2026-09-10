@@ -187,6 +187,42 @@ Full risk taxonomy + flag-by-flag reference at [`../rust/docs/CREATIVE_AUDITOR.m
 
 ---
 
+## Compose spec v2 — reviewing the compiled payload (`--print-compiled`)
+
+`campaign compose-from-spec` accepts a **v2** spec (`"schema_version": 2`) whose
+`targeting_brief` / `creative_brief` / `advantage` / `placements` / `schedule` /
+`bidding` blocks the binary compiles into the literal Meta payloads. A v1 spec
+(no `schema_version`, or `1`) is unaffected.
+
+For an unattended pipeline the useful property is that the compile step is
+**pure** — `--print-compiled` makes no API calls and needs no credentials, so it
+runs in the same CI stage as your linters:
+
+```bash
+# Fails the job (exit 2) if the brief can't compile, and prints the exact
+# targeting / asset_feed_spec a reviewer signs off on.
+apb --json campaign compose-from-spec --spec-file brief.json --print-compiled \
+  > compiled.json
+jq -e '.ad_sets[0].targeting.targeting_automation.advantage_audience != null' compiled.json
+jq '.compile_warnings // []' compiled.json
+```
+
+| Field in the output | Use |
+|---|---|
+| `ad_sets[].targeting` | the literal Meta targeting spec that will be POSTed |
+| `ad_sets[].ads[].creative` | `{"type":"asset_feed", …}` when it came from a `creative_brief` |
+| `compile_warnings[]` | `placement_removed_in_v26` · `unresolved_reference` · `creative_format_risk` · `ai_disclosure_not_sent` |
+
+Exit codes are the usual ones: a fail-loud conflict (both `targeting` and
+`targeting_brief`, both `creative` and `creative_brief`, a missing `advantage`
+block under v2) is `validation_error` → **exit 2**, before any network call.
+
+Under `--execute` the run adds the v2 stages — `audiences → lead_forms →
+campaign → per ad set → rules` — and the failure envelope grows
+`created_before_failure.{audience_ids,lead_form_ids,rule_ids}` plus
+`rollback.{deleted,not_reversible}`. **`not_reversible` needs a human**: Meta has
+no DELETE for a lead-gen form, so a rolled-back run can leave one behind.
+
 ## Pre-flight Guards (`validation_error`, exit 2, during `--dry-run`)
 
 A growing set of Meta-side rejections are now caught **before any network call** — so they fail fast on `--dry-run`, not after `--execute`. All return exit `2` with `error.code = "validation_error"`. Agents can either branch on the exit code (already covered) or pattern-match the message excerpt.
@@ -301,11 +337,38 @@ apb playbook waste-audit --account act_123 --no-input --plan artifacts/waste.md
 
 Coverage: the mutation cohort (`campaign update-status|duplicate|delete`,
 `adset update-budget|update-targeting|delete`, `ad update-status|create|delete`,
-`creative create-image|create-video`) and the `rebalance` / `waste-audit` /
+`creative create-image|create-video`), **`campaign compose-from-spec`** (a whole
+campaign build — see below), and the `rebalance` / `waste-audit` /
 `fatigue-index` playbooks emit machine plans. Other mutating commands run a normal
 dry-run and note `not yet plannable`; pure reads note `nothing to plan`. The plan
 file carries no authority — apb's full 5-layer write gate + SaaS write-policy/scope
 are re-enforced at apply time.
+
+### Build a whole campaign from a brief (`recipe build`)
+
+`apb recipe build --brief brief.yaml --out DIR` is the plan-first entry point for
+a *new* campaign: it compiles the brief to a compose spec v2, runs the compile
+pre-flight, and writes `spec.v2.json` + `plan.json` (a plan-envelope-v2 create
+plan) + `plan.md` + `plan.html` + `summary.json`. Dry-run by default; exit 2 on a
+brief the compiler refuses (unknown objective, no budget, `provider: agent` with
+no copy, a `channel: google` brief).
+
+```bash
+apb recipe build --brief brief.yaml --out build/ --format all --no-input
+# CI gate: fail the job if the plan carries any warning
+python3 -c "import json,sys; sys.exit(1 if json.load(open('build/summary.json'))['warnings'] else 0)"
+
+# apply later, through the same executor an imported plan uses
+apb plan apply --from-file build/plan.json                       # preview
+READ_ONLY=false ALLOW_WRITES=true APB_ALLOW_MUTATIONS=true \
+  apb plan apply --from-file build/plan.json --execute            # born PAUSED
+```
+
+`apb plan get --id <plan_id> --format v2` prints a stored plan's envelope (the
+same document `GET /api/v1/plans/:id` returns under `data.envelope`), and
+`apb plan export --from-file <plan.json> --format html [--fonts web]` re-renders
+any envelope as the shareable review page. `apb context init|show` keeps the
+per-account goal/brand document those recipes read — local state, no Graph call.
 
 ### Apply a plan from a file (`plan apply --from-file`)
 
@@ -333,6 +396,102 @@ prior values for a **staleness** check (a drifted file is refused unless
 portable file that round-trips through `plan apply`. HTTP parity:
 `POST /api/v1/plans/import` (import + validate only; execution stays on
 `POST /api/v1/plans/:id/execute[-safe]`).
+
+#### Whole-build plans (`compose-from-spec --plan`) — the unattended shape
+
+A compose plan is the one case where the artifact contains a dependency chain, so
+an agent driving it needs three extra fields.
+
+```bash
+# 1. Plan (no mutation, no approval needed to produce it)
+apb campaign compose-from-spec --spec-file brief.json --no-input --plan artifacts/build.json
+jq -r '.actions[] | "\(.id) \(.op)"' artifacts/build.json
+# a1 campaign.create / a2 adset.create / a3 creative.create / a4 ad.create
+
+# 2. Apply behind the gate; capture the receipt
+APB_ALLOW_MUTATIONS=true ALLOW_WRITES=true READ_ONLY=false \
+  apb plan apply --from-file artifacts/build.json --execute --no-input --json > receipt.json
+
+# 3. Branch on the outcome — NOT on the exit code alone
+case "$(jq -r .status receipt.json)" in
+  EXECUTED) echo "build complete" ;;
+  PARTIAL)  echo "stopped after $(jq -r .completed_through receipt.json) — rolling back"
+            jq .rollback_envelope receipt.json > rollback.json
+            APB_ALLOW_MUTATIONS=true ALLOW_WRITES=true READ_ONLY=false \
+              apb plan apply --from-file rollback.json --execute --confirm-destructive --no-input --json ;;
+  FAILED)   echo "nothing was created"; exit 1 ;;
+esac
+```
+
+- `status` — `EXECUTED` (all actions landed) / `PARTIAL` (some did; entities exist) /
+  `FAILED` (none did). A partial build is a normal outcome, not a crash: on the Meta
+  sandbox the creative layer is blocked by a Page permission, so a full build stops
+  after the ad set.
+- `completed_through` — the id of the last action that succeeded.
+- `rollback_envelope` — a ready-to-apply plan that deletes exactly what was created,
+  children first. It is all delete-class, so applying it needs `--confirm-destructive`.
+
+Actions reference each other with `{{ref:aN}}` (the ad set's `campaign_id` is
+`{{ref:a1}}`) and address the account as `{{account}}/campaigns`. Both are bound at
+apply time — never edit them by hand, and never assume the ids exist before the
+apply runs. `source.context_snapshot` carries the typed `CampaignComposeSpec`, so an
+agent can re-derive or diff the build from the plan file alone.
+
+### Merging plans and the `wait-for-status` gate (`plan merge`)
+
+`plan merge` (planning-001 sprint-m03) is a pure local transform — no write
+gates needed, no API call unless it reads a live ad-set's learning status
+(skip that too with `--offline`). It combines N plan files, isolates any
+contradictory bidding/targeting/budget change as an unresolved `conflict`,
+and — for anything gated behind Meta's Smart-Bidding learning window —
+inserts a `wait-for-status` step that `plan apply` (and the read-only `plan
+validate --from-file`) evaluate against the live status every time they run.
+An agent driving this in CI never needs to poll separately: a skipped action
+is reported, never treated as a failure, and never blocks the rest of the
+plan.
+
+```bash
+apb plan merge --from build/plan.json --from fatigue.json \
+  --out merged.json --no-input --json
+# {"waves": [...], "conflicts": [...], "action_count": N, ...}
+
+# Read-only: is anything still waiting?
+apb plan validate --from-file merged.json --no-input --json > check.json
+jq -r '.status' check.json                 # "imported" | "waiting-on-learning"
+
+APB_ALLOW_MUTATIONS=true ALLOW_WRITES=true READ_ONLY=false \
+  apb plan apply --from-file merged.json --execute --no-input --json > receipt.json
+jq -r '.waiting[]?.wait_id, .expired[]?.wait_id' receipt.json
+# non-empty ⇒ re-run this SAME file later; skipped actions are still pending,
+# not failed — receipt.json's exit code is 0 either way.
+```
+
+`conflicts[]` in the merged JSON are never auto-resolved — a human (or a
+downstream review step) picks one side and re-emits that action before the
+next merge.
+
+### Weekly portfolio rebalance (`agency portfolio plan`, planning-001 S4)
+
+`agency portfolio plan` never calls the SaaS API and never mutates the
+account by itself — it's a local, read-only allocator that only ever writes
+plan files. Safe to run unattended on a schedule; the produced plan still
+needs `plan apply --execute` (with the usual write gates) to take effect.
+
+```bash
+apb agency portfolio plan --accounts act_123456789 \
+  --max-step-pct 10 --out portfolio.plan.json --no-input --json
+jq '.moves | length, .note' portfolio.plan.json
+# N   null           <- moves proposed, or
+# 0   "no ad set..." <- empty-but-correct (e.g. a zero-spend account)
+
+# Review, then apply like any other plan-envelope-v2 document
+APB_ALLOW_MUTATIONS=true ALLOW_WRITES=true READ_ONLY=false \
+  apb plan apply --from-file portfolio.plan.json --execute --no-input --json
+```
+
+See `rust/docs/planning.md` § "portfolio plan" for the method (marginal
+return from 30d/60d slopes, learning + ROAS-floor + headroom gates) and the
+`--meta-portfolio-out` cross-channel bridge schema.
 
 ### Gated mutation in a deployment job
 

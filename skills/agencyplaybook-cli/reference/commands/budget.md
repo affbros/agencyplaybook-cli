@@ -1,6 +1,6 @@
 # `apb budget` — Command Reference
 
-1 commands. Auto-generated from the apb binary on 2026-09-09.
+1 commands. Auto-generated from the apb binary on 2026-09-10.
 
 ### `apb budget simulate`
 
@@ -12,6 +12,8 @@ Run budget simulation
 |---|---|---|
 | `--account` | `<ACCOUNT>` |  |
 | `--campaign` | `<CAMPAIGN>` |  |
+| `--adset-id` | `<ADSET_ID>` | An ad set id instead of `--campaign`. planning-001 S2: when the ad set is forecastable (has a manual targeting spec), the simulation is re-based on a real Meta `delivery_estimate` scenario instead of the closed-form heuristic. Always emits `basis` |
+| `--basis` | `<BASIS>` | `auto` (default) — use `delivery_estimate` when the ad set is forecastable, else the closed-form heuristic. `heuristic` forces the closed form even when an estimate is available |
 | `--daily-budget` | `<DAILY_BUDGET>` |  |
 | `--budget` | `<BUDGET>` |  |
 | `--days` | `<DAYS>` |  |
@@ -25,6 +27,7 @@ Run budget simulation
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
+| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
@@ -37,5 +40,5 @@ Run budget simulation
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb budget simulate --campaign <CAMPAIGN> --daily-budget <DAILY_BUDGET>
+apb budget simulate --campaign <CAMPAIGN> --adset-id <ADSET_ID>
 ```

@@ -49,8 +49,12 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb campaign duplicate`
 - `apb duplicate`
 
-### `admin:split-test` (4 commands)
+### `admin:split-test` (8 commands)
 
+- `apb experiment create`
+- `apb experiment end`
+- `apb experiment promote`
+- `apb experiment results`
 - `apb split-test create`
 - `apb split-test evaluate`
 - `apb split-test promote`
@@ -67,7 +71,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb audience list`
 - `apb audience overlap`
 
-### `read:campaigns` (41 commands)
+### `read:campaigns` (43 commands)
 
 - `apb account current`
 - `apb account info-detailed`
@@ -96,7 +100,9 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb library search`
 - `apb plan doctor`
 - `apb plan export`
+- `apb plan forecast`
 - `apb plan list`
+- `apb plan merge`
 - `apb policy profile set`
 - `apb policy profile show`
 - `apb targeting behavior-search`
@@ -193,7 +199,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
 - `apb agency accounts`
 - `apb agency connect-meta`
-- `apb agency portfolio`
+- `apb agency portfolio plan`
 - `apb playbook advantage-adoption`
 - `apb playbook anomaly-detect`
 - `apb playbook bid-strategy`
@@ -283,7 +289,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 
 - `apb budget simulate`
 
-### `write:campaigns` (50 commands)
+### `write:campaigns` (52 commands)
 
 - `apb ad create`
 - `apb ad create-multi`
@@ -331,8 +337,10 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb plan create`
 - `apb plan execute`
 - `apb plan execute-safe`
+- `apb plan get`
 - `apb plan review-batch`
 - `apb plan validate`
+- `apb recipe build`
 - `apb value-rule create`
 - `apb value-rule delete`
 
@@ -365,7 +373,7 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb rules preview`
 - `apb rules update`
 
-### `—` (24 commands)
+### `—` (28 commands)
 
 - `apb alias list`
 - `apb alias remove`
@@ -381,6 +389,8 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb auth login`
 - `apb auth status`
 - `apb auth test`
+- `apb context init`
+- `apb context show`
 - `apb doctor api-compat`
 - `apb doctor check`
 - `apb doctor quota`
@@ -391,3 +401,5 @@ A command above your tier returns `403 insufficient_scope` (CLI exit 3).
 - `apb guardrails test`
 - `apb meta cache`
 - `apb meta status`
+- `apb recipe describe`
+- `apb recipe list`

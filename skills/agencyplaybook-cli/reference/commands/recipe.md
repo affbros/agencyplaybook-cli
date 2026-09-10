@@ -1,20 +1,26 @@
-# `apb guardrails` — Command Reference
+# `apb recipe` — Command Reference
 
-4 commands. Auto-generated from the apb binary on 2026-09-10.
+3 commands. Auto-generated from the apb binary on 2026-09-10.
 
-### `apb guardrails clear`
+### `apb recipe build`
 
-Remove the stored guardrail profile for an account
+Build a launch-ready Meta campaign from a brief: compose spec v2, a plan-envelope-v2 create plan, the review document and the HTML review page. Dry-run by default — nothing is created without `--execute`, and everything a build creates is born PAUSED.
+
+**Scope:** `write:campaigns` · **Min tier:** professional
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account whose profile to remove (e.g. act_123). Required |
+| `--brief` | `<BRIEF>` | Path to the brief (YAML or JSON) |
+| `--out` | `<OUT>` | Build directory (default `./build-<YYYYmmdd-HHMM>/`) |
+| `--format` | `<FORMAT>` | Which artifacts to write: `json` \| `md` \| `html` \| `all` (default) |
+| `--provider` | `<PROVIDER>` | Copy source: `heuristic` (default, starter copy) or `agent` (the copy arrives in the brief). Overrides `copy.provider` |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -26,30 +32,22 @@ Remove the stored guardrail profile for an account
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails clear --plan <PATH> --fonts <MODE>
+apb recipe build --brief <BRIEF> --out <OUT>
 ```
 
-### `apb guardrails set`
+### `apb recipe describe`
 
-Create or update the stored guardrail profile for an account in `~/.apb/guardrails.json`. Re-running replaces the listed fields
-
-**Write op** (requires `--execute`)
+Print a recipe's decision rules, threshold formulas and exports
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account the profile applies to (e.g. act_123). Required |
-| `--allowed-domains` | `<ALLOWED_DOMAINS>` | Allowed final-URL hosts (comma-separated; a host matches it or any subdomain). Replaces the stored list |
-| `--canonical-brands` | `<CANONICAL_BRANDS>` | Canonical brand terms — ad copy must contain at least one (comma-separated). Replaces the stored list |
-| `--blocked-terms` | `<BLOCKED_TERMS>` | Blocked terms — ad copy must contain none (comma-separated). Replaces the stored list |
-| `--max-daily-budget` | `<MAX_DAILY_BUDGET>` | Daily-budget cap in major currency units (e.g. 50 = $50/day) |
-| `--currency` | `<CURRENCY>` | Currency code for the budget cap (e.g. USD). Optional |
-| `--enforcement` | `<ENFORCEMENT>` | Enforcement mode: on/block (default), warn, or off |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -61,22 +59,22 @@ Create or update the stored guardrail profile for an account in `~/.apb/guardrai
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails set --execute --allowed-domains <ALLOWED_DOMAINS> --canonical-brands <CANONICAL_BRANDS>
+apb recipe describe --plan <PATH> --fonts <MODE>
 ```
 
-### `apb guardrails show`
+### `apb recipe list`
 
-Show the resolved guardrail profile for an account (file + ENV + flags), or all stored profiles when `--account` is omitted
+List every registered recipe — name, channel, what it composes
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account (e.g. act_123). Omit to list every stored profile |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |
 | `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
 | `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
 | `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
+| `--account` | `<ACCOUNT>` | Target a specific ad account (overrides default/discovered account) |
 | `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
 | `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
 | `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
@@ -88,36 +86,5 @@ Show the resolved guardrail profile for an account (file + ENV + flags), or all 
 | `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
 
 ```bash
-apb guardrails show --plan <PATH> --fonts <MODE>
-```
-
-### `apb guardrails test`
-
-Dry-check a hypothetical write against the resolved profile (no API call): pass a candidate landing URL, copy, and/or daily budget and see the verdict
-
-| Flag | Value | Description |
-|---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account to resolve the profile for (e.g. act_123). Required |
-| `--link` | `<LINKS>` | Candidate final/landing URL to check (repeatable) |
-| `--copy` | `<COPIES>` | Candidate ad copy to check (repeatable) |
-| `--budget` | `<BUDGET>` | Candidate daily budget in major currency units (e.g. 50 = $50/day) |
-| `--currency` | `<CURRENCY>` | Currency of the candidate budget (e.g. USD) |
-| `--json` |  | Output as JSON |
-| `--execute` |  | Apply changes (opposite of dry-run) |
-| `--dry-run` |  | Preview only, do not mutate |
-| `--plan` | `<PATH>` | Plan it, don't do it: run the full dry-run pipeline and write `<path>.md` (human plan document) + `<path>.json` (re-playable machine plan). No API mutation is performed. Cannot be combined with `--execute`. plan-first-cli-001 S3 |
-| `--fonts` | `<MODE>` | How a rendered HTML review page sources its fonts: `system` (default — system stacks, zero external URLs, opens offline) or `web` (adds the Google Fonts link for nicer online viewing). Applies to `--plan out.html`, `plan export --format html`, and `recipe build`. campaign-build-001 § 3.1 rule 2 [default: system] |
-| `--confirm-destructive` |  | Required for destructive operations (DELETE, ARCHIVE, extreme budget changes) |
-| `--no-input` |  | Never prompt for input. Required for CI/CD, cron, and AI-agent execution. Mutations still require their existing safety flags (--execute / --confirm-destructive) |
-| `--debug` |  | Enable debug-level tracing to stderr. Honors RUST_LOG if already set. Token / OAuth-secret content is sanitized before logging |
-| `--no-color` |  | Disable ANSI color in CLI output. Also honors NO_COLOR=1 / CLICOLOR=0 |
-| `--ignore-cooldown` |  | Bypass the CLI's filesystem cooldown short-circuit and attempt the call even if the local cooldown file says the account is on a post-429 cooldown window. Sprint 003 — meta-429-mitigation-001 |
-| `--allow-domain` | `<HOST>` | Waive the guardrail for a specific final-URL host (repeatable). Requires `--guardrail-reason` |
-| `--allow-brand` |  | Waive the guardrail's canonical-brand / blocked-term copy checks. Requires `--guardrail-reason` |
-| `--allow-budget` |  | Waive the guardrail's daily-budget cap / currency check. Requires `--guardrail-reason` |
-| `--guardrail-reason` | `<TEXT>` | Justification recorded in the audit log when any `--allow-*` override is used. Required whenever an override waives a guardrail violation |
-| `--guardrails` | `<MODE>` | Override the guardrail enforcement mode for this command only (`on`/`block`, `warn`, or `off`). Highest precedence over ENV and the stored `~/.apb/guardrails.json` profile |
-
-```bash
-apb guardrails test --link <LINKS> --copy <COPIES>
+apb recipe list --plan <PATH> --fonts <MODE>
 ```

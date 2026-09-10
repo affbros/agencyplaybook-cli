@@ -1,7 +1,7 @@
 # `apb` CLI — Command Index
 
-Auto-generated from the apb binary on 2026-09-09. 
-267 commands across 39 domains. 
+Auto-generated from the apb binary on 2026-09-10. 
+279 commands across 42 domains. 
 Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain>.md` — open the file for the domain you need.
 
 | Domain | Commands | Reference |
@@ -19,12 +19,14 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | budget | 1 | `reference/commands/budget.md` |
 | campaign | 15 | `reference/commands/campaign.md` |
 | catalog | 10 | `reference/commands/catalog.md` |
+| context | 2 | `reference/commands/context.md` |
 | coverage | 1 | `reference/commands/coverage.md` |
 | creative | 18 | `reference/commands/creative.md` |
 | custom-conversion | 5 | `reference/commands/custom-conversion.md` |
 | dataset | 18 | `reference/commands/dataset.md` |
 | doctor | 4 | `reference/commands/doctor.md` |
 | duplicate | 1 | `reference/commands/duplicate.md` |
+| experiment | 4 | `reference/commands/experiment.md` |
 | growth | 1 | `reference/commands/growth.md` |
 | guardrails | 4 | `reference/commands/guardrails.md` |
 | leadgen | 6 | `reference/commands/leadgen.md` |
@@ -33,10 +35,11 @@ Per-domain detail (flags, scopes, examples) lives in `reference/commands/<domain
 | meta | 2 | `reference/commands/meta.md` |
 | metrics | 4 | `reference/commands/metrics.md` |
 | pixel | 19 | `reference/commands/pixel.md` |
-| plan | 13 | `reference/commands/plan.md` |
+| plan | 16 | `reference/commands/plan.md` |
 | playbook | 34 | `reference/commands/playbook.md` |
 | policy | 2 | `reference/commands/policy.md` |
 | portfolio | 1 | `reference/commands/portfolio.md` |
+| recipe | 3 | `reference/commands/recipe.md` |
 | report | 12 | `reference/commands/report.md` |
 | rules | 11 | `reference/commands/rules.md` |
 | search | 1 | `reference/commands/search.md` |

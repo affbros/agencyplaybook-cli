@@ -105,6 +105,49 @@ apb campaign compose-from-spec --spec-file q3-launch.json --execute
 # (Auto-pauses created entities in reverse order if any step fails.)
 ```
 
+### Compose spec v2 — the SOP
+
+A v2 spec (`"schema_version": 2`) lets you describe intent — `targeting_brief`,
+`creative_brief`, `advantage`, `placements`, `schedule`, `bidding` — instead of
+hand-writing Meta's nested JSON. v1 specs are unchanged and still work.
+
+**Always follow this order.**
+
+```bash
+# 1. Compile locally. No API calls, no credentials needed. This is the review artifact.
+
+# 2. Read what will actually be sent — never sign off on the brief alone.
+jq '.ad_sets[0].targeting, .ad_sets[0].ads[0].creative.asset_feed_spec' compiled.json
+
+# 3. Read the warnings. Do not skip this step.
+jq '.compile_warnings // []' compiled.json
+#   placement_removed_in_v26 → a v26-dead placement was dropped
+#   unresolved_reference     → an audiences[]/lead_forms[] name; FATAL under --execute if still unresolved
+#   creative_format_risk     → carousel/collection/format-automation was declared
+#   ai_disclosure_not_sent   → recorded in the artifact only; Meta v25.0 has no field for it
+
+# 4. Dry-run against the account (adds delivery estimates + the stage plan).
+apb campaign compose-from-spec --spec-file brief.json --with-estimates
+
+# 5. Only then execute, under the 4 write gates.
+apb campaign compose-from-spec --spec-file brief.json --execute
+```
+
+**Things to tell the user before they run step 5:**
+
+- `advantage.audience` (0 or 1) is **required** on every v2 ad set. Meta v26 rejects an ad-set
+  create whose Advantage+ audience flag isn't explicit, so the compiler refuses to guess.
+- Stage order is `audiences → lead_forms → campaign → per ad set → rules`. A failure rolls the
+  campaign tree back by pausing in reverse and **deletes** created rules + audiences — but
+  **lead-gen forms cannot be deleted by API**. Anything in `rollback.not_reversible` needs a
+  human to archive it in Ads Manager.
+- `schedule` (dayparting) still requires a **lifetime** budget — same rule as `--daypart-*`.
+- Two sources of truth is always an error, never a merge: `targeting` + `targeting_brief`,
+  `creative` + `creative_brief`, `schedule` + `adset_schedule`, or
+  `advantage.detailed_targeting: true` with `advantage.audience: 0`.
+
+Full field-by-field reference: `USAGE_GUIDE.md` § Workflow 5e.
+
 ## 9. JSON output for shell pipelines
 
 ```bash
@@ -193,6 +236,25 @@ apb split-test create \
   --execute
 apb split-test status --id abc123
 apb split-test promote --id abc123 --winner B --scale 1.5 --execute --confirm-destructive
+```
+
+## 14b. Experiment (base-campaign A/B with a p-value verdict)
+
+`experiment` wraps `split-test create` with a `--base-campaign-id` entry point
+(auto-resolves the control variant) and a stats-backed `results` verdict:
+
+```bash
+apb experiment create \
+  --base-campaign-id 23847000 \
+  --traffic-split 50 \
+  --hypothesis "New hook copy improves purchase rate" \
+  --duration-days 14 \
+  --execute
+apb experiment results --id exp_abc123 --metric conversions --confidence 0.95
+# {"verdict": "WINNER"|"LOSER"|"INCONCLUSIVE", "p_value": ..., "days_needed": ...}
+apb experiment promote --id exp_abc123 --plan promote.json   # envelope action, not a direct mutation
+apb experiment end --id exp_abc123 --plan end.json
+apb plan apply --from-file promote.json --execute --confirm-destructive
 ```
 
 ## 15. Sync local state with Meta
@@ -331,6 +393,38 @@ apb campaign compose-from-spec --preset catalog-sales \
 
 Built-in preset names are reserved — if a user-saved preset shares the name, `compose-from-spec --preset <name>` exits 2 with a shadowing error.
 
+### Plan the build, apply it, undo it
+
+```bash
+# Plan — no mutation. Writes build.json (machine) + build.md (human review).
+apb campaign compose-from-spec --spec-file brief.json --plan build.json
+
+jq -r '.actions[] | "\(.id) \(.op) \(.target.resource)"' build.json
+# a1 campaign.create  act_.../campaigns
+# a2 adset.create     act_.../adsets      (params.campaign_id = "{{ref:a1}}")
+# a3 creative.create  act_.../adcreatives
+# a4 ad.create        act_.../ads
+
+# Apply — atomic order, all five gates re-enforced regardless of the file.
+READ_ONLY=false ALLOW_WRITES=true APB_ALLOW_MUTATIONS=true \
+  apb plan apply --from-file build.json --execute --json > receipt.json
+jq '.status, .completed_through' receipt.json     # "PARTIAL"  "a2"  (sandbox creative ceiling)
+
+# Undo exactly what landed — reverse order, gate 5 required.
+jq .rollback_envelope receipt.json > rollback.json
+READ_ONLY=false ALLOW_WRITES=true APB_ALLOW_MUTATIONS=true \
+  apb plan apply --from-file rollback.json --execute --confirm-destructive --json | jq .status
+```
+
+### Flip Advantage+ on an existing ad set
+
+```bash
+apb adset update --id 120... --advantage-audience on --execute
+apb adset update --id 120... --advantage-placements on --execute
+# --advantage-placements off is refused: pick an explicit set instead, e.g.
+apb adset update-targeting --id 120... --spec '{"geo_locations":{"countries":["US"]}}' --placements feed --execute
+```
+
 ## 22. Naming uploaded assets (v0.2.2)
 
 Uploads default the asset name to the file's basename; override per asset:
@@ -348,6 +442,29 @@ apb creative create-video-simple --name "Promo creative" --page-id PAGE \
 
 # Omit a *-name flag → the asset is named by the filename (e.g. promo.mp4).
 ```
+
+## 23. "What happens if we add $X?" — delivery-estimate scenarios (v0.5.29+)
+
+Before raising a budget, see what Meta actually expects to deliver — no mutation:
+
+```bash
+# From a spec, or a live ad set — defaults scenarios to the ad set's own
+# daily budget × {0.5, 1, 1.5} when --budget-scenarios is omitted:
+apb plan forecast --adset-id 120210000000000 --budget-scenarios 50,75,100
+
+# Write the JSON + a self-contained scenario-table page:
+apb plan forecast --adset-spec build/spec.v2.json --out forecast.json --plan forecast.html
+```
+
+Read-only: one Meta `delivery_estimate` call per scenario, on the v26-safe
+field set only (`estimate_mau_lower_bound`/`_upper_bound`, `estimate_ready`).
+An ad set with no manual targeting (Advantage+ /
+fully-automated) can't be estimated against — every scenario comes back with
+an honest `note` instead of a guessed number, `basis: "unavailable"`.
+
+`budget simulate --adset-id <id> --daily-budget <usd>` uses the same estimate
+when the ad set is forecastable (re-basing the old closed-form heuristic on
+it) and always reports which it used: `basis: "delivery_estimate" | "heuristic"`.
 
 ---
 
