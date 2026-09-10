@@ -77,12 +77,16 @@ Exact commands, artifact paths and the JSON contracts are in `references/cli-han
 | Plan | `orchestrate campaign-launch --from-file build/spec.json > build/launch-dryrun.json` (dry-run; the `steps[]` JSON + guard verdict IS the review artifact). ⚠️ `--plan build/plan.md` currently writes an EMPTY doc for launches (plan-first renderer only knows bulk-mutation ops — campaign-build-001 followup P1); write `build/SUMMARY.md` from the dry-run instead | Add `--validate-only --execute` (with `APB_GADS_ALLOW_MUTATIONS=true`) for a SERVER_VALIDATED round-trip |
 | Launch | **Only after a human YES:** `… --execute` (born PAUSED) → `verify list` → `changes` | Never combine with a budget/target change on an existing campaign |
 
-**Advanced features the v1 spec can't carry yet** (schedules, device modifiers, geo exclusions /
-presence type, audiences, sitelinks / callouts / snippets, shared negative sets, tracking template,
-network / rotation settings, conversion goals): until `campaign-build-001` S1 lands, list them in
-`build/post-launch.md` as the exact `mutate …` commands to run after launch, each dry-run first.
-Once S1/S2 ship, put them in the brief's `targeting` / `assets` / `negatives` / `settings` blocks and
-`recipe build --brief` carries them. Don't pretend the v1 spec has fields it doesn't.
+**Advanced features the v1 `CampaignLaunchSpec` still can't carry** (schedules, device modifiers,
+geo exclusions / presence type, audiences, sitelinks / callouts / snippets, shared negative sets,
+tracking template, network / rotation settings, conversion goals): if you're on the v1
+stage-by-stage sequence, list them in `build/post-launch.md` as the exact `mutate …` commands to
+run after launch, each dry-run first. **`campaign-build-001` S1/S2 have shipped** — the brief's
+`targeting` / `assets` / `negatives` / `settings` blocks carry all of the above natively today, and
+`recipe build --brief` is the whole-campaign path that emits them directly (see
+`references/cli-handoff.md` § "Today — Meta/Google, whole-campaign brief"). Prefer `recipe build`
+for a fresh brief; the v1 sequence + `post-launch.md` stays useful only when you're deliberately
+hand-editing stage by stage. Don't pretend the v1 spec has fields it doesn't.
 
 ## 3. Copy — layered skills, our doctrine on top
 
@@ -119,8 +123,15 @@ Always, in this order (matches the CLI's plan-first format):
    `build/plan.md`, `build/post-launch.md`, plus `plan.json` (Plan envelope) and `plan.html` — on
    Google also `editor/*.csv` (Meta has no Ads-Editor format, so a Meta build writes none).
 3. **Deploy options**, stated plainly: CLI `--execute` (born PAUSED — `recipe build --execute` on
-   both channels) · import `plan.json` into AgencyPlaybook (Meta today; Google after S3) · MCP `gads_build_campaign_spec → validate → preview
-   → human YES → apply → verify` · Google Ads Editor CSV.
+   both channels) · import `plan.json` into AgencyPlaybook — **both channels, shipped**: Meta via
+   `POST /api/v1/plans/import` (Plans page approve → execute → poll → rollback) and Google via
+   `POST /api/v1/gads/plans/import` (same lifecycle on `/gads/plans/:id`) · MCP round trip
+   `agency_build_plan` (or `gads_build_campaign_spec → gads_validate_spec` / `meta_build_campaign_spec
+   → meta_create_plan → meta_validate_plan`) → human YES → `gads_execute_plan` / `meta_execute_plan`
+   (approve + execute + poll) → `agency_rollback_plan` if it needs undoing → `agency_export_plan` to
+   hand the stored plan back to the CLI (`apb plan apply --from-file` /
+   `apb-gads mutate apply-plan --from-file`) · Google Ads Editor CSV. See
+   `references/cli-handoff.md` § "MCP sequence" for the full chain.
 4. **Open questions / what you couldn't verify** — named, not buried.
 
 ## 5. Hard rules (non-negotiable)

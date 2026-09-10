@@ -8,16 +8,19 @@ file is the authoritative reference for that path: the sequence, the managed wri
 4 deferred), every refusal reason, and the non-negotiables. If you are only analyzing, you never
 touch any of this.
 
-## The one write tool
+## The write tools
 
-| Tool | What it does | Token comes from |
+| Tool | What it does | Token / consent comes from |
 |---|---|---|
 | `gads_apply_change` | applies ONE bounded Google change (the 9 preview ops; 5 executable today) to one campaign / criterion / budget | `gads_preview_change` |
+| `gads_execute_plan` | approves + executes + polls an IMPORTED Google plan-envelope-v2 row to terminal state (`pending → approved → executing → executed \| failed`) — the Google twin of `meta_execute_plan` | the row's own approval (imported already-approved, or approved via the Plans page / this tool) |
+| `agency_rollback_plan` | undoes an executed plan, or a `failed` plan whose receipt created at least one resource, on **either** channel | the SaaS row being undone IS the consent record — `confirm_destructive:true` required |
 
-It is `destructiveHint:true`. It applies to the customer you operate on, and requires the single-use,
-customer-bound approval token + `operator_confirmation:true` (the human YES) before it touches
-anything. **There is no Google plan-orchestration / multi-step execute tool** in this surface
-(the gads side has no plan state machine; the token is the interlock) — do not invent one.
+`gads_apply_change` is `destructiveHint:true`. It applies to the customer you operate on, and
+requires the single-use, customer-bound approval token + `operator_confirmation:true` (the human
+YES) before it touches anything. `gads_execute_plan` and `agency_rollback_plan` operate on a
+**stored plan row**, not a single bounded change — see "SaaS sessions" below for the full
+plan-envelope-v2 lifecycle, which is live on Google exactly as it is on Meta.
 
 ## The mandatory sequence (never skip, never reorder)
 
@@ -145,12 +148,19 @@ same way `gads_preview_change` does and, on success, imports the exported envelo
 (`POST /gads/plans/import`, hash-bound) — returning `plan_id` + `review_url`. `gads_apply_change`
 ALSO imports the change-set it is about to apply (reusing the already-verified token's hash — no
 fresh mint) BEFORE its existing sandbox-fenced local execution, returning `plan_id`. **The Google
-execute route is still `501 not_implemented_yet` until sprint-s03b** — an imported row stays
-`pending`/`approved` regardless of what the local execution below it does; `gads_apply_change`
-says so explicitly with `saas_execution:"not_available_until_s03b"`. On a SaaS session the plan is
-on the tenant's Plans page at `/gads/plans/<id>` — the same doctrine as Meta's Plans page (see the
-`agencyplaybook-meta-brain` skill's `safety-and-approval.md`). Non-SaaS sessions (no `APB_API_KEY`)
-never call the plans API — the exported envelope is returned inline only.
+execute route is live** (`POST /api/v1/gads/plans/:id/execute`, `gads_plans.rs`) — call
+`gads_execute_plan` to approve + execute + poll an imported row to `executed`/`failed`, exactly the
+lifecycle `meta_execute_plan` drives for Meta. On a SaaS session the plan is on the tenant's Plans
+page at **`/plans/<id>`** (one route for both channels — the same doctrine as Meta's Plans page,
+see the `agencyplaybook-meta-brain` skill's `safety-and-approval.md`). Non-SaaS sessions (no
+`APB_API_KEY`) never call the plans API — the exported envelope is returned inline only.
+
+A stored plan can also be undone: `agency_rollback_plan` (channel-aware — pass `channel:"google"`)
+undoes an `executed` row, or a `failed` row whose receipt created at least one resource. And a
+plan built anywhere can be handed to `apb-gads`: `agency_export_plan` returns the envelope, its
+`plan_hash`, and the exact apply command — `apb-gads mutate apply-plan --from-file plan.json
+--execute` — plus the `{{ref:aN}}` note when the envelope carries temp refs (the executor binds
+them at run time; never hand-edit one).
 
 ## Non-negotiables (the doctrine)
 

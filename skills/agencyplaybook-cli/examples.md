@@ -466,6 +466,33 @@ an honest `note` instead of a guessed number, `basis: "unavailable"`.
 when the ad set is forecastable (re-basing the old closed-form heuristic on
 it) and always reports which it used: `basis: "delivery_estimate" | "heuristic"`.
 
+## 24. Handing a plan to AgencyPlaybook, and picking one back up
+
+**CLI → SaaS**: build a plan, hand it to the SaaS Plans page for a human approve:
+
+```bash
+apb recipe build --brief briefs/client.yaml --out build/          # writes build/plan.json, born PAUSED
+curl -s -X POST https://api.agencyplaybook.io/api/v1/plans/import \
+  -H "Authorization: Bearer $APB_API_KEY" -H "Content-Type: application/json" \
+  --data-binary @build/plan.json                                  # -> { plan_id, ... }
+# now approve/execute on /plans/<plan_id>, or via the MCP: agency_export_plan / meta_execute_plan
+```
+
+**SaaS → CLI**: pull an approved (or already-executed) plan back down and run or re-inspect it
+from a terminal:
+
+```bash
+apb plan get --id pln_abc123 --format v2 > plan.json      # or: agency_export_plan over the MCP
+apb plan validate --from-file plan.json                   # dry run first
+apb plan apply --from-file plan.json --execute             # the four write gates, same as any plan apply
+apb plan export --from-file plan.json --format html --out review.html   # human-readable render
+```
+
+`plan_hash` is re-verified on apply — a file you edited after export needs `--allow-edited-plan`,
+and you should say so explicitly rather than adding the flag silently. If the envelope still
+carries `{{ref:aN}}` / `{{account}}` placeholders, never substitute them by hand — the executor
+(SaaS job runner or either CLI) binds them at run time from its own ref map for the run.
+
 ---
 
 ## Cross-references

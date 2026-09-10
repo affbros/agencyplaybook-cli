@@ -34,8 +34,8 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
 | `report` | 24 | performance/asset/PMAX/shopping/settings reports | `references/commands/report.md` |
-| `experiment` | 1 | `results --experiment-id` — one experiment's outcome: control vs treatment metrics + point estimate / margin of error / p-value per metric. Read-only, no gates. | `references/commands/experiment.md` |
-| `portfolio` | 3 | MCC-wide per-currency roll-ups: `summary` (+`--compare`), `breakdown --dimension device\|network\|campaign_type`, `trend` — sequential fan-out, money never summed across currencies | `references/commands/portfolio.md` |
+| `experiment` | 2 | `results --experiment-id` — one experiment's outcome: control vs treatment metrics + point estimate / margin of error / p-value per metric (read-only); `promote --id` — graduate the treatment into the live production change (real write, dry-run first, `--execute` to graduate; `--plan` emits a reviewable envelope). | `references/commands/experiment.md` |
+| `portfolio` | 4 | MCC-wide per-currency roll-ups: `summary` (+`--compare`), `breakdown --dimension device\|network\|campaign_type`, `trend` — sequential fan-out, money never summed across currencies — plus `plan --objective --budget-total` (marginal-return cross-account budget allocator: shifts budget from below- to above-median marginal-return campaigns, never onto LEARNING or currency-crossing; read-only, writes a `campaign-budget-update-bulk` envelope to `--out`, never executes) | `references/commands/portfolio.md` |
 | `playbook` | 67 | `list` + **66 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
 | `verdict` | 1 | one decisive verb per campaign (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) from 3 gates | `references/commands/verdict.md`, `references/verdict-framework.md` |
 | `campaign-type-advisor` | 1 | prescriptive engine choice (Search vs PMax vs Demand Gen) for a goal | `references/commands/campaign-type-advisor.md`, `references/campaign-type-selection.md` |
@@ -45,7 +45,7 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `plan` | 11 | keyword ideas/metrics; build Search/PMAX launch specs (`plan campaign …`) | `references/commands/plan.md` |
+| `plan` | 11 | keyword ideas/metrics; build Search/PMAX launch specs (`plan campaign …`); `merge --from … --mode --horizon` (N envelopes → one ranked, wave-sequenced envelope); `forecast --spec … / --campaign-id …` (delivery-estimate scenarios, read-only); `export --from-file --format html\|editor-csv` (render an existing envelope) | `references/commands/plan.md` |
 | `validate` | 2 | check a launch spec (`campaign-spec` / `pmax-spec`) — **exit 3 on fail** | `references/commands/validate.md` |
 | `context` | 2 | per-customer goal/strategy state, **schema v2** — goals + `brand` (terms/domains/competitors) + `lists` (canonical negative shared set) + per-recipe tunables (local JSON) | `references/commands/context.md` |
 

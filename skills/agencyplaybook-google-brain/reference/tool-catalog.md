@@ -1,18 +1,22 @@
-# Tool catalog — the Google surface (14 `gads_*` + the shared `agency_*` tools)
+# Tool catalog — the Google surface (16 `gads_*` + the shared/handoff `agency_*` tools)
 
 The single source you consult for tool selection. **Every tool never throws** — connectivity /
 auth / validation problems come back as structured data (often `isError:true` with an
 `error.code`) that you reason over. This is **not** a CLI flag reference — it describes MCP tool
 inputs/outputs.
 
-The MCP advertises **37 tools** total. **14 are `gads_*`** (Google); the brain also reuses the
-**shared `agency_*`** context/discovery/result tools. Of the Google tools, the **9 read tools**
-carry `readOnlyHint:true` and mutate nothing; the **3 plan/preview tools**
-(`gads_build_campaign_spec` / `gads_validate_spec` / `gads_preview_change`) are
-`readOnlyHint:false + destructiveHint:false` (they build an artifact / mint an approval token but
-make NO live change); **`gads_apply_change`** is the only write (`destructiveHint:true`, behind the
-approval handshake + an explicit human YES); **`gads_verify_execution`** is a read-only post-write
-readback. Full execution doctrine: `reference/safety-and-approval.md`.
+The MCP advertises **45 tools** total (**48** for an agency-entitled tenant, via the Meta-only
+Group L). **16 are `gads_*`** (Google); the brain also reuses the **shared `agency_*`**
+context/discovery/result tools plus the **channel-aware `agency_*` plan-handoff and CLI-planning
+tools** (`agency_rollback_plan`, `agency_export_plan`, `agency_build_plan`, `agency_merge_plans`,
+`agency_forecast_plan` — these work identically for Meta, just pass `channel`/no channel arg per
+tool as documented below). Of the Google-named tools, the **9 read tools** carry
+`readOnlyHint:true` and mutate nothing; the **3 plan/preview tools** (`gads_build_campaign_spec` /
+`gads_validate_spec` / `gads_preview_change`) are `readOnlyHint:false + destructiveHint:false`
+(they build an artifact / mint an approval token but make NO live change); `gads_apply_change` and
+`gads_execute_plan` are writes (`destructiveHint:true`, behind the approval handshake + an
+explicit human YES); `gads_verify_execution` is a read-only post-write readback. Full execution
+doctrine: `reference/safety-and-approval.md`.
 
 > Every Google read is an `apb-gads` SUBPROCESS in SaaS-managed mode (`APB_API_KEY` resolves the
 > Google token server-side; argv-only `execFile`, no shell, a hard read-flag allowlist that refuses
@@ -209,8 +213,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 - **Output:** `{ customer_id, kind, plan_id?, hash, summary, envelope? (or result_id? when
   out:"file"), review_url?, approval_token, change_set_hash, expires_at, risk:"mutation", note }`.
   `plan_id`/`review_url` are present only on a SaaS session with a successful import — the envelope
-  is always produced either way. **Google plan execute is still 501 until sprint-s03b** — this tool
-  never applies anything, only exports + optionally imports the artifact.
+  is always produced either way. This tool never applies anything itself, only exports +
+  optionally imports the artifact — pass the resulting `plan_id` to `gads_execute_plan` (Group
+  gads-plan-execution) to approve + execute + poll it, or `agency_export_plan` to hand it back to
+  `apb-gads` as `plan.json`.
 
 ---
 
@@ -256,15 +262,112 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   verify_result, approval_jti, audit_id, note }` (or `{error}` with `raw.reason` /
   `raw.approval_reason`). **saas-plans SP4 — on a SaaS session:** ALSO imports this exact change as
   a plan-envelope-v2 document (reusing the already-verified token's hash — no fresh mint) BEFORE
-  the local execution below, returning `plan_id`. Since the SaaS Google executor is `501` until
-  sprint-s03b, the row stays `pending`/`approved` — `saas_execution:"not_available_until_s03b"`
-  says so explicitly. This is best-effort and does not block or change the local execution.
+  the local execution below, returning `plan_id`. This tool deliberately does NOT chain into the
+  SaaS Google executor — the change was already applied via the local/managed-write path, so
+  executing the same imported envelope would re-apply it a second time —
+  `saas_execution:"applied_locally_saas_row_not_executed"` says so explicitly; the row is an
+  audit-trail artifact only, never pass this `plan_id` to `gads_execute_plan`. (The SaaS Google
+  executor itself is live — see `gads_execute_plan` for the path that DOES execute an imported
+  plan.) This is best-effort and does not block or change the local execution.
 - **Path selection is credential routing, NOT a fence.** Production (no BYO yaml) → the apb-api
   `/google` managed-write proxy (`googleAds:mutate`; scope `write:google:mutations` + `write_policy`
   gated upstream). The BYO sandbox test path (a configured write yaml) → the gads subprocess with
   `--execute`. **Only 5 of the 9 ops are executable via the managed proxy today** — the other 4 are
   refused `google_managed_op_requires_ad_group` with no live call (see
   `reference/safety-and-approval.md`).
+
+
+### `gads_execute_plan`
+- **Purpose:** approve + execute + poll an IMPORTED Google plan-envelope-v2 row to a terminal
+  state — the Google twin of `meta_execute_plan`. `readOnlyHint:false + destructiveHint:true`. Adds
+  NO new capability (the web Plans page could already do this) — a second, equally-gated door onto
+  the same SaaS Google executor.
+- **Handshake (enforced IN ORDER):** read the row (`GET /gads/plans/:id`; must be `pending` or
+  `approved`) → `verifyRowBoundApprovalAndConsume(approval_token)` (single-use; the change-set
+  binding lives server-side — the row was imported with `approval_token_hash` bound to it, and
+  `/approve` re-derives that digest, so a token minted for a different plan is refused) →
+  `operator_confirmation:true` → destructive gate (any action `requires_confirm:true`, or
+  `max_blast_radius >= 4`, or CRITICAL risk) needs `confirm_destructive:true` → `POST
+  /gads/plans/:id/approve {mcp_token}` (skipped, not failed, if a human already approved on the web
+  Plans page) → `POST /gads/plans/:id/execute` (202) → poll `GET /gads/plans/:id` to terminal →
+  best-effort `gads_verify_execution` readback → audit.
+- **Input:** `{ plan_id, approval_token, operator_confirmation:true, confirm_destructive? }`.
+- **Output:** `{ customer_id, plan_id, channel:"google", state, job_id, requires_confirm, summary,
+  approved, executed, completed_through?, execution_receipt?, result, poll_timed_out,
+  verify_result?, approval_jti, audit_id, note }` (or `{error}`). A terminal `failed` reports
+  `completed_through` (the last action that landed) and points at `agency_rollback_plan` — since
+  sprint-s03c a `failed` plan whose receipt created at least one resource IS rollback-eligible; do
+  NOT just build a fresh plan on top of live orphans.
+
+---
+
+## Group — Plan handoff (channel-aware: works for BOTH `meta` and `google` plan rows)
+
+### `agency_rollback_plan`
+- **Purpose:** undo an EXECUTED plan, or a `failed` plan whose receipt shows the run created at
+  least one resource, on **either** channel (pass `channel:"google"`). `readOnlyHint:false +
+  destructiveHint:true`. The API builds the inverse plan from the original's recorded prior values
+  + its execution receipt, imports it as its own row, and runs it as a job.
+- **Consent — NO approval token, deliberately:** the SaaS row being undone IS the consent record;
+  the inverse plan inherits its approval. Requires `operator_confirmation:true` AND
+  `confirm_destructive:true` instead (an undo removes created entities).
+- **Input:** `{ channel:"google", plan_id, operator_confirmation:true, confirm_destructive:true }`.
+- **Output:** `{ channel, plan_id, account, state_before, state_after, rollback_plan_id, job_id,
+  actions, not_invertible, rolled_back, poll_timed_out, result, audit_id, note }` (or `{error}`).
+  `not_invertible` is REPORTED, never guessed at — still live, needs a manual decision.
+
+### `agency_export_plan`
+- **Purpose:** hand a stored SaaS plan row BACK to `apb-gads` as its plan-envelope-v2 document.
+  `readOnlyHint:true`. This is the **SaaS → CLI** half of the handoff; the **CLI → SaaS** half
+  needs no tool — a CLI-produced document (`apb-gads recipe build`, `plan merge`, `plan export`) is
+  imported by `gads_export_plan` and shows on the same `/plans/<id>` Plans page for a human
+  Approve.
+- **Input:** `{ channel:"google", plan_id, format?:"envelope"(default)|"handoff" }`.
+- **Output:** `{ plan_id, channel, state, plan_hash, has_temp_refs, envelope?, summary,
+  cli:{apply_command, validate_command, rollback_command}, urls:{review_html, editor_zip?}, note }`
+  (or `{error}`). `apply_command` — `apb-gads mutate apply-plan --from-file plan.json --execute`
+  (`--validate-only` first). `plan_hash` is re-verified on apply — an edited file needs
+  `--allow-edited-plan`, say so explicitly. `has_temp_refs:true` means `{{ref:aN}}` / `{{account}}`
+  placeholders remain — the EXECUTOR binds those at run time; never substitute by hand.
+
+---
+
+## Group — CLI-planning producers (channel-aware; read-only — none of these writes)
+
+### `agency_build_plan`
+- **Purpose:** turn a BRIEF into a launch-ready build on either channel — runs the CLI's own
+  `recipe build` (`apb-gads` for Google) as a dry-run subprocess. `readOnlyHint:false +
+  destructiveHint:false` (produces an artifact, mints a token; no live change). On a SaaS session
+  the envelope is ALSO imported to the Plans page with a freshly minted token → `plan_id` +
+  `review_url`.
+- **Input:** `{ channel:"google", brief (YAML string | object), customer_id?, stage?
+  ("research"|"structure"|"copy"|"targeting"|"assets"|"bidding"|"validate"|"plan", default "plan"),
+  format?:"envelope"|"handoff" }`.
+- **Output:** `{ channel, account, stage, plan_id?, plan_hash, has_temp_refs, action_count,
+  blast_radius, summary, spec, verdict, artifacts[], envelope?, result_id?, review_url,
+  approval_token, change_set_hash, expires_at, cli:{apply_command,validate_command,
+  rollback_command}, note }` (or `{error}`). Next step after human YES: `gads_execute_plan` (SaaS)
+  or `agency_export_plan` → CLI apply.
+
+### `agency_merge_plans`
+- **Purpose:** merge N plan envelopes into ONE ranked, wave-sequenced envelope
+  (`plan merge`) — read-only producer.
+- **Input:** `{ channel:"google", envelopes[] (plan-envelope-v2 documents or plan_ids), mode?
+  ("growth"|"efficiency"), customer_id?, format? }`.
+- **Output:** `{ channel, account, inputs, mode, plan_id?, plan_hash, has_temp_refs, action_count,
+  blast_radius, summary, waves, conflicts, envelope?, result_id?, review_url, approval_token,
+  change_set_hash, expires_at, cli, note }`. `waves` carries `wait-for-status` pseudo-actions the
+  EXECUTOR waits on between waves — never strip them. `conflicts[]` is what the merge refused to
+  reconcile — a human must settle those before re-merging.
+
+### `agency_forecast_plan`
+- **Purpose:** forecast a build spec (`agency_build_plan`'s `spec`) or a live campaign
+  (`plan forecast`) — read-only, no plan artifact produced.
+- **Input:** `{ channel:"google", spec? | campaign_id?, customer_id? }` — exactly one of
+  `spec`/`campaign_id`.
+- **Output:** `{ channel, account, source, forecast, scenarios?, result_id?, caveats[], note }` (or
+  `{error}`). PMAX / Demand Gen have no forecast API and return `forecast:null` — read `caveats`
+  before quoting a number to a client.
 
 ---
 

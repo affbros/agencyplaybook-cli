@@ -131,10 +131,61 @@ in Editor before launch; it is a READ artifact only, `--execute` never touches i
 
 ## MCP sequence (agent-driven, either era)
 
-`gads_resolve_customer` → `gads_build_campaign_spec` (emits the spec; after S5 accepts the brief) →
-`gads_validate_spec` → `gads_preview_change` → **human YES + approval token** → `gads_apply_change`
-→ `gads_verify_execution`. Meta: `meta_build_campaign_spec` → `meta_create_plan` →
-`meta_validate_plan` → YES → `meta_execute_plan`.
+Single bounded change (one campaign/ad-set/keyword op, not a whole build): Google
+`gads_preview_change` (mints a token) → **human YES + approval token** → `gads_apply_change` →
+`gads_verify_execution`. Meta: `meta_preview_change` → YES → `meta_apply_change` →
+`meta_verify_execution`.
+
+Spec/build → plan → execute (either channel): `gads_resolve_customer` → `gads_build_campaign_spec`
+(emits the spec; after S5 accepts the brief) → `gads_validate_spec` / `gads_export_plan` (produces
+the envelope, imports it, mints the token) → YES → `gads_execute_plan` (approve + execute + poll).
+Meta: `meta_build_campaign_spec` → `meta_create_plan` → `meta_validate_plan` (mints the token) →
+YES → `meta_execute_plan` (imports + approves + executes + polls). Both channels share the same
+plan states: `pending → approved → executing → executed | failed`.
+
+Whole-brief build (`recipe build`, either channel): `agency_build_plan` (spec + plan envelope +
+verdict, imported to the Plans page on a SaaS session, born PAUSED) → human reviews the artifact
+(review URL / `review.html`) → YES → `gads_execute_plan` / `meta_execute_plan` (approve + execute
++ poll) → `meta_verify_execution` / `gads_verify_execution`. If it needs undoing:
+`agency_rollback_plan` (channel-aware; also rollback-eligible for a `failed` plan whose receipt
+created at least one resource — read `completed_through` first, don't just build a fresh plan on
+top of live orphans).
+
+### Handing a plan to AgencyPlaybook, and picking one back up (both directions)
+
+**SaaS → CLI** (you built/approved a plan in the MCP or on the Plans page and want to run or
+re-inspect it from a terminal): `agency_export_plan` returns the envelope, its `plan_hash`, and
+the exact apply command for the row's channel — `apb plan apply --from-file plan.json --execute`
+(Meta) or `apb-gads mutate apply-plan --from-file plan.json --execute` (Google). Dry-run first
+with `apb plan validate --from-file` / `--validate-only`. Equivalent CLI-only form: `apb plan get
+--id <id> --format v2 > plan.json`. `plan_hash` is re-verified on apply — a hand-edited file needs
+`--allow-edited-plan`; say so explicitly rather than adding it silently. `apb plan export
+--from-file plan.json --format html|editor-csv` renders the same envelope for human review or
+Google Ads Editor.
+
+**CLI → SaaS** (you built a plan on the CLI — `recipe build`, `plan merge`, `orchestrate …
+--plan`, `apb plan export` — and want it on the Plans page for approval): the resulting
+`plan.json` imports via the existing import path — `meta_execute_plan` (Meta) or
+`gads_export_plan` (Google) picks up an on-disk envelope and imports it, or `POST
+/api/v1/plans/import` / `/api/v1/gads/plans/import` directly — after which it appears on
+`/plans/<id>` for a human approve, same as anything built through the MCP. `{{ref:aN}}` /
+`{{account}}` temp references in a create-class envelope are bound by the EXECUTOR at run time
+(SaaS job runner and both CLIs share one ref map per run) — never hand-edit them.
+
+### CLI-only planning verbs
+
+The MCP wraps `agency_build_plan` / `agency_merge_plans` / `agency_forecast_plan` over the three
+most common of these — the rest stay terminal-only.
+
+`plan merge --from a.json --from b.json --mode … --horizon …` (N envelopes → one ranked,
+wave-sequenced envelope; MCP twin: `agency_merge_plans`), `plan forecast --adset-spec … /
+--campaign-id …` (MCP twin: `agency_forecast_plan`), `apb-gads recipe build` / `apb recipe build`
+(MCP twin: `agency_build_plan`), `plan validate --from-file`, `plan doctor --from-file` (structural
+lint before validate), `plan get --id <id> --format v2`, `plan export --from-file … --format
+html|editor-csv`, `plan review-batch` / `plan approve-batch` (batch human review), `plan canary`
+(staged rollout), `portfolio plan` (cross-account), `experiment --treatment-plan <envelope>` (A/B
+test a plan against a live baseline). None of these have a direct MCP tool beyond the three named
+above — run them in a terminal, then hand the result back through the CLI → SaaS import path.
 
 ## Artifact layout
 

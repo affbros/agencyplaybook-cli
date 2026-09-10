@@ -294,6 +294,40 @@ apb-gads mutate apply-plan --from-file waste.md.json --execute
 
 `--save-plan` is the **deprecated** predecessor (JSON only, no document) — prefer `--plan`.
 
+### Handing a plan to AgencyPlaybook, and picking one back up
+
+**CLI → SaaS.** A `<path>.json` plan-envelope-v2 document (`recipe build`, `mutate apply-plan
+--plan`, `orchestrate campaign-launch --plan`, `plan merge`) imports via `POST
+/api/v1/gads/plans/import` and lands on the tenant's Plans page at **`/plans/<id>`** (same route
+as Meta — there is no separate `/gads/plans/<id>` page). Approve there, or drive it through the
+MCP: `gads_export_plan` mints the token + imports it, then `gads_execute_plan` approves + executes
++ polls to a terminal state.
+
+**SaaS → CLI.** There is no `plan get` on this binary — pull a stored Google plan down via the MCP
+(`agency_export_plan { channel:"google", plan_id }` → write `envelope` to `plan.json`) or a direct
+`GET /api/v1/gads/plans/:id` (Bearer `APB_API_KEY`), then dry-run before applying for real:
+
+```sh
+# after writing plan.json (from agency_export_plan or a GET /gads/plans/:id):
+apb-gads mutate apply-plan --from-file plan.json --validate-only     # dry run
+apb-gads mutate apply-plan --from-file plan.json --execute           # the three-gate safety model
+apb-gads plan export --from-file plan.json --format editor-csv --out build/   # or --format html
+```
+
+`plan_hash` is re-verified on apply — a hand-edited file needs `--allow-edited-plan`; say so
+explicitly rather than adding it silently. If the envelope still carries `{{ref:aN}}` /
+`{{account}}` placeholders, never substitute them by hand — the SaaS job runner and this binary
+both bind them at run time from one ref map per run.
+
+**CLI-only planning verbs** (no MCP tool beyond the three read-class producers
+`agency_build_plan`/`agency_merge_plans`/`agency_forecast_plan`): `plan merge --from a.json --from
+b.json --mode growth|efficiency --horizon <days>` (N envelopes → one ranked, wave-sequenced
+envelope — never strip the `wait-for-status` pseudo-actions between waves; `conflicts[]` needs a
+human to settle), `plan forecast --spec build/spec.v2.json` / `--campaign-id <id>
+--budget-scenarios 50,75,100` (delivery estimates, read-only), `portfolio plan` (cross-account),
+`experiment results --experiment-id <id>` / `experiment promote --id <id>` (A/B verdict and
+graduation).
+
 ## Reading results & capability reasoning
 
 - **JSON is the contract.** Read specific keys with `jq` rather than dumping whole playbook

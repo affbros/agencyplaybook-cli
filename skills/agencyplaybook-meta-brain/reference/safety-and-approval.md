@@ -7,16 +7,19 @@ and the human go-ahead — **never in the binary, which is a mechanical executor
 authoritative reference for that path: the sequence, the two flavours (single change vs plan), every
 refusal reason, and the non-negotiables. If you are only analyzing, you never touch any of this.
 
-## The two write tools
+## The write tools
 
-| Tool | What it does | Token comes from |
+| Tool | What it does | Token / consent comes from |
 |---|---|---|
 | `meta_apply_change` | applies ONE bounded change: `pause` · `resume` · `enable` · `set_status` · `set_budget` · `update_budget` · `archive` · `delete` to one campaign/adset/ad | `meta_preview_change` |
 | `meta_execute_plan` | runs a VALIDATED apb-api plan (can be a multi-step mutation; blast_radius 0–5) | `meta_validate_plan` |
+| `agency_rollback_plan` | undoes an executed plan, or a `failed` plan whose receipt created at least one resource, on **either** channel (`meta` or `google`) | the SaaS row being undone IS the consent record — `confirm_destructive:true` required |
 
-Both are `destructiveHint:true`. Both apply to the account you operate on, and both require the
-single-use, account-bound approval token + `operator_confirmation:true` (the human YES) before they
-touch anything.
+`meta_apply_change` and `meta_execute_plan` are `destructiveHint:true`. Both apply to the account
+you operate on, and both require the single-use, account-bound approval token +
+`operator_confirmation:true` (the human YES) before they touch anything. `agency_rollback_plan`
+operates on a stored, already-executed plan row rather than minting a fresh token — see
+"SaaS sessions" below for when a plan is rollback-eligible.
 
 ## The mandatory sequence (never skip, never reorder)
 
@@ -121,9 +124,17 @@ yet), and `meta_execute_plan` goes through the SaaS handshake instead of a direc
 plaintext token ever crosses the wire on) → `POST /plans/:id/execute` (202, async job) → poll to a
 terminal state. If a human clicks **Approve** on the web Plans page with the SAME token before you
 call `meta_execute_plan`, the approve step is skipped (not failed) and execution proceeds — **on a
-SaaS session the plan is on your Plans page at `/plans/<id>` (or `/gads/plans/<id>` for Google);
-approve it there or say YES here — both are the same approval.** Read a plan back (native or
-envelope id) with `meta_get_plan`. Non-SaaS sessions (no `APB_API_KEY`) are unaffected — the
+SaaS session the plan is on your Plans page at `/plans/<id>` — one route for both channels** (a
+Google envelope lands at the same `/plans/<id>` URL, not a separate `/gads/plans/<id>`); approve it
+there or say YES here — both are the same approval. A plan built by the CLI (`apb plan apply
+--from-file`, `recipe build`, `orchestrate campaign-launch --plan`) and imported through
+`meta_execute_plan` / `gads_export_plan` shows up on that SAME Plans page for a human approve —
+there is no separate "CLI plans" view. Read a plan back (native or envelope id) with
+`meta_get_plan`, or hand it back to a CLI with `agency_export_plan` (returns the envelope,
+`plan_hash`, and the exact `apb plan apply --from-file` / `apb-gads mutate apply-plan --from-file`
+command). Once executed, `agency_rollback_plan` undoes it (channel-aware — pass `channel:"meta"`
+or `channel:"google"`); on a `failed` plan, read `completed_through` first rather than building a
+fresh plan on top of live orphans. Non-SaaS sessions (no `APB_API_KEY`) are unaffected — the
 pre-SP4 local subprocess execute path runs exactly as before, and none of the above ever calls the
 plans API.
 

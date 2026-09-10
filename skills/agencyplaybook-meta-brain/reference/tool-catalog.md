@@ -1,21 +1,27 @@
-# Tool catalog — the 23 meta-brain MCP tools (+3 Group L when agency-entitled)
+# Tool catalog — the 26 meta-brain MCP tools (+3 Group L when agency-entitled)
 
 The single source you consult for tool selection. **Every tool never throws** — connectivity/
 auth/validation problems come back as structured data (often `isError:true` with an
 `error.code`) that you reason over. This is **not** a CLI flag reference — it describes MCP tool
 inputs/outputs.
 
-Your surface is the **16 `meta_*` tools + the 7 shared `agency_*` tools = 23**, plus the
+Your surface is the **17 `meta_*` tools + the 9 shared/handoff `agency_*` tools = 26**, plus the
 informational `gads_health` (Google *analysis* is the sibling `agencyplaybook-google-brain`) and,
 for an **agency-entitled** tenant, **+3 Group L** agency tools (§ Group L below). The MCP advertises
-**37 tools total** (40 agency-entitled); the `gads_*` Google tools are NOT yours to drive.
+**45 tools total** (48 agency-entitled) across BOTH channels — this file covers your 27 (30
+agency-entitled); the `gads_*` Google tools beyond `gads_health` are NOT yours to drive. Two of the
+9 shared/handoff `agency_*` tools — `agency_rollback_plan` and `agency_export_plan` — are
+**channel-aware**: pass `channel:"meta"` and they behave exactly as documented here, but the same
+tools work identically for a Google plan row (`channel:"google"`).
 
 Read tools (Groups A–G, K, L below) carry `readOnlyHint:true` and mutate nothing. The plan/spec
 artifacts in Group G are `readOnlyHint:false` (a record is created) but `destructiveHint:false` — no
-account changes. The **2 write tools** (Group I — `meta_apply_change` / `meta_execute_plan`,
-`destructiveHint:true`) run ONLY behind the approval handshake + an explicit human YES; the Group H
-preview/validate tools mint a token but change nothing; `meta_verify_execution` (Group J) is a
-read-only post-write readback. Full execution doctrine: `reference/safety-and-approval.md`.
+account changes. The **write tools** (Group I — `meta_apply_change` / `meta_execute_plan`, plus the
+channel-aware `agency_rollback_plan`, all `destructiveHint:true`) run ONLY behind the approval
+handshake + an explicit human YES (rollback substitutes the plan's own prior approval — see its
+entry); the Group H preview/validate tools mint a token but change nothing; `meta_verify_execution`
+(Group J) is a read-only post-write readback. Full execution doctrine:
+`reference/safety-and-approval.md`.
 
 Drift note: this is the verified P6 surface. `agency_capabilities` reports the live
 `available_tool_groups` (and whether you're agency-entitled, which exposes Group L), so trust that
@@ -310,6 +316,81 @@ from configuration — NOT a restriction.
   (`executed`/`failed`/`rolled_back`, ~2s interval, ~10 min ceiling). `envelope_id`/`job_id`/
   `execution_receipt`/`poll_timed_out` are present only on this path. A plan with no envelope form
   falls back to the pre-SP4 direct execute unchanged. See `reference/safety-and-approval.md`.
+
+---
+
+## Group — Plan handoff (channel-aware: works for BOTH `meta` and `google` plan rows)
+
+### `agency_rollback_plan`
+- **Purpose:** undo an EXECUTED plan, or a `failed` plan whose receipt shows the run created at
+  least one resource, on **either** channel. `readOnlyHint:false + destructiveHint:true`. The API
+  builds the inverse plan from the original's recorded prior values + its execution receipt,
+  imports it as its own row, and runs it as a job.
+- **Consent — NO approval token, deliberately:** the SaaS row being undone IS the consent record
+  (it could not have executed without being approved), and the inverse plan inherits that approval.
+  What this tool requires instead is the same human gate an execute carries:
+  `operator_confirmation:true` AND `confirm_destructive:true` (an undo removes created entities).
+- **Input:** `{ channel:"meta"|"google", plan_id, operator_confirmation:true, confirm_destructive:true }`.
+- **Output:** `{ channel, plan_id, account, state_before, state_after, rollback_plan_id, job_id,
+  actions, not_invertible, rolled_back, poll_timed_out, result, audit_id, note }` (or `{error}`).
+  `not_invertible` is REPORTED, never guessed at — anything listed there is still live and needs a
+  manual decision. Eligibility refusals: `plan_not_executed` (a `failed` plan that created nothing),
+  `no_execution_receipt`, `plan_not_invertible`.
+
+### `agency_export_plan`
+- **Purpose:** hand a stored SaaS plan row BACK to the CLI as its plan-envelope-v2 document.
+  `readOnlyHint:true` — never approves, executes or mutates anything. This is the **SaaS → CLI**
+  half of the handoff; the **CLI → SaaS** half needs no tool (a CLI-produced document is imported
+  by the existing import path — `meta_execute_plan`'s handshake for Meta, `gads_export_plan` for
+  Google — and shows on the same `/plans/<id>` Plans page for a human Approve).
+- **Input:** `{ channel:"meta"|"google", plan_id, format?:"envelope"(default)|"handoff" }`.
+  `"envelope"` returns the full document (write it verbatim to `plan.json`); `"handoff"` returns
+  only the commands/metadata for a smaller response.
+- **Output:** `{ plan_id, channel, state, plan_hash, has_temp_refs, envelope?, summary,
+  cli:{apply_command, validate_command, rollback_command}, urls:{review_html, editor_zip?}, note }`
+  (or `{error}`). `apply_command` — `apb plan apply --from-file plan.json --execute` (Meta,
+  validate first with `apb plan validate --from-file`) or `apb-gads mutate apply-plan --from-file
+  plan.json --execute` (Google, `--validate-only` first). `plan_hash` is re-verified on apply — a
+  file edited after export needs `--allow-edited-plan`, and you should say so explicitly rather
+  than adding it silently. `has_temp_refs:true` means the envelope still carries `{{ref:aN}}` /
+  `{{account}}` — the EXECUTOR binds those at run time; never substitute them by hand.
+
+---
+
+## Group — CLI-planning producers (channel-aware; read-only — none of these writes)
+
+### `agency_build_plan`
+- **Purpose:** turn a BRIEF into a launch-ready build — runs `apb recipe build` on Meta (pass
+  `channel:"meta"`) as a dry-run subprocess. `readOnlyHint:false + destructiveHint:false` (no
+  `--execute` is ever built, so nothing is created in the account). On a SaaS session the envelope
+  is ALSO imported to the Plans page with a freshly minted approval token → `plan_id` +
+  `review_url`.
+- **Input:** `{ channel:"meta", brief (YAML string | object), account_id?, format?:"envelope"|
+  "handoff" }`. (`stage` is Google-only and refused by name on Meta.)
+- **Output:** `{ channel, account, plan_id?, plan_hash, has_temp_refs, action_count, blast_radius,
+  summary, spec, verdict, artifacts[], envelope?, result_id?, review_url, approval_token,
+  change_set_hash, expires_at, cli:{apply_command,validate_command,rollback_command}, note }` (or
+  `{error}`). Next step after human YES: `meta_execute_plan` or `agency_export_plan` → CLI apply.
+  Undo an executed build with `agency_rollback_plan`.
+
+### `agency_merge_plans`
+- **Purpose:** merge N plan envelopes into ONE ranked, wave-sequenced envelope (`plan merge`) —
+  read-only producer.
+- **Input:** `{ channel:"meta", envelopes[] (plan-envelope-v2 documents or plan_ids), mode?
+  ("growth"|"efficiency"), account_id?, format? }`. (`--learning-window-days` is Meta-only.)
+- **Output:** `{ channel, account, inputs, mode, plan_id?, plan_hash, has_temp_refs, action_count,
+  blast_radius, summary, waves, conflicts, envelope?, result_id?, review_url, approval_token,
+  change_set_hash, expires_at, cli, note }`. `waves` carries `wait-for-status` pseudo-actions the
+  EXECUTOR waits on between waves — never strip them. `conflicts[]` needs a human to settle before
+  re-merging.
+
+### `agency_forecast_plan`
+- **Purpose:** forecast a build spec (`agency_build_plan`'s `spec`) or a live ad set
+  (`plan forecast`) — read-only, no plan artifact produced.
+- **Input:** `{ channel:"meta", spec? | adset_id?, account_id? }` — exactly one of `spec`/`adset_id`.
+- **Output:** `{ channel, account, source, forecast, scenarios?, result_id?, caveats[], note }` (or
+  `{error}`). Meta returns the delivery-estimate scenario table — read `caveats` before quoting a
+  number to a client.
 
 ---
 

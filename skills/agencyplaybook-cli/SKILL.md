@@ -90,7 +90,7 @@ The create/update result also carries a soft **`advisories[]`** array (v0.1.20, 
 
 10. **Name uploaded assets** (v0.2.2). Whenever the CLI uploads an image/video from a local file, the asset is named by the file's basename (filename + extension) by default. Override it: `creative upload-image --name`, `creative upload-video --name` (+ `--title` for the display title, which defaults to the name), and per-asset `--image-name` / `--video-name` / `--thumbnail-name` / `--hero-image-name` on the `create-*` builders — distinct from each builder's `--name`, which is the *creative* name. A hash or pre-uploaded ID passed instead of a file path is used as-is.
 
-12. **Plan a whole build, then apply it** (campaign-build-001 M1b — ships with the next `apb` release). `apb campaign compose-from-spec --spec-file brief.json --plan build.json` writes the build as a plan-envelope-v2 document — ordered `campaign.create` → `adset.create` → `creative.create` → `ad.create` actions, children bound to parents with `{{ref:aN}}` temp references, the account as `{{account}}/campaigns`, and the typed spec preserved in `source.context_snapshot`. Zero mutation. `apb plan apply --from-file build.json --execute` (+ the four write gates) runs it in that atomic order and returns `status` (`EXECUTED`/`PARTIAL`/`FAILED`), `completed_through`, and a `rollback_envelope` that deletes exactly what was created, children first — feed it back through `plan apply --execute --confirm-destructive`. **A create plan needs no `--confirm-destructive`; its rollback always does.** Never hand-edit `{{ref:…}}` / `{{account}}`, and put explicit pixel/page ids in any spec you intend to plan (`"auto"` needs a live lookup a plan can't make — the CLI warns).
+12. **Plan a whole build, then apply it** (campaign-build-001 M1b). `apb campaign compose-from-spec --spec-file brief.json --plan build.json` writes the build as a plan-envelope-v2 document — ordered `campaign.create` → `adset.create` → `creative.create` → `ad.create` actions, children bound to parents with `{{ref:aN}}` temp references, the account as `{{account}}/campaigns`, and the typed spec preserved in `source.context_snapshot`. Zero mutation. `apb plan apply --from-file build.json --execute` (+ the four write gates) runs it in that atomic order and returns `status` (`EXECUTED`/`PARTIAL`/`FAILED`), `completed_through`, and a `rollback_envelope` that deletes exactly what was created, children first — feed it back through `plan apply --execute --confirm-destructive`. **A create plan needs no `--confirm-destructive`; its rollback always does.** Never hand-edit `{{ref:…}}` / `{{account}}`, and put explicit pixel/page ids in any spec you intend to plan (`"auto"` needs a live lookup a plan can't make — the CLI warns).
 
 13. **Advantage+ switches on a live ad set** (campaign-build-001 M1b). `apb adset update --id <id> --advantage-audience on|off` sets `targeting_automation.advantage_audience`; `--advantage-placements on` applies the `advantage-plus` preset. Both are a read-modify-write over the live targeting, so nothing else is dropped. There is **no `--advantage-placements off`** (manual placements = an explicit set: use `adset update-targeting --placements <preset>`), and neither switch can be combined with the other `adset update` fields in one call — a mixed invocation fails loud naming the clashes.
 
@@ -148,8 +148,29 @@ apb recipe build --brief brief.yaml --out build/ --format all
 It writes `build/{spec.v2.json, plan.json, plan.md, plan.html, preview.html, summary.json}` and
 launches nothing. Show the user `plan.html` (or the summary), then either apply
 `plan.json` (`apb plan apply --from-file build/plan.json --execute`, four write gates, born
-PAUSED) or hand it to AgencyPlaybook for approval. Rollback comes from
+PAUSED) or hand it to AgencyPlaybook for approval (see below). Rollback comes from
 `launch.json.rollback_envelope`.
+
+### Handing a plan to AgencyPlaybook, and picking one back up
+
+**CLI → SaaS.** `POST /api/v1/plans/import` with `build/plan.json`'s body imports the envelope as
+a row on the tenant's Plans page (`/plans/<id>`) — approve there, or `POST
+/plans/:id/approve {mcp_token}` if you're driving it through the MCP handshake, then `POST
+/plans/:id/execute` (202, async) and poll `GET /plans/:id` to a terminal state
+(`executed`/`failed`). A `failed` run whose receipt created at least one resource is
+rollback-eligible: `POST /plans/:id/rollback`. Note `completed_through` before deciding whether to
+roll back or build a fresh plan on top.
+
+**SaaS → CLI.** Pull a stored plan back down with `apb plan get --id <id> --format v2 >
+plan.json`, then `apb plan validate --from-file plan.json` (dry run) before `apb plan apply
+--from-file plan.json --execute`. `apb plan export --from-file plan.json --format html` renders it
+for human review outside the SaaS UI. `plan_hash` is re-verified on apply — if you've hand-edited
+the file, pass `--allow-edited-plan` and say so explicitly rather than adding it silently.
+
+**`{{ref:aN}}` / `{{account}}`** — a create-class plan addresses entities its own earlier actions
+create, so those ids don't exist yet and show up as placeholders. The EXECUTOR (the SaaS job
+runner and both CLIs share one ref map per run) binds them at run time. Never hand-edit a ref — it
+either fails `unresolved_ref` or silently targets the wrong entity.
 
 Rules to honour when you write a brief:
 
