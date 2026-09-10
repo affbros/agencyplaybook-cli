@@ -4,7 +4,7 @@
 # binary: apb-gads
 # tier: audit
 # cadence: on-demand
-# description: GENERATED read-only audit bundle — runs the 6 apb-gads 'pmax' diagnostic playbooks into a timestamped results dir + index.md. --only <slug,...> and --lookback supported. Zero API mutations.
+# description: GENERATED read-only audit bundle — runs the 7 apb-gads 'pmax' diagnostic playbooks into a timestamped results dir + index.md. --only <slug,...> and --lookback supported. Zero API mutations.
 # writes: never
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,6 +28,7 @@ audit_begin audit-pmax
 
 out="$(audit_selected pmax-asset-coverage && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-asset-coverage --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-asset-coverage "$out"
 out="$(audit_selected pmax-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-audit "$out"
+out="$(audit_selected pmax-brand-share && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-brand-share --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-brand-share "$out"
 out="$(audit_selected pmax-maturity-gate && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-maturity-gate --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-maturity-gate "$out"
 out="$(audit_selected pmax-scaling-plan && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-scaling-plan --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-scaling-plan "$out"
 out="$(audit_selected pmax-segmentation-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-segmentation-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-segmentation-audit "$out"

@@ -4,7 +4,7 @@
 # binary: apb-gads
 # tier: audit
 # cadence: on-demand
-# description: GENERATED read-only audit bundle — runs all 66 apb-gads diagnostic playbooks, one JSON per slug into a timestamped results dir + index.md. --only <slug,...> and --lookback supported. Zero API mutations.
+# description: GENERATED read-only audit bundle — runs all 68 apb-gads diagnostic playbooks, one JSON per slug into a timestamped results dir + index.md. --only <slug,...> and --lookback supported. Zero API mutations.
 # writes: never
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -55,6 +55,7 @@ out="$(audit_selected device-performance && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS}
 out="$(audit_selected duplicate-keywords && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook duplicate-keywords --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record duplicate-keywords "$out"
 out="$(audit_selected expansion-readiness && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook expansion-readiness --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record expansion-readiness "$out"
 out="$(audit_selected experiment-readiness && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook experiment-readiness --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record experiment-readiness "$out"
+out="$(audit_selected feed-health-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook feed-health-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record feed-health-audit "$out"
 out="$(audit_selected geo-bid-drift-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook geo-bid-drift-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record geo-bid-drift-audit "$out"
 out="$(audit_selected geo-performance && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook geo-performance --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record geo-performance "$out"
 out="$(audit_selected impression-share-loss && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook impression-share-loss --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record impression-share-loss "$out"
@@ -69,6 +70,7 @@ out="$(audit_selected negative-keyword-coverage && "${APB_GADS_BIN}" ${GADS_EXTR
 out="$(audit_selected placement-leakage-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook placement-leakage-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record placement-leakage-audit "$out"
 out="$(audit_selected pmax-asset-coverage && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-asset-coverage --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-asset-coverage "$out"
 out="$(audit_selected pmax-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-audit "$out"
+out="$(audit_selected pmax-brand-share && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-brand-share --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-brand-share "$out"
 out="$(audit_selected pmax-maturity-gate && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-maturity-gate --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-maturity-gate "$out"
 out="$(audit_selected pmax-scaling-plan && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-scaling-plan --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-scaling-plan "$out"
 out="$(audit_selected pmax-segmentation-audit && "${APB_GADS_BIN}" ${GADS_EXTRA_ARGS} --customer "$CUSTOMER" playbook pmax-segmentation-audit --lookback-days "$LOOKBACK" 2>/dev/null || true)"; audit_record pmax-segmentation-audit "$out"

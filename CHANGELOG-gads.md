@@ -4,6 +4,100 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.1] — 2026-09-10 (Planning verbs: merge · forecast · experiments · portfolio — executor-facing fixes)
+
+**A patch bump:** ships **30 groups · 307 leaf commands · 124 gated mutations ·
+68 diagnostic playbooks · 24 reports** against Google Ads API **v25** — the g07–g10 planning-001
+lane consolidated into one binary release, on top of everything shipped in `gads-v0.3.0`.
+
+### Added
+
+- **`plan merge`** — merges N Google plan-envelope-v2 files (from separate `--plan`/`recipe
+  build`/`recipe search-terms` runs) into ONE reviewable envelope: dedupes byte-identical actions,
+  isolates contradictory bidding/target/budget changes as unresolved conflicts, ranks survivors
+  (growth/efficiency), and sequences them behind the learning-window guard — inserting
+  `wait-for-status` pseudo-actions where a campaign is still learning. Honoured end-to-end by
+  `mutate apply-plan`, which now respects `waiting[]`/`expired[]` from a merged plan.
+- **`plan forecast`** — forecasts a campaign build via `GenerateKeywordForecastMetrics` (the real
+  v25 proto); `--target-scenarios` sweeps daily target spend, `--campaign-id` forecasts against a
+  live campaign, forecast scores fold into `--plan` output. New global `--debug` flag surfaces
+  inter-call pacing (1 QPS/CID) on stderr.
+- **`experiment results`** — `--metric conversions|cost_per_conversion|conversion_value_per_cost`
+  + `--confidence` now compute a top-level `verdict` (`WINNER`/`LOSER`/`INCONCLUSIVE`) with
+  `p_value` + `days_needed`, resolved against `metric_policy.experiment.{p_value, min_runtime_days}`.
+- **`experiment promote`** and **`mutate experiment-promote`** — graduate an experiment's treatment
+  into the live change (`GraduateExperiment`, a dedicated RPC, not a batched `googleAds:mutate` op
+  — refuses `--execute --validate-only`). `apply-plan` dispatches both `experiment-promote` and
+  merge-produced `experiment-create` actions. `mutate experiment-create --treatment-plan <path>`
+  applies a plan-envelope-v2 file to the treatment campaign once it exists, via a resource-
+  substitution convention (author against the base campaign; apply-time swaps in the resolved
+  treatment resource).
+- **`plan merge` routes qualifying `full` resets through `experiment-create`** — bidding-strategy-
+  type changes (always) and budget deltas > 20% (`LearningThresholds::budget_full_pct`), gated on
+  the campaign clearing `metric_policy.experiment.min_30d_conversions` (default 10). Target-class
+  (tCPA/tROAS) deltas are a documented, deliberate gap — no live per-strategy field extractor exists
+  yet; see `CONTRACTS.md` § 10.10.
+- **`portfolio plan`** — marginal-return budget allocator across an MCC: `0.6·slope30 + 0.4·slope60`
+  scoring, global floor/ceiling policy, `insufficient_data`-reasoned nulls, `--with-meta` reads the
+  lenient `meta-portfolio.json` bridge file `apb agency portfolio plan --meta-portfolio-out` writes
+  (report-only — Meta actions are listed, never added to this binary's envelope).
+- **`pmax-brand-share`** — per-campaign PMAX search-term insight playbook: true ROAS/CPA broken out
+  by brand vs. non-brand search terms, `insufficient_data` verdict when volume is too thin.
+- **`feed-health-audit`** — account-level Merchant Center listing-group cross-reference using the
+  real v25 `ProductStatus` enum.
+- **Seasonality / data-exclusion guardrails** — `bidding_seasonality_adjustment_create_plan` /
+  `bidding_data_exclusion_create_plan` gained hard T1.4 pre-check refusals: 14-day window, modifier
+  band, and live-overlap-against-existing-adjustments checks, reported via the same `GateRefusal`
+  exit-3 envelope as `mutation_guard`. `--allow-long-window` / `--allow-overlap` override them.
+  `validate campaign-spec`'s `spec.seasonality[]` block reuses the window + modifier checks
+  statically. Distinct from the pre-existing advisory `seasonality_guardrails()`, still emitted
+  alongside.
+- **Gate-refusal JSON + stable exit-code table** — every refusal-class outcome (`gate_refused`,
+  `plan_envelope_mismatch`, `plan_not_invertible`, spec/plan validation failures, `doctor check`'s
+  auth-failure case) now exits **3** with exactly one JSON document on stdout carrying
+  `"status": "refused"` and a `"code"`. `mutation_guard`'s 4 direct checks (write-policy floor,
+  `read_only`, `allow_writes`, `require_mutation_env`) emit the new `gate_refused` shape
+  (`blocked_reasons[]` + a `gates` snapshot); `blocked_reasons[0]` stays byte-identical to the
+  pre-existing `"mutations blocked: …"` stderr line so text-matching callers are unaffected. Exit 0
+  = success, 1 = tool/runtime error, 2 = clap usage error (never reached by application code), 3 =
+  refused. **BREAKING for any script that parsed stderr to detect a gate block** — a refusal is now
+  a typed exit code + stdout JSON, not just prose; the stderr line is preserved for backward
+  compatibility but should not be the parse target going forward. See `CONTRACTS.md` § 10.9.
+- **`orchestrate rollback --from-receipt … --plan <path>`** — a flat (non-launch) `apply-plan
+  --execute` receipt can now be inverted into its own tagged plan-envelope-v2 document
+  (`source.kind = "rollback:<sha256 of the receipt>"`), reviewable/re-runnable via `mutate
+  apply-plan` instead of executing immediately. `create`-verb operations invert; `update`/`remove`
+  ops (no prior-state capture in a flat receipt) are named non-invertible rather than silently
+  dropped — refuses cleanly with `plan_not_invertible` when nothing inverts.
+- **`--no-color`** global flag — disables ANSI color in any output this invocation writes
+  (`NO_COLOR=1` equivalent). No-op today (nothing in this binary colors output yet); forward-looking
+  so scripts/CI can pass it unconditionally.
+
+### Changed
+
+- **`mutate apply-plan`'s envelope/spec consistency recompute (the `plan_envelope_mismatch` gate)
+  now runs in dry-run, not only `--execute`** — a build-plan document that has drifted from its
+  source spec is refused before a human approves it, not only when someone runs `--execute` on an
+  already-stale approval.
+
+### Fixed
+
+- **`rust/gads/scripts/public-scripts/` generator drift** — `audit-full.sh` / `audit-pmax.sh` were
+  stale and `audit-other.sh` was missing entirely (the q01/q03 playbooks landed without a
+  `gen_scripts.py` regen); regenerated (10 audit bundles) and CI's `gen_scripts.py --check` /
+  `check_scripts_parity.py` gates added to the release checklist so this can't recur silently.
+- **Skill reference-page sync gap** (sprint-g07 finding, recurred once more before this release) —
+  `rust/gads/skills/agencyplaybook-cli-google/references/commands/` is meant to be a byte-identical
+  copy of `docs/cli-documentation/` but the sync was a manual, ungated `cp`; it had drifted again
+  (missing `experiment promote`, `mutate experiment-promote`, `--treatment-plan`, sprint-g09's
+  additions). Re-synced, and `check_skill_parity.py` now asserts the two trees match — a future
+  regen-without-copy fails CI instead of shipping a stale skill.
+
+### Notes
+
+- v25 pin unchanged since `gads-v0.2.0` (sprint-u11/u12).
+- Sandbox-only testing per the usual discipline — see `AGENTS.md` § Testing Surface.
+
 ## [0.3.0] — 2026-09-09 (Recipes framework · complete launch envelope · Editor CSV / HTML plan export · apply-plan execute)
 
 **A minor bump, not a patch:** ships **30 groups · 300 leaf commands · 123 gated mutations ·
