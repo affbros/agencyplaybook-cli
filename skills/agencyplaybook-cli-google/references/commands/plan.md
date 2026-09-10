@@ -4,7 +4,7 @@
 
 Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaService / KeywordPlanService. Does not write; no three-gate safety applied. Expert copy + brief: install the agencyplaybook-planner skill (see /downloads)
 
-**Surface:** 👁️ Read-only · **12 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **13 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -21,6 +21,7 @@ Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaS
 | [`rsa`](#apb-gads-plan-rsa) | Generate RSA headline/description candidates per ad group from a campaign-structure JSON file |
 | [`tracking`](#apb-gads-plan-tracking) | Emit a static conversion-tracking setup template for the given mode. |
 | [`campaign`](#apb-gads-plan-campaign) | Greenfield campaign planning: assemble a launchable CampaignLaunchSpec from planning artifacts (`search`). |
+| [`export`](#apb-gads-plan-export) | Render a plan envelope file (v1 lifted or native v2) into an artifact, read-only — no gates, no network. |
 
 ---
 
@@ -48,6 +49,7 @@ Usage: apb-gads plan keyword-ideas [OPTIONS]
 | `--network <NETWORK>` | Network: GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS [default: GOOGLE_SEARCH] |
 | `--limit <LIMIT>` | Page size (1..=10000) [default: 100] |
 | `--include-adult` | Include adult keywords in results |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-keyword-historical-metrics"></a>
 ### `apb-gads plan keyword-historical-metrics`
@@ -71,6 +73,7 @@ Usage: apb-gads plan keyword-historical-metrics [OPTIONS]
 | `--network <NETWORK>` | [default: GOOGLE_SEARCH] |
 | `--include-adult` | — |
 | `--include-average-cpc` | Request the averageCpcMicros field in the response (adds historicalMetricsOptions.includeAverageCpc to the request) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-from-audit"></a>
 ### `apb-gads plan from-audit`
@@ -90,6 +93,7 @@ Usage: apb-gads plan from-audit [OPTIONS] --spec-file <SPEC_FILE> --playbook <PL
 | `--spec-file <SPEC_FILE>` | Path to the spec envelope JSON (the `--output-spec` output) |
 | `--playbook <PLAYBOOK>` | Source playbook slug, recorded in the artifact for traceability (e.g. `waste-cluster-audit`) |
 | `--rank-by <RANK_BY>` | Action ranking: `growth-first` (default — lead with the biggest scaling upside, never bury a scale-up under a cut) or `efficiency-first` (the legacy savings-weighted priority order) [default: growth-first] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-goals"></a>
 ### `apb-gads plan goals`
@@ -109,6 +113,7 @@ Usage: apb-gads plan goals [OPTIONS] --mode <MODE>
 | `--mode <MODE>` | Campaign mode: lead-gen \| ecommerce \| brand \| app |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD (e.g. 25.0). Omit to use MAXIMIZE_CONVERSIONS |
 | `--target-roas <TARGET_ROAS>` | Target ROAS as a multiplier (e.g. 4.0 = 400%). Omit unless ROAS-focused |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-keywords"></a>
 ### `apb-gads plan keywords`
@@ -131,6 +136,7 @@ Usage: apb-gads plan keywords [OPTIONS]
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
 | `--position-target <POSITION_TARGET>` | Where to aim each keyword's suggested bid within its top-of-page range: first-page (low) \| top-of-page (midpoint, default) \| first-position (high) [default: top-of-page] |
 | `--intent-file <INTENT_FILE>` | Path to an intent-keywords YAML file. Each present category (commercial, coupon, free, jobs, support, branded, competitors) REPLACES the built-in defaults — edit the lists to add/remove terms. See docs/planning.md |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-structure"></a>
 ### `apb-gads plan structure`
@@ -148,6 +154,7 @@ Usage: apb-gads plan structure [OPTIONS] --from <FROM>
 | Option | Description |
 |---|---|
 | `--from <FROM>` | Path to the keywords-plan JSON produced by `plan keywords` |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-rsa"></a>
 ### `apb-gads plan rsa`
@@ -168,6 +175,7 @@ Usage: apb-gads plan rsa [OPTIONS] --from <FROM>
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
 | `--brand <BRAND>` | Brand name to inject into templates (e.g. "Scandalous Coffee") [default: ""] |
 | `--final-url <FINAL_URL>` | Base final URL for the ads (e.g. "https://www.scandalouscoffee.com") [default: ""] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-tracking"></a>
 ### `apb-gads plan tracking`
@@ -185,6 +193,7 @@ Usage: apb-gads plan tracking [OPTIONS] --mode <MODE>
 | Option | Description |
 |---|---|
 | `--mode <MODE>` | Campaign mode: lead-gen \| ecommerce \| brand \| app |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-campaign"></a>
 ### `apb-gads plan campaign`
@@ -231,6 +240,7 @@ Usage: apb-gads plan campaign search [OPTIONS] --structure <STRUCTURE> --rsa <RS
 | `--landing-page <LANDING_PAGE>` | Landing page URL — overrides the RSA artifact's final_urls for every ad group |
 | `--daily-budget <DAILY_BUDGET>` | Daily budget in USD (e.g. 500). Required; converted to micros |
 | `--geo-target-id <GEO_TARGET_ID>` | Positive geo-target-constant ID (numeric). Repeatable. Default 2840 (US) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--location <LOCATION>` | Geo-target NAME (e.g. "United States"). Repeatable; resolved to an ID |
 | `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English) |
 | `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
@@ -264,6 +274,7 @@ Usage: apb-gads plan campaign full [OPTIONS] --landing-page <LANDING_PAGE> --dai
 | `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
 | `--network <NETWORK>` | Network: GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS [default: GOOGLE_SEARCH] |
 | `--daily-budget <DAILY_BUDGET>` | Total daily budget in USD (split across campaigns by volume share) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD (sets TARGET_CPA bidding) |
 | `--target-roas <TARGET_ROAS>` | Target ROAS multiplier (e.g. 4.0) |
 | `--brand <BRAND>` | Brand name injected into RSA templates [default: ""] |
@@ -297,6 +308,7 @@ Usage: apb-gads plan campaign pmax [OPTIONS] --campaign-name <CAMPAIGN_NAME> --b
 | `--bidding-strategy <BIDDING_STRATEGY>` | Bidding: MAXIMIZE_CONVERSIONS \| MAXIMIZE_CONVERSION_VALUE (PMAX-only) [default: MAXIMIZE_CONVERSIONS] |
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | Target CPA micros (MAXIMIZE_CONVERSIONS only) |
 | `--target-roas <TARGET_ROAS>` | Target ROAS (MAXIMIZE_CONVERSION_VALUE only, e.g. 3.5) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--negative-keyword <NEGATIVE_KEYWORD>` | Campaign negative keyword as `text:match_type` (PHRASE\|EXACT). Repeatable |
 | `--brand-guidelines` | Enable PMAX brand guidelines (campaign-level brand assets). Needs a logo |
 | `--headline <HEADLINE>` | Headline (3–15 required). Repeatable |
@@ -343,6 +355,7 @@ Usage: apb-gads plan campaign demand-gen [OPTIONS] --campaign-name <CAMPAIGN_NAM
 | `--target-roas <TARGET_ROAS>` | Target ROAS (MAXIMIZE_CONVERSION_VALUE, e.g. 3.5) |
 | `--ad-group-name <AD_GROUP_NAME>` | — |
 | `--audience-id <AUDIENCE_ID>` | Existing AUDIENCE id (numeric). Repeatable |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--video-asset <VIDEO_ASSET>` | Video asset resource name (≥1 required). Repeatable |
 | `--logo-asset <LOGO_ASSET>` | Logo image asset resource name (≥1 required). Repeatable |
 | `--headline-asset <HEADLINE_ASSET>` | — |
@@ -350,3 +363,24 @@ Usage: apb-gads plan campaign demand-gen [OPTIONS] --campaign-name <CAMPAIGN_NAM
 | `--description-asset <DESCRIPTION_ASSET>` | — |
 | `--cta-asset <CTA_ASSET>` | — |
 | `--business-name-asset <BUSINESS_NAME_ASSET>` | — |
+
+<a id="apb-gads-plan-export"></a>
+### `apb-gads plan export`
+
+Render a plan envelope file (v1 lifted or native v2) into an artifact, read-only — no gates, no network. What the SaaS `editor.zip` route shells to for `--format editor-csv` (sprint-g05)
+
+**Usage**
+
+```
+Usage: apb-gads plan export [OPTIONS] --from-file <FILE> --format <FORMAT> --out <PATH>
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--from-file <FILE>` | Path to the plan JSON (v1 or v2 envelope) |
+| `--format <FORMAT>` | editor-csv \| html \| md. `editor-csv` writes `<out>/editor/*.csv`; `html`/`md` write a single file at `--out` |
+| `--out <PATH>` | Output path: a directory for `editor-csv`, a file for `html`/`md` |
+| `--fonts <FONTS>` | system (default) \| web — only meaningful with `--format html` [default: system] |
+| `--allow-edited-plan` | Proceed even if the envelope's recomputed hash no longer matches its stored value (same override `apply-plan` uses) |

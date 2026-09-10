@@ -23,7 +23,7 @@ These are defined on the top-level parser and accepted by (almost) every command
 | `--lookback-days <LOOKBACK_DAYS>` | Override the per-playbook default lookback window (in days) for any read that uses a date range |
 | `--output <OUTPUT>` | Write JSON output to this file path instead of stdout |
 | `--save-plan <SAVE_PLAN>` | (deprecated — use --plan) After a dry-run mutation, write a normalized plan JSON to this path (re-playable via `mutate apply-plan`) |
-| `--plan <PLAN>` | Plan it, don't do it: run the full dry-run pipeline and write <path>.md (human plan document) + <path>.json (re-playable machine plan). No API mutation is performed. Cannot be combined with --execute. |
+| `--plan <PLAN>` | Plan it, don't do it: run the full dry-run pipeline and write a plan-envelope-v2 document. The extension picks the artifact: .json = the machine envelope (re-playable via `mutate apply-plan`), .html = the review page, .md = the human plan document plus its <path>.json twin; any other path writes <path>.md + <path>.json. No API mutation is performed. Cannot be combined with --execute. |
 | `-h, --help` | Print help |
 | `-V, --version` | Print version |
 

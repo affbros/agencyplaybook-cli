@@ -6,7 +6,7 @@ This is the **exhaustive, runtime-derived** reference for every command, subcomm
 
 For narrative, examples, and *how to think about* the CLI, see [`../commands.md`](../commands.md) (day-to-day reference), [`../playbooks.md`](../playbooks.md), and [`../mutations.md`](../mutations.md) (the safety model). This directory is the flat, complete enumeration those docs defer to.
 
-**At a glance:** 29 command groups · 295 total commands/subcommands · API version `v25`.
+**At a glance:** 30 command groups · 300 total commands/subcommands · API version `v25`.
 
 ## Global options
 
@@ -23,7 +23,8 @@ These are defined on the top-level parser and accepted by (almost) every command
 | `--lookback-days <LOOKBACK_DAYS>` | Override the per-playbook default lookback window (in days) for any read that uses a date range |
 | `--output <OUTPUT>` | Write JSON output to this file path instead of stdout |
 | `--save-plan <SAVE_PLAN>` | (deprecated — use --plan) After a dry-run mutation, write a normalized plan JSON to this path (re-playable via `mutate apply-plan`) |
-| `--plan <PLAN>` | Plan it, don't do it: run the full dry-run pipeline and write <path>.md (human plan document) + <path>.json (re-playable machine plan). No API mutation is performed. Cannot be combined with --execute. |
+| `--plan <PLAN>` | Plan it, don't do it: run the full dry-run pipeline and write a plan-envelope-v2 document. The extension picks the artifact: .json = the machine envelope (re-playable via `mutate apply-plan`), .html = the review page, .md = the human plan document plus its <path>.json twin; any other path writes <path>.md + <path>.json. No API mutation is performed. Cannot be combined with --execute. |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `-h, --help` | Print help |
 | `-V, --version` | Print version |
 
@@ -58,7 +59,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`playbook`](playbook.md) | 👁️ read | 67 | Agency-style read playbooks: audits, scorecards, and hygiene readouts. |
 | [`verdict`](verdict.md) | 👁️ read | 1 | Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT) per ENABLED campaign across ALL channel types, from 3 gates (Efficiency / Delivery+headroom / Quality). |
 | [`campaign-type-advisor`](campaign-type-advisor.md) | 👁️ read | 1 | Campaign-type advisor (Search vs PMax vs Demand Gen) — prescriptive: given a goal, demand state, conversion-signal strength, and daily budget, recommend the primary engine + the maturity-ordered sequence (Search captures demand · PMax scales it · Demand Gen creates it). |
-| [`plan`](plan.md) | 👁️ read | 12 | Phase B1 (v24) — keyword planning surface (reads only). |
+| [`plan`](plan.md) | 👁️ read | 13 | Phase B1 (v24) — keyword planning surface (reads only). |
 | [`sandbox`](sandbox.md) | ✍️ write | 1 | Test-sandbox write flows: end-to-end helper(s) that exercise the $1 sandbox policy (create → verify → clean up) on a disposable entity. |
 | [`orchestrate`](orchestrate.md) | ✍️ write | 8 | Phase 3 composite workflows — orchestrators that compose primitives into end-to-end operator flows (ad-rotate, campaign-launch, etc.) |
 | [`audit`](audit.md) | 👁️ read | 3 | Sprint D — audit log inspection + replay |
@@ -67,6 +68,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`changes`](changes.md) | ✍️ write | 3 | Artifact pipeline — turn a scored ActionPlan (from `plan from-audit`) into a reviewable Changeset and apply it through the guarded plan path. |
 | [`growth`](growth.md) | 👁️ read | 5 | Growth analysis — dual-window weekly/monthly performance reviews and guardrail-based monitoring. |
 | [`export`](export.md) | 👁️ read | 1 | Render an artifact JSON into CSV, JSON, or Markdown. |
+| [`recipe`](recipe.md) | ✍️ write | 4 | Recipes — one verb, one job. |
 | [`context`](context.md) | 👁️ read | 2 | Per-customer goal/strategy context state. |
 | [`validate`](validate.md) | 👁️ read | 3 | Inspect planning artifacts for launch-readiness. |
 | [`experiment`](experiment.md) | 👁️ read | 1 | Google Ads experiment reads. |
@@ -380,6 +382,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads plan campaign full`](plan.md#apb-gads-plan-campaign-full) — Run the whole greenfield pipeline (keyword research → structure → rsa → goals → tracking → one launch spec per campaign + summary.md) into --export-dir.
 - [`apb-gads plan campaign pmax`](plan.md#apb-gads-plan-campaign-pmax) — Assemble a launchable PmaxLaunchPlanSpec (bare JSON) for a single-asset-group Performance Max campaign (phase 1).
 - [`apb-gads plan campaign demand-gen`](plan.md#apb-gads-plan-campaign-demand-gen) — Assemble a launchable DemandGenLaunchSpec (bare JSON) for a single-ad-group Demand Gen campaign (decision-verdict-001 S004) — the third pillar alongside `search` / `pmax`.
+- [`apb-gads plan export`](plan.md#apb-gads-plan-export) — Render a plan envelope file (v1 lifted or native v2) into an artifact, read-only — no gates, no network.
 
 ### `sandbox`
 
@@ -441,6 +444,13 @@ Every leaf command, grouped. Click through to the parameter-level page.
 ### `export`
 
 - [`apb-gads export render`](export.md#apb-gads-export-render) — Render an artifact JSON file to CSV, JSON, or Markdown
+
+### `recipe`
+
+- [`apb-gads recipe list`](recipe.md#apb-gads-recipe-list) — List every registered recipe: name, channel, what it composes, status
+- [`apb-gads recipe describe`](recipe.md#apb-gads-recipe-describe) — Print a recipe's decision rules, threshold formulas and exports.
+- [`apb-gads recipe build`](recipe.md#apb-gads-recipe-build) — Build a whole campaign from a brief: research → structure → copy → targeting → assets → bidding → validate → plan.
+- [`apb-gads recipe search-terms`](recipe.md#apb-gads-recipe-search-terms) — Classify every served search term into negate / promote / review / skip against the account's targets, brand rules and EXISTING negatives (read, never assumed), and package the act buckets as a plan envelope.
 
 ### `context`
 

@@ -1,6 +1,6 @@
 # apb-gads command index
 
-**295 leaf commands across 29 groups** (Google Ads API v25). Per-group flag references live in
+**300 leaf commands across 30 groups** (Google Ads API v25). Per-group flag references live in
 `references/commands/<group>.md` (generated from the binary — the accurate per-param source). The
 live registry is `apb-gads --help` and `apb-gads playbook list`.
 
@@ -47,7 +47,13 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 |---|--:|---|---|
 | `plan` | 11 | keyword ideas/metrics; build Search/PMAX launch specs (`plan campaign …`) | `references/commands/plan.md` |
 | `validate` | 2 | check a launch spec (`campaign-spec` / `pmax-spec`) — **exit 3 on fail** | `references/commands/validate.md` |
-| `context` | 2 | per-customer goal/strategy state (local JSON) | `references/commands/context.md` |
+| `context` | 2 | per-customer goal/strategy state, **schema v2** — goals + `brand` (terms/domains/competitors) + `lists` (canonical negative shared set) + per-recipe tunables (local JSON) | `references/commands/context.md` |
+
+## Recipes — one verb for a whole job
+
+| Group | # | Purpose | Reference |
+|---|--:|---|---|
+| `recipe` | 3 | `list` · `describe <name>` · **`search-terms`** — read the account's context, derive thresholds from its targets, classify every row into negate/promote/review/skip with a reason, and emit a plan envelope + `review.json`. Dry-run by default; `--execute` routes through `mutate apply-plan`'s three gates | `references/commands/recipe.md`, SKILL.md § *Recipes* |
 
 ## Mutations & orchestration (write-capable — see `safety-model.md`)
 
@@ -67,4 +73,4 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | `schedule` | 7 | cron-install recurring **read-only** runs | `references/commands/schedule.md` |
 | `export` | 1 | render an artifact JSON to CSV / JSON / Markdown | `references/commands/export.md` |
 
-> Counts verified against `apb-gads 0.1.11`. The two nesting points are `plan campaign {search,full,pmax}` and `sandbox helper full-flow`.
+> Counts verified against `apb-gads 0.3.0` (dep-phase2 sprint-g06). The two nesting points are `plan campaign {search,full,pmax}` and `sandbox helper full-flow`.

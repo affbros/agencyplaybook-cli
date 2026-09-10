@@ -34,6 +34,7 @@ Usage: apb-gads validate campaign-spec [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | Path to the CampaignLaunchSpec JSON (`plan campaign search --export`) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-validate-pmax-spec"></a>
 ### `apb-gads validate pmax-spec`
@@ -51,6 +52,7 @@ Usage: apb-gads validate pmax-spec [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | Path to the PmaxLaunchPlanSpec JSON (`plan campaign pmax`) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-validate-demand-gen-spec"></a>
 ### `apb-gads validate demand-gen-spec`
@@ -68,3 +70,4 @@ Usage: apb-gads validate demand-gen-spec [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | Path to the DemandGenLaunchSpec JSON (`plan campaign demand-gen`) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

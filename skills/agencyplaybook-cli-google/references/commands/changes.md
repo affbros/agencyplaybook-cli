@@ -37,6 +37,7 @@ Usage: apb-gads changes from-plan [OPTIONS] --from-file <FROM_FILE>
 |---|---|
 | `--from-file <FROM_FILE>` | Path to the ActionPlan JSON (from `plan from-audit`) |
 | `--include-review` | Also stage actions flagged requires_human_review (default: skip, recording them in the changeset's `skipped[]`) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-changes-apply"></a>
 ### `apb-gads changes apply`
@@ -54,6 +55,7 @@ Usage: apb-gads changes apply [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | Path to the Changeset JSON (from `changes from-plan`) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-changes-rollback"></a>
 ### `apb-gads changes rollback`
@@ -71,3 +73,4 @@ Usage: apb-gads changes rollback [OPTIONS] --audit-id <AUDIT_ID>
 | Option | Description |
 |---|---|
 | `--audit-id <AUDIT_ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

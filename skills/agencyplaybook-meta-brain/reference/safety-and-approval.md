@@ -112,6 +112,21 @@ The write tools never throw — a refusal is `isError:true` + a structured error
 | `confirm_destructive_required` | L4 op without `confirm_destructive:true` | re-confirm the irreversible change, pass it |
 | `upstream_error` / `config_error` (on submit) | apb / apb-api reported a failure AFTER the gates | no change landed (readback skipped); surface the message |
 
+## SaaS sessions — the Plans page and the chat handshake are the SAME approval (saas-plans SP4)
+
+When the session is SaaS-authenticated (`APB_API_KEY` set), `meta_create_plan` best-effort lands
+the plan on the tenant's Plans page immediately (`envelope_id` in the output — no token bound
+yet), and `meta_execute_plan` goes through the SaaS handshake instead of a direct execute: import
+(bind `sha256(approval_token)`) → `POST /plans/:id/approve {mcp_token}` (the ONLY call the
+plaintext token ever crosses the wire on) → `POST /plans/:id/execute` (202, async job) → poll to a
+terminal state. If a human clicks **Approve** on the web Plans page with the SAME token before you
+call `meta_execute_plan`, the approve step is skipped (not failed) and execution proceeds — **on a
+SaaS session the plan is on your Plans page at `/plans/<id>` (or `/gads/plans/<id>` for Google);
+approve it there or say YES here — both are the same approval.** Read a plan back (native or
+envelope id) with `meta_get_plan`. Non-SaaS sessions (no `APB_API_KEY`) are unaffected — the
+pre-SP4 local subprocess execute path runs exactly as before, and none of the above ever calls the
+plans API.
+
 ## Non-negotiables (the doctrine)
 
 1. **Preview/validate + an explicit human YES are BOTH required before execute.** The token is not

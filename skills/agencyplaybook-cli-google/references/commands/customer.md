@@ -26,7 +26,11 @@ Customer (account) reads: list accessible accounts and walk the MCC hierarchy.
 Usage: apb-gads customer list [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-customer-suggest-brands"></a>
 ### `apb-gads customer suggest-brands`
@@ -45,3 +49,4 @@ Usage: apb-gads customer suggest-brands [OPTIONS] --prefix <PREFIX>
 |---|---|
 | `--prefix <PREFIX>` | Brand-name prefix to search (e.g. "Starbucks") |
 | `--selected-brand-id <SELECTED_BRAND_ID>` | Already-selected brand id to exclude from results (repeatable) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

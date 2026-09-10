@@ -37,6 +37,12 @@ Usage: apb-gads context init [OPTIONS] --mode <MODE>
 | `--target-roas <TARGET_ROAS>` | Target ROAS as a multiplier (optional, used with target_roas mode) |
 | `--primary-kpi <PRIMARY_KPI>` | Primary KPI (default: conversions) |
 | `--from <FROM>` | Optional path to a `plan goals` artifact JSON whose goals fields override the explicit --mode / --target-cpa / --target-roas flags |
+| `--brand-term <TERM>` | Schema v2 — a brand term recipes must never negate or auto-promote. Repeatable. Omitting it leaves any existing terms in place |
+| `--brand-domain <DOMAIN>` | Schema v2 — a domain the brand owns. Repeatable; omitting preserves |
+| `--brand-competitor <BRAND>` | Schema v2 — a competitor brand. Competitor traffic is account-wide junk, so it seeds the canonical negative list. Repeatable |
+| `--canonical-negative-set <SHARED_SET>` | Schema v2 — the account's canonical NEGATIVE_KEYWORDS shared set (resource name or bare id). Where account-wide negatives go |
+| `--protected-shared-set <SHARED_SET>` | Schema v2 — a shared set recipes must not modify. Repeatable |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-context-show"></a>
 ### `apb-gads context show`
@@ -49,4 +55,8 @@ Show the current context for a customer. Errors if not yet initialized
 Usage: apb-gads context show [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

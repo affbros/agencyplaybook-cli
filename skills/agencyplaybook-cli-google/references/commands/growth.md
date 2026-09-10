@@ -31,7 +31,11 @@ Dual-window weekly performance review (current N days vs prior N days). Classifi
 Usage: apb-gads growth weekly-review [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-growth-monthly-review"></a>
 ### `apb-gads growth monthly-review`
@@ -44,7 +48,11 @@ Dual-window monthly performance review (current N days vs prior N days) with bud
 Usage: apb-gads growth monthly-review [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-growth-monitor"></a>
 ### `apb-gads growth monitor`
@@ -62,6 +70,7 @@ Usage: apb-gads growth monitor [OPTIONS] --rules <RULES>
 | Option | Description |
 |---|---|
 | `--rules <RULES>` | Path to the guardrails YAML rules file |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-growth-scale-up"></a>
 ### `apb-gads growth scale-up`
@@ -79,6 +88,7 @@ Usage: apb-gads growth scale-up [OPTIONS]
 | Option | Description |
 |---|---|
 | `--min-roas <MIN_ROAS>` | Minimum ROAS gate for the expansion-readiness lever (e.g. 3.0) [default: 3] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-growth-consolidation"></a>
 ### `apb-gads growth consolidation`
@@ -91,4 +101,8 @@ Consolidation/structure readout aligned to the "consolidate + broad match + Smar
 Usage: apb-gads growth consolidation [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

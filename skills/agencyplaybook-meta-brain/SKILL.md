@@ -35,17 +35,17 @@ the mechanics (auth, account resolution, the Meta API, the verdict engine, the d
 playbooks, the cryptographic approval interlock). **You own the reasoning — and you own consent:
 the approval handshake enforces that what executes is exactly what was previewed + approved, and
 your explicit human YES is what authorizes it.** The binary is a mechanical executor, not a guard.
-Never reinvent what a tool already does; orchestrate the 23 tools and interpret what they return.
+Never reinvent what a tool already does; orchestrate the 24 tools and interpret what they return.
 
 > **You call MCP tools, never a command line.** This skill names MCP *tools*
 > (`meta_get_verdict`, `meta_run_audit`, …). It does **not** type `apb …` shell commands —
 > that is the separate `agencyplaybook-cli` skill for direct-CLI users. If you catch yourself
 > writing a command string, stop and call the equivalent MCP tool instead.
 
-## The 23 tools (full contracts in `reference/tool-catalog.md`)
+## The 24 tools (full contracts in `reference/tool-catalog.md`)
 
-The MCP advertises **37 tools total** (40 for an agency-entitled tenant); your surface is the
-**16 `meta_*` (Meta) tools + the 7 shared `agency_*` tools = 23**, plus the informational
+The MCP advertises **39 tools total** (42 for an agency-entitled tenant); your surface is the
+**17 `meta_*` (Meta) tools + the 7 shared `agency_*` tools = 24**, plus the informational
 `gads_health` cross-platform check (Google *analysis* is the sibling `agencyplaybook-google-brain`)
 and, when the tenant is **agency-entitled**, **+3 Group L** agency tools
 (`meta_agency_list_accounts`, `agency_select_subaccount`, `agency_get_portfolio`). You do NOT drive
@@ -62,7 +62,7 @@ as structured data you reason over. Only **2 tools mutate an account** (`meta_ap
 | Reporting | `meta_get_performance` · `meta_compare_performance` | read |
 | Audits (playbooks) | `agency_list_audits` · `meta_run_audit` | read |
 | Decision | `meta_get_verdict` | read |
-| Plan (records / artifacts) | `meta_create_plan` · `meta_build_campaign_spec` · `agency_list_plans` · `agency_get_plan` | read (no change) |
+| Plan (records / artifacts) | `meta_create_plan` · `meta_build_campaign_spec` · `agency_list_plans` · `agency_get_plan` · `meta_get_plan` | read (no change) |
 | Result paging | `agency_get_result` | read |
 | **Preview / Validate (mint approval)** | `meta_preview_change` · `meta_validate_plan` | dry-run + token mint (no change) |
 | **Execute (WRITE behind the handshake)** | `meta_apply_change` · `meta_execute_plan` | write (gated by token + human YES) |
@@ -222,7 +222,7 @@ rather than dumping everything.
   the consent is the handshake + the human go-ahead; bypassing either is the cardinal sin.
 - Claiming you changed an account during pure analysis.
 - Guessing the account instead of resolving + confirming it.
-- Inventing a tool/flag/slug that isn't in the 23 tools / `agency_list_audits`.
+- Inventing a tool/flag/slug that isn't in the 24 tools / `agency_list_audits`.
 - Dumping raw JSON instead of summarizing + paging via `agency_get_result`.
 - Looping on a `not_entitled` / scope error — surface the upgrade path and offer a read-only
   alternative instead.

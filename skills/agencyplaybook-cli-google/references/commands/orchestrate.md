@@ -43,6 +43,7 @@ Usage: apb-gads orchestrate ad-rotate [OPTIONS] --ad-group-id <AD_GROUP_ID>
 | `--ad-group-id <AD_GROUP_ID>` | Ad group ID. All referenced ads must belong to this ad group |
 | `--pause-ad-id <PAUSE_AD_ID>` | Ad ID(s) to set to PAUSED. Repeat the flag for each ID |
 | `--enable-ad-id <ENABLE_AD_ID>` | Ad ID(s) to set to ENABLED. Repeat the flag for each ID |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-ad-refresh"></a>
 ### `apb-gads orchestrate ad-refresh`
@@ -67,6 +68,7 @@ Usage: apb-gads orchestrate ad-refresh [OPTIONS] --ad-group-id <AD_GROUP_ID>
 | `--path2 <PATH2>` | Optional display path 2 (≤15 chars) |
 | `--pause-ad-id <PAUSE_AD_ID>` | Old ad ID to PAUSE (destructive; needs --confirm). Omit to create only and get a recommended pause target |
 | `--new-status <NEW_STATUS>` | New ad status: PAUSED (default, safe) or ENABLED [default: PAUSED] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-campaign-launch"></a>
 ### `apb-gads orchestrate campaign-launch`
@@ -86,6 +88,7 @@ Usage: apb-gads orchestrate campaign-launch [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON spec file |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. |
 
 <a id="apb-gads-orchestrate-pmax-build"></a>
 ### `apb-gads orchestrate pmax-build`
@@ -103,6 +106,7 @@ Usage: apb-gads orchestrate pmax-build [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON PmaxLaunchPlanSpec file |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-demand-gen-build"></a>
 ### `apb-gads orchestrate demand-gen-build`
@@ -120,6 +124,7 @@ Usage: apb-gads orchestrate demand-gen-build [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON DemandGenLaunchSpec file |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-weekly-optimization"></a>
 ### `apb-gads orchestrate weekly-optimization`
@@ -138,6 +143,7 @@ Usage: apb-gads orchestrate weekly-optimization [OPTIONS]
 |---|---|
 | `--search-term-limit <SEARCH_TERM_LIMIT>` | Max search-term candidates to surface [default: 50] |
 | `--min-roas-for-expansion <MIN_ROAS_FOR_EXPANSION>` | Minimum ROAS for expansion readiness candidates [default: 2] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-monthly-review"></a>
 ### `apb-gads orchestrate monthly-review`
@@ -150,7 +156,11 @@ Monthly-review readout: composes account-health + waste-audit + creative-refresh
 Usage: apb-gads orchestrate monthly-review [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-rollback"></a>
 ### `apb-gads orchestrate rollback`
@@ -169,3 +179,4 @@ Usage: apb-gads orchestrate rollback [OPTIONS]
 |---|---|
 | `--resource <RESOURCE>` | Resource name to remove. Repeat for each resource. Example: customers/123/campaigns/456 |
 | `--from-receipt <FROM_RECEIPT>` | A saved `orchestrate campaign-launch --execute` receipt (JSON). Removes everything that launch created — the head (budget/campaign/ad groups/ads/ keywords) AND every v2 tail resource — children first. Mutually exclusive with --resource |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

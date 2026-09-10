@@ -35,6 +35,7 @@ Usage: apb-gads audit list [OPTIONS]
 |---|---|
 | `--since <SINCE>` | Filter entries on or after this unix timestamp |
 | `--limit <LIMIT>` | Max entries to return |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-audit-get"></a>
 ### `apb-gads audit get`
@@ -52,6 +53,7 @@ Usage: apb-gads audit get [OPTIONS] --id <ID>
 | Option | Description |
 |---|---|
 | `--id <ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-audit-replay"></a>
 ### `apb-gads audit replay`
@@ -69,3 +71,4 @@ Usage: apb-gads audit replay [OPTIONS] --id <ID>
 | Option | Description |
 |---|---|
 | `--id <ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

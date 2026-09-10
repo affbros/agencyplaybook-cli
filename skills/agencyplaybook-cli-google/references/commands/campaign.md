@@ -31,6 +31,7 @@ Usage: apb-gads campaign list [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-campaign-get"></a>
 ### `apb-gads campaign get`
@@ -46,3 +47,4 @@ Usage: apb-gads campaign get [OPTIONS] --campaign-id <CAMPAIGN_ID>
 | Option | Description |
 |---|---|
 | `--campaign-id <CAMPAIGN_ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

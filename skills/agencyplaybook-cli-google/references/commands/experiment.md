@@ -36,3 +36,4 @@ Usage: apb-gads experiment results [OPTIONS] --experiment-id <EXPERIMENT_ID>
 | Option | Description |
 |---|---|
 | `--experiment-id <EXPERIMENT_ID>` | Numeric experiment id (see `report experiments`) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. |

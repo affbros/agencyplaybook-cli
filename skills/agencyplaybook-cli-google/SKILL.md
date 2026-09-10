@@ -1,7 +1,7 @@
 ---
 name: agencyplaybook-cli-google
 description: |
-  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 123 gated mutations; run raw GAQL; schedule read-only audits. Covers all 295 commands across 29 groups against Google Ads API v25.
+  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 123 gated mutations; run raw GAQL; schedule read-only audits. Covers all 300 commands across 30 groups against Google Ads API v25.
 
   USE WHEN the user mentions Google Ads, "apb-gads", "gads", "google ads cli", "agencyplaybook google", "apb google", PMAX / Performance Max, RSA / responsive search ads, smart bidding, tCPA / tROAS / target CPA / target ROAS, learning phase, search themes, brand exclusions, negative keywords, keyword planning, conversion value rules, bid adjustments / bid modifiers, account health, waste audit, scaling ad spend, campaign launch, ad-strength / ad rotation, quality score, impression share, dayparting, geo/device performance, GAQL, or wants ANY Google Ads account read, audit, plan, report, or change — even if they don't name the CLI. NOT for Meta/Facebook/Instagram ads (use the agencyplaybook-cli skill) or generic SEO.
 ---
@@ -12,13 +12,13 @@ Drive the `apb-gads` CLI — a safe, triple-gated Rust Google Ads operator tool 
 judgment layer it doesn't ship with: which lever for which situation, in what order, framed
 for growth, and never at the cost of a converged Smart-Bidding campaign.
 
-**Division of labor.** The CLI owns the mechanics: **295 commands across 29 groups** —
+**Division of labor.** The CLI owns the mechanics: **300 commands across 30 groups** —
 123 gated mutations, 66 diagnostic playbooks, 24 reports, MCC-wide portfolio roll-ups — every
 write dry-run by default behind three independent gates, every response JSON. This skill owns
 the *operating model*. Never reimplement what the CLI does; orchestrate it, and read the
 references below for depth.
 
-> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 29 groups · 295 leaf
+> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 30 groups · 300 leaf
 > commands · 123 `mutate` subcommands · 66 playbooks (6 sections) · 24 reports · Google Ads
 > **API v25**. The runtime is the source of truth — when a doc and the binary disagree, the binary wins.
 
@@ -31,6 +31,8 @@ Load `references/` files **as needed** (progressive disclosure — don't read th
 | Exact flags/params for a command ("what does `mutate campaign-budget-update` take?") | `references/commands/<group>.md` (one page per group — `mutate`, `playbook`, `report`, `plan`, `campaign`, …) |
 | Switch which account commands target (agency multi-account: "use account X", "set/show current account") | `references/commands/account.md` (`account use`/`current`/`clear`/`list` — persists a current MCC child to `~/.apb-gads/state.json`; precedence `--customer` > persisted > config default) |
 | To pick a playbook by symptom ("why won't this exit learning?", "find waste") | `references/playbook-catalog.md` (66 playbooks by section) |
+| Do a whole recurring job end-to-end ("clean up my search terms", "what's wasting spend and what should I promote?") | `references/commands/recipe.md` — `recipe list` / `recipe describe <name>` / `recipe search-terms`; the SOP paragraph is § *Recipes* below |
+| **Build** a new campaign from a brief ("set up a search campaign for X", "build me a keyword list with ads and negatives", "launch a new campaign") | `references/commands/recipe.md` — `recipe build`; the SOP is § *Build a whole campaign from a brief* below |
 | Turn a diagnosis into ONE decisive verb per campaign ("which should I scale / cap?") — SCALE / TIGHTEN / OPTIMIZE / CAP (/ HOLD / CUT) | `references/verdict-framework.md` |
 | Choose the campaign TYPE for a goal ("Search, PMax, or Demand Gen?") | `references/campaign-type-selection.md` |
 | The doctrine behind a recommendation (modifier×strategy, RSA stats, PMAX facts) | `references/doctrine.md` |
@@ -138,6 +140,100 @@ and **still exits 0** — read `.status`, then undo with `orchestrate rollback -
 Blocks, formats, the pre-flight refusals and the ≤0.1.20 silent-drop trap:
 `references/workflows.md` § W6b.
 
+## Recipes — one verb for a whole job
+
+A **playbook finds**; a **recipe decides and packages**. When the user asks for an OUTCOME rather
+than a diagnosis — "clean up my search terms", "what am I wasting money on and what should I add
+as keywords?" — reach for a recipe first: it reads the account's own targets and standing rules,
+classifies every row, and hands back a plan you can show them.
+
+**The SOP is three steps: run the recipe, read the summary, explain the review bucket.**
+
+```bash
+$B --customer <CID> recipe list                       # what exists
+$B --customer <CID> recipe describe search-terms      # the decision rules, verbatim from the code
+$B --customer <CID> recipe search-terms --lookback-days 30 \
+     --out build/search-terms --format all --plan build/search-terms/plan.html
+```
+
+1. **Run it.** Dry-run by default; it writes `review.json` (+ CSVs with `--format all`) and, with
+   `--plan`, the envelope / review page / document.
+2. **Read the summary.** It is on **stderr** and in the JSON's `summary[]`. The header prints the
+   DERIVED thresholds and the formula behind them ("waste ≥ USD 20.00 & 0 conv · promote ≥ 3 conv
+   at ≤ USD 10.00 (2.00 × target CPA 10.00)"). Quote those numbers to the user — they are the
+   argument for every row that follows. Money is always in the account's currency.
+3. **Explain the review bucket.** `review` is where the recipe deliberately did NOT act: brand
+   terms (never negated or auto-promoted), terms served from 2+ ad groups (ambiguous attribution),
+   PMAX search-term insight rows (category-level — informational only), and anything inside the
+   review band. Walk the user through `review.json`'s reasons and ask for a decision; do not
+   quietly promote the band.
+
+**Prerequisites and refusals.** A recipe stops loudly with `context_missing: brand.terms` rather
+than guessing a brand from campaign names. Set it up once:
+
+```bash
+$B --customer <CID> context init --mode target_cpa --target-cpa 15 \
+     --brand-term "<brand>" --brand-competitor "<competitor>" \
+     --canonical-negative-set <sharedSetId>
+```
+
+**Applying.** `--execute` hands the recipe's envelope to `mutate apply-plan` — the same three
+gates, no new write path — and a plan above 200 actions also needs `--confirm`. Tune, don't
+override: `--threshold-override waste_multiplier=3.0` (also `promote_min_conversions`,
+`review_band_pct`, `spend_floor`), or persist per-customer values in
+`context.recipes.search_terms`. Full doctrine: `references/commands/recipe.md`.
+
+## Build a whole campaign from a brief — `recipe build`
+
+When the user wants something **built** rather than diagnosed — "set up a search campaign for X",
+"build me a keyword list with ads and negatives", "launch a new campaign" — the verb is
+`recipe build`. It runs the whole expert pipeline (research → structure → copy → targeting →
+assets → bidding → validate → plan) from ONE input, the **brief**, and launches nothing unless
+asked. Full doctrine: `references/commands/recipe.md`; operator doc `docs/recipes-build.md`.
+
+**The SOP is four steps: write the brief, dry-run it, review the plan, then ask before launching.**
+
+```bash
+# 1. dry-run the whole build (nothing reaches the account)
+$B --customer <CID> recipe build --brief briefs/<slug>.yaml --out build/
+
+# 2. inspect a single stage while iterating
+$B --customer <CID> recipe build --brief briefs/<slug>.yaml --out build/ --stage research
+
+# 3. re-run a hand-edited spec (same spec_hash, same plan digest)
+$B --customer <CID> recipe build --spec build/spec.v2.json --out build/v2
+
+# 4. server-validate the whole launch body — still creates nothing
+$B --customer <CID> recipe build --brief briefs/<slug>.yaml --validate-only
+
+# 5. ONLY after an explicit human YES: launch it, born PAUSED
+$B --customer <CID> recipe build --brief briefs/<slug>.yaml --out build/ --execute
+$B --customer <CID> orchestrate rollback --from-receipt build/launch.json     # the undo
+```
+
+1. **Write the brief.** Minimum: `customer_id`, `business.landing_page`, `goals.mode` +
+   its target, `goals.daily_budget`, `research.seed_keywords` (or `seed_url`), and
+   `targeting.geo.include`. Curation lives in `structure.max_ad_groups`,
+   `research.exclude_intents` and `research.match_type_policy` — set them; the defaults do not
+   curate.
+2. **Read the summary.** On **stderr** and in the JSON's `summary[]`: research counts, ad groups,
+   keyword match-type mix, copy source, targeting, negatives, assets, goals, the validation
+   verdict, and what was written.
+3. **Review the plan, not the spec.** `build/plan.md` (or `plan.html`, which you can send to a
+   client) renders the same plan-envelope-v2 document `plan.json` carries. `research/keywords.json`
+   answers "why isn't <keyword> in here?" — every candidate has a decision and a reason.
+4. **Ad copy is the user's call.** `--provider heuristic` (the default) produces **starter copy**
+   and the tool flags it `starter_copy: true`. Say so out loud, and offer the expert path: write
+   the copy into the brief under `copy.headlines` / `copy.descriptions` with
+   `copy.provider: agent` (the `agencyplaybook-planner` skill exists for exactly this). Never
+   describe heuristic copy as written-for-them.
+
+**Refusals are information, not obstacles.** `brief_invalid: <field>` names the field to fix. A geo
+/ shared set / conversion action / audience name that matches zero or many rows fails with the
+candidates listed — show the user the candidates and ask which they meant; never pick for them. A
+`--type pmax` build refuses by name any brief block PMAX has no equivalent for. A failing
+validation exits **3** and emits no plan.
+
 ## Safety doctrine (apply to every mutation)
 
 1. **Dry-run first.** Every `mutate`/`orchestrate`/`changes apply` write needs `--execute`.
@@ -159,16 +255,26 @@ Blocks, formats, the pre-flight refusals and the ≤0.1.20 silent-drop trap:
 ### `--plan` (plan-first) — hand the user a readable plan
 
 The global `--plan <path>` flag means **"plan it, don't do it."** On any mutating command,
-orchestrator, or playbook it runs the full dry-run pipeline and writes a human-readable **plan
-document** (`<path>.md`) plus, when the result has re-playable operations, the machine plan
-(`<path>.json`) — with **zero** API mutation. Use it to give the user (or their client) a document
-to approve before anything is applied.
+orchestrator, or playbook it runs the full dry-run pipeline and writes a **plan-envelope-v2**
+document — with **zero** API mutation. Use it to give the user (or their client) something to
+approve before anything is applied.
 
+- **The extension picks the artifact:**
+  - `<path>.json` → the machine envelope alone (`schema_version: 2`, re-playable via
+    `mutate apply-plan`);
+  - `<path>.html` → the **review page** — a self-contained, print-ready page a client can read;
+  - `<path>.md` → the human plan document plus its `<path>.md.json` envelope twin;
+  - any other path → `<path>.md` + `<path>.json` (the original pair).
 - `--plan` **cannot** be combined with `--execute` (hard error naming both flags).
-- Path twins: a `.md` path → doc `<path>.md` + twin `<path>.md.json`; any other path → `.md`/`.json`
-  appended (`waste` → `waste.md` + `waste.json`).
+- `orchestrate campaign-launch --plan build.json` yields the **whole build** as create ops (budget →
+  campaign → ad groups → ads → keywords, then every v2 tail stage), each action carrying its stage,
+  its dependencies, and the exact Google operation in `preview`. `plan from-audit --plan` carries the
+  ActionPlan's priority / impact / growth / confidence / risk / effort into each action's `score`.
 - A playbook with no actionable operations writes an explicit *empty-plan* doc (not an error); a
   pure read warns "nothing to plan" and runs normally.
+- `mutate apply-plan` **dry-runs every action** in a v2 plan. It refuses `--execute` on a BUILD plan
+  (one whose actions target temp references): those only resolve inside the atomic mutate
+  `orchestrate campaign-launch --execute` assembles — the plan is that launch's reviewable preview.
 - The plan file is **input, not consent** — applying it re-runs every gate, and is itself validated
   as untrusted input: unknown `schema_version` is rejected, a hand-edited file fails the `plan_hash`
   check, and recorded prior values are re-read to detect drift. A hash mismatch needs
@@ -178,7 +284,9 @@ to approve before anything is applied.
 ```sh
 # 1. Plan (writes waste.md + waste.md.json, touches nothing):
 apb-gads --customer 1234567890 playbook waste-audit --plan waste.md
-# 2. Show the user waste.md, get explicit approval, then apply:
+# 1b. …or hand them a review page instead:
+apb-gads --customer 1234567890 playbook waste-audit --plan waste.html
+# 2. Show the user waste.md (or waste.html), get explicit approval, then apply:
 apb-gads mutate apply-plan --from-file waste.md.json --execute
 #    (refuses if the file was edited after step 1, or if the account drifted since;
 #     override with --allow-edited-plan / --allow-stale-plan only with the user's OK.)

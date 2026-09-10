@@ -36,3 +36,4 @@ Usage: apb-gads export render [OPTIONS] --from <FROM>
 | `--from <FROM>` | Path to the artifact JSON file |
 | `--format <FORMAT>` | Output format: csv, json, or markdown |
 | `--out-dir <OUT_DIR>` | For CSV format: directory to write one file per table. Defaults to the current working directory |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. |

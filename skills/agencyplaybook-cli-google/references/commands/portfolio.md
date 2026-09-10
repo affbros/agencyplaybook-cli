@@ -34,6 +34,7 @@ Usage: apb-gads portfolio summary [OPTIONS]
 | Option | Description |
 |---|---|
 | `--compare` | Also compute the equal-length prior window and per-account deltas |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-portfolio-breakdown"></a>
 ### `apb-gads portfolio breakdown`
@@ -51,6 +52,7 @@ Usage: apb-gads portfolio breakdown [OPTIONS] --dimension <DIMENSION>
 | Option | Description |
 |---|---|
 | `--dimension <DIMENSION>` | Segment dimension: device \| network \| campaign_type |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-portfolio-trend"></a>
 ### `apb-gads portfolio trend`
@@ -63,4 +65,8 @@ MCC-wide daily trend: per-currency cost / conversions / conversions_value time-s
 Usage: apb-gads portfolio trend [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

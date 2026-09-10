@@ -138,6 +138,20 @@ guarantee on every customer is the handshake + the human YES, never an allowlist
 | `insufficient_scope` / `not_entitled` | missing `write:google:mutations` scope / `write_policy` / `google_addon` | surface the upgrade path; offer a read-only alternative; don't loop |
 | `upstream_error` / `config_error` | apb-gads / proxy reported a failure AFTER the gates | no change landed (readback skipped); surface the message |
 
+## SaaS sessions — plan artifacts also land on the tenant's Plans page (saas-plans SP4)
+
+When the session is SaaS-authenticated (`APB_API_KEY` set): `gads_export_plan` mints a token the
+same way `gads_preview_change` does and, on success, imports the exported envelope
+(`POST /gads/plans/import`, hash-bound) — returning `plan_id` + `review_url`. `gads_apply_change`
+ALSO imports the change-set it is about to apply (reusing the already-verified token's hash — no
+fresh mint) BEFORE its existing sandbox-fenced local execution, returning `plan_id`. **The Google
+execute route is still `501 not_implemented_yet` until sprint-s03b** — an imported row stays
+`pending`/`approved` regardless of what the local execution below it does; `gads_apply_change`
+says so explicitly with `saas_execution:"not_available_until_s03b"`. On a SaaS session the plan is
+on the tenant's Plans page at `/gads/plans/<id>` — the same doctrine as Meta's Plans page (see the
+`agencyplaybook-meta-brain` skill's `safety-and-approval.md`). Non-SaaS sessions (no `APB_API_KEY`)
+never call the plans API — the exported envelope is returned inline only.
+
 ## Non-negotiables (the doctrine)
 
 1. **Preview + an explicit human YES are BOTH required before execute.** The token is not consent —

@@ -29,3 +29,4 @@ Usage: apb-gads verdict [OPTIONS]
 | `--min-conversions <MIN_CONVERSIONS>` | Maturity floor — min conversions before a campaign is judged (default 50) |
 | `--queue` | Rank the verdicts into a decision queue ($ impact/day + next-action + reallocation) |
 | `--include-paused` | Also judge PAUSED campaigns (reactivation / post-mortem lens). Paused campaigns carry delivery "n/a" so SCALE can't fire; read OPTIMIZE=relaunch, CUT=correctly killed |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

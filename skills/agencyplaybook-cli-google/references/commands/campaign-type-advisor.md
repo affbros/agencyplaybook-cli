@@ -27,3 +27,4 @@ Usage: apb-gads campaign-type-advisor [OPTIONS] --goal <GOAL>
 | `--demand <DEMAND>` | Existing search demand for the product/service: existing \| none (default existing) |
 | `--signal-strength <SIGNAL_STRENGTH>` | Conversion-signal strength (PMax-readiness proxy): high \| medium \| low. Ignored when --customer is set (derived from trailing-30d conversions) |
 | `--budget-daily <BUDGET_DAILY>` | Daily budget in account currency (broad-reach feasibility check) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

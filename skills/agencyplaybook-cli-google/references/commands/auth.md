@@ -30,7 +30,11 @@ Authentication checks against the configured OAuth credentials.
 Usage: apb-gads auth test [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-auth-accessible-customers"></a>
 ### `apb-gads auth accessible-customers`
@@ -41,7 +45,11 @@ _No command-specific options — uses only the [global options](README.md#global
 Usage: apb-gads auth accessible-customers [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-auth-refresh-token-help"></a>
 ### `apb-gads auth refresh-token-help`
@@ -52,7 +60,11 @@ _No command-specific options — uses only the [global options](README.md#global
 Usage: apb-gads auth refresh-token-help [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-auth-login"></a>
 ### `apb-gads auth login`
@@ -71,6 +83,7 @@ Usage: apb-gads auth login [OPTIONS] --api-key <API_KEY>
 |---|---|
 | `--api-key <API_KEY>` | Your AgencyPlaybook API key (apb_...) |
 | `--api-url <API_URL>` | Override the AgencyPlaybook API base URL |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-auth-status"></a>
 ### `apb-gads auth status`
@@ -83,7 +96,11 @@ Show the Google Ads connection status for the current API key
 Usage: apb-gads auth status [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-auth-connect-google"></a>
 ### `apb-gads auth connect-google`
@@ -101,3 +118,4 @@ Usage: apb-gads auth connect-google [OPTIONS]
 | Option | Description |
 |---|---|
 | `--timeout <TIMEOUT>` | Seconds to wait for browser authorization [default: 300] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

@@ -188,7 +188,10 @@ live change is a later, gated phase (validate → approve → execute, Groups H/
   target_id? OR target_ids[]?, payload?{…} (e.g. {status:"PAUSED"} / {daily_budget:5000}),
   account_id? }`.
 - **Output:** `{ plan_id, state:"CREATED", action, target_id?, target_ids?, blast_radius?,
-  dry_run_preview?, note }`. Take the `plan_id` to `meta_validate_plan` → `meta_execute_plan`.
+  dry_run_preview?, envelope_id?, note }`. Take the `plan_id` to `meta_validate_plan` →
+  `meta_execute_plan`. `envelope_id` (saas-plans SP4) is present on a SaaS session — a
+  best-effort import that puts the plan on the tenant's Plans page immediately; absent on a
+  non-SaaS session or if the import didn't succeed (the plan record itself is unaffected either way).
 
 ### `meta_build_campaign_spec`
 - **Purpose:** build a launch-ready Meta campaign SPEC and preview it in DRY-RUN mode — the
@@ -212,11 +215,25 @@ live change is a later, gated phase (validate → approve → execute, Groups H/
 
 ### `agency_get_plan`
 - **Purpose:** fetch one stored plan by id — its state, action, risk level, and preflight checks.
-- **Backing:** there is NO `GET /plans/:id`; reads `GET /api/v1/plans` + selects the id, then
-  enriches with `GET /api/v1/plans/:id/doctor` (`{safe_to_execute, checks[]}`).
+- **Backing:** reads `GET /api/v1/plans` + selects the id, then enriches with
+  `GET /api/v1/plans/:id/doctor` (`{safe_to_execute, checks[]}`).
 - **Input:** `{ plan_id (from `meta_create_plan` / `agency_list_plans`) }`.
 - **Output:** `{ plan_id, found, state?, action?, target_id?, risk_level?, created_at?, doctor?,
   note }`. An unknown id returns `found:false` (NOT an error).
+
+### `meta_get_plan` (saas-plans SP4)
+- **Purpose:** read one plan as its **plan-envelope-v2 document**. `readOnlyHint:true`.
+- **Backing:** `GET /api/v1/plans/:id` — works with EITHER a native plan id (`meta_create_plan`)
+  or a SaaS envelope-row id (`meta_create_plan`'s `envelope_id`, or the row
+  `meta_validate_plan`/`meta_execute_plan` imports on a SaaS session) — both additively carry an
+  `envelope` field.
+- **Input:** `{ plan_id }`.
+- **Output:** `{ plan_id, channel:"meta", state, envelope, envelope_note?, note }`. `state` is
+  the envelope row's SaaS state (`pending`/`approved`/…/`executed`) when the id resolves to one,
+  else the native plan's status. `envelope` is `null` (+ `envelope_note`) for a plan with no
+  envelope form (e.g. a `cap` bookkeeping plan).
+- **On a SaaS session:** this is how you check on a plan that lives on the tenant's Plans page —
+  see `reference/safety-and-approval.md` § SaaS sessions.
 
 ---
 
@@ -281,10 +298,18 @@ from configuration — NOT a restriction.
   first** (recovers the current descriptor + enforces freshness — a changed plan ⇒ `hash_mismatch`).
 - **Input:** `{ plan_id, account_id?, approval_token, operator_confirmation:true, confirm_destructive?,
   path?("http"|"subprocess") }`.
-- **Output:** `{ account_context, plan_id, state, change_set, change_set_hash, blast_radius, path,
-  executed, result, verify_result, approval_jti, audit_id, note }` (or `{error}`). Refuses
-  `not_found` (no such plan) / `plan_not_validated` (not VALIDATED) before the handshake.
+- **Output:** `{ account_context, plan_id, envelope_id?, job_id?, state, change_set, change_set_hash,
+  blast_radius, path, executed, result, execution_receipt?, poll_timed_out?, verify_result,
+  approval_jti, audit_id, note }` (or `{error}`). Refuses `not_found` (no such plan) /
+  `plan_not_validated` (not VALIDATED) before the handshake.
 - **L4** (CRITICAL / blast score ≥ 4) ⇒ `confirm_destructive:true` required.
+- **saas-plans SP4 — on a SaaS session (`path:"http"`, the default):** goes through the SaaS
+  handshake instead of a direct execute — import (bind `sha256(approval_token)`) → `POST
+  /plans/:id/approve {mcp_token: approval_token}` (skipped if a human already approved on the web)
+  → `POST /plans/:id/execute` (202, async job) → polls `GET /plans/:id` to a terminal state
+  (`executed`/`failed`/`rolled_back`, ~2s interval, ~10 min ceiling). `envelope_id`/`job_id`/
+  `execution_receipt`/`poll_timed_out` are present only on this path. A plan with no envelope form
+  falls back to the pre-SP4 direct execute unchanged. See `reference/safety-and-approval.md`.
 
 ---
 

@@ -31,3 +31,4 @@ Usage: apb-gads ad list [OPTIONS]
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
 | `--with-attestation` | v24.2: attempt Ad.synthetic_content_info (advertiser + system AI-content attestations, EU AI Act 2026-08-02). Not yet queryable on live v24.2 (PROHIBITED_FIELD_IN_SELECT_CLAUSE) — falls back to the base list plus an `attestation_unavailable` note |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

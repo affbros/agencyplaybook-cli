@@ -33,7 +33,11 @@ List all registered jobs
 Usage: apb-gads schedule list [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-schedule-add"></a>
 ### `apb-gads schedule add`
@@ -62,6 +66,7 @@ Usage: apb-gads schedule add [OPTIONS] --id <ID> --cron <CRON> [COMMAND]...
 | `--cron <CRON>` | 5-field cron expression or `@hourly` / `@daily` / `@weekly` / `@monthly` / `@yearly` shortcut |
 | `--job-customer <JOB_CUSTOMER>` | Per-job customer override. Falls back to `default_customer_id` from the config if omitted |
 | `--notes <NOTES>` | Free-form description |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. |
 
 <a id="apb-gads-schedule-remove"></a>
 ### `apb-gads schedule remove`
@@ -79,6 +84,7 @@ Usage: apb-gads schedule remove [OPTIONS] --id <ID>
 | Option | Description |
 |---|---|
 | `--id <ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-schedule-show"></a>
 ### `apb-gads schedule show`
@@ -96,6 +102,7 @@ Usage: apb-gads schedule show [OPTIONS] --id <ID>
 | Option | Description |
 |---|---|
 | `--id <ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-schedule-install"></a>
 ### `apb-gads schedule install`
@@ -114,6 +121,7 @@ Usage: apb-gads schedule install [OPTIONS]
 |---|---|
 | `--apply` | Actually merge the managed section into the user's crontab. |
 | `--binary <BINARY>` | Override the apb-gads binary path in emitted cron lines. |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-schedule-uninstall"></a>
 ### `apb-gads schedule uninstall`
@@ -131,6 +139,7 @@ Usage: apb-gads schedule uninstall [OPTIONS]
 | Option | Description |
 |---|---|
 | `--apply` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-schedule-run"></a>
 ### `apb-gads schedule run`
@@ -148,3 +157,4 @@ Usage: apb-gads schedule run [OPTIONS] --id <ID>
 | Option | Description |
 |---|---|
 | `--id <ID>` | — |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

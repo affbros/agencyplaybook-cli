@@ -196,6 +196,22 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   spec token (deferred); `gads_apply_change` consumes only a `gads_preview_change` token for a
   single bounded change. Don't imply a launch you can't perform.
 
+### `gads_export_plan` (saas-plans SP4)
+- **Purpose:** produce a **plan-envelope-v2 document** for a Google change — one bounded op
+  (`change_set`) or a launch spec (`spec` + `spec_kind`) — WITHOUT applying it. `readOnlyHint:false
+  + destructiveHint:false`. Mints a token the SAME way `gads_preview_change` does.
+- **Backing (NO `--execute`):** `apb-gads mutate <op> … --plan <tmp>.json` (change_set) or
+  `apb-gads orchestrate campaign-launch|pmax-build --from-file <spec> --plan <tmp>.json` (spec) —
+  the full dry-run pipeline, PLUS the envelope is written to disk and read back. No API mutation.
+- **Input:** `{ customer_id?, change_set?:{op,entity_id,params?} | spec?:<object>,
+  spec_kind?("campaign_spec"|"pmax_spec", default campaign_spec), out?("envelope"|"file") }` —
+  provide exactly one of `change_set` / `spec`.
+- **Output:** `{ customer_id, kind, plan_id?, hash, summary, envelope? (or result_id? when
+  out:"file"), review_url?, approval_token, change_set_hash, expires_at, risk:"mutation", note }`.
+  `plan_id`/`review_url` are present only on a SaaS session with a successful import — the envelope
+  is always produced either way. **Google plan execute is still 501 until sprint-s03b** — this tool
+  never applies anything, only exports + optionally imports the artifact.
+
 ---
 
 ## Group H — Preview a single change (mint an approval token; NO change)
@@ -236,8 +252,13 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   audit.
 - **Input:** `{ customer_id?, change:{ op, entity_id, params? } (must hash-match the token),
   approval_token, operator_confirmation:true, confirm_destructive? }`.
-- **Output:** `{ customer_id, change, change_set_hash, applied, result, verify_result, approval_jti,
-  audit_id, note }` (or `{error}` with `raw.reason` / `raw.approval_reason`).
+- **Output:** `{ customer_id, change, change_set_hash, plan_id?, saas_execution?, applied, result,
+  verify_result, approval_jti, audit_id, note }` (or `{error}` with `raw.reason` /
+  `raw.approval_reason`). **saas-plans SP4 — on a SaaS session:** ALSO imports this exact change as
+  a plan-envelope-v2 document (reusing the already-verified token's hash — no fresh mint) BEFORE
+  the local execution below, returning `plan_id`. Since the SaaS Google executor is `501` until
+  sprint-s03b, the row stays `pending`/`approved` — `saas_execution:"not_available_until_s03b"`
+  says so explicitly. This is best-effort and does not block or change the local execution.
 - **Path selection is credential routing, NOT a fence.** Production (no BYO yaml) → the apb-api
   `/google` managed-write proxy (`googleAds:mutate`; scope `write:google:mutations` + `write_policy`
   gated upstream). The BYO sandbox test path (a configured write yaml) → the gads subprocess with

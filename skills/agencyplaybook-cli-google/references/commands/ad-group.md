@@ -30,3 +30,4 @@ Usage: apb-gads ad-group list [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

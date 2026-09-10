@@ -46,7 +46,7 @@ tool already does; orchestrate the Google tools and interpret what they return.
 
 ## The Google tool surface (full contracts in `reference/tool-catalog.md`)
 
-The MCP advertises **37 tools total**; **14 are `gads_*` (Google)**, and the brain reuses the
+The MCP advertises **39 tools total**; **15 are `gads_*` (Google)**, and the brain reuses the
 **shared `agency_*`** context/discovery/result tools. The Google read tools never change anything
 and never throw — failures come back as structured data you reason over. The write tool
 (`gads_apply_change`) can apply a change to the customer you operate on — ONLY behind the approval
@@ -61,14 +61,14 @@ handshake + an explicit human YES (see § Analysis vs execution).
 | Audits (playbooks) | `agency_list_audits` (`platform:"google"`) · `gads_run_audit` | read |
 | Decision | `gads_get_verdict` | read |
 | Result paging (shared) | `agency_get_result` | read |
-| **Plan / preview (mint approval)** | `gads_build_campaign_spec` · `gads_validate_spec` · `gads_preview_change` | dry-run + token mint (no change) |
+| **Plan / preview (mint approval)** | `gads_build_campaign_spec` · `gads_validate_spec` · `gads_export_plan` · `gads_preview_change` | dry-run + token mint (no change) |
 | **Execute (WRITE behind the handshake)** | `gads_apply_change` | write (gated by token + human YES) |
 | **Verify (post-write readback)** | `gads_verify_execution` | read |
 
-The 14 `gads_*` tools: `gads_health`, `gads_list_customers`, `gads_resolve_customer`,
+The 15 `gads_*` tools: `gads_health`, `gads_list_customers`, `gads_resolve_customer`,
 `gads_list_entities`, `gads_get_entity`, `gads_get_performance`, `gads_run_gaql`, `gads_run_audit`,
-`gads_get_verdict` (9 read) · `gads_build_campaign_spec`, `gads_validate_spec` (2 plan) ·
-`gads_preview_change` (1 preview) · `gads_apply_change` (1 write) · `gads_verify_execution`
+`gads_get_verdict` (9 read) · `gads_build_campaign_spec`, `gads_validate_spec`, `gads_export_plan`
+(3 plan) · `gads_preview_change` (1 preview) · `gads_apply_change` (1 write) · `gads_verify_execution`
 (1 verify). `gads_apply_change` applies ONE bounded change to the customer you operate on and
 requires the single-use, customer-bound approval token + `operator_confirmation:true` (your human
 YES) before it touches anything. **There is no Google plan-orchestration / multi-step execute tool
