@@ -4,6 +4,74 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.0] — 2026-09-09 (Recipes framework · complete launch envelope · Editor CSV / HTML plan export · apply-plan execute)
+
+**A minor bump, not a patch:** ships **30 groups · 300 leaf commands · 123 gated mutations ·
+66 diagnostic playbooks · 24 reports** against Google Ads API **v25** — everything the Google lane
+landed since `gads-v0.2.0` (sprints g01–g05b), consolidated into one binary release.
+
+### Added
+
+- **`recipe` command group** (`recipe list|describe|build|search-terms`) — a Recipe trait + runtime
+  layered over the existing planning primitives. `recipe build --brief <yaml> --out <dir> --format
+  spec|plan|review|html|editor-csv|all` turns a structured brief into an 8-stage build (keyword
+  research → structure curation → RSA drafting → negatives → validate → plan/review/editor-csv
+  artifacts), with structure-curation knobs (`--max-ad-groups`, `--exclude-intents`,
+  `--competitors`, EXACT top-N) and `--seed-url` domain grounding. `recipe search-terms` is the
+  first concrete recipe (search-term-to-negative harvesting) built on the same trait.
+- **`context` schema v2** and **`gaql_query_all` pagination** — per-customer goal/context state and
+  a paginated GAQL helper used throughout the new recipe + report code paths.
+- **plan-envelope-v2 emission everywhere** — every `create` op across campaign/ad-group/ad/asset
+  mutations now emits the shared `apb_envelope` v2 document (schema, canonical-JSON SHA-256 digest);
+  `--plan <path>.json|.md|.html` works on every write-gated command; a Google vocabulary gate
+  (`check_envelope_vocab.py`) asserts every emitted op resolves to a real catalogue leaf.
+- **`plan export --format editor-csv|html|md`** — a read-only renderer that shells any saved plan
+  envelope into a Google Ads Editor-importable CSV bundle, a standalone HTML review page, or
+  Markdown. New global `--fonts system|web` flag controls whether `.html` output (this flag, or
+  `recipe build`'s `plan.html`) links Google Fonts or stays fully offline-safe.
+- **Editor CSV bundle** (`recipe build --format editor-csv|all`) — writes `<out>/editor/*.csv`
+  directly from a completed recipe build, alongside the existing spec/plan/review/research
+  artifacts.
+- **Complete launch envelope** — the dry-run branch of `campaign_launch_plan` (and the PMAX /
+  Demand Gen twins) now emits the FULL step-6-through-9 tail (geo, language, negatives,
+  bidding-strategy actions) from the same `launch_steps()` table the execute path calls — a step
+  added to the table can no longer be silently omitted from either side.
+- **`mutate apply-plan --execute` now executes build plans**, not just previews them — driven off
+  the recovered build spec, with a `plan_envelope_mismatch` refusal gate: if a plan's stored
+  `actions[]` no longer match what its recovered spec would perform (edited/tampered plan file),
+  execution refuses with exit code **3** before any Google mutate call is attempted.
+- **Launch head-step partial-failure receipt** — a failure partway through the launch head steps
+  now emits a structured receipt describing exactly which steps completed, instead of a bare error.
+- **`orchestrate rollback --from-receipt`** accepts `apply-plan`'s own execute-receipt shape
+  directly, so a failed or unwanted `apply-plan --execute` can be rolled back from its own output.
+- **Tier-4 harness chains**: `recipe-build-lifecycle` and `apply-plan-build-lifecycle`
+  (build → list-targeting → every-action-grouped → validate-only → tampered-plan-refused →
+  no-write-on-refusal → execute-receipt → receipt-has-geo-and-language → verify →
+  rollback-from-receipt → keeper-only-after-rollback), both exercised end-to-end against the
+  sandbox test child.
+
+### Changed
+
+- `envelope_out::actions_from_result` now reads `atomic_plan.operations` for PMAX and Demand Gen
+  builds (previously under-emitted vs. the Search path — the producer-side fix, not a consumer
+  workaround).
+- Operator-visible JSON: negative-keyword-list routing carries version-agnostic `api_routing`.
+
+### Fixed
+
+- PMAX / Demand Gen `atomic_plan.operations` emission — the two campaign types were missing
+  actions in their `campaign_launch_plan` dry-run output that Search already emitted; both now
+  reuse the same complete `launch_steps()` table as Search.
+- Clippy: clean across `ads-core` + `ads-cli` at `-D warnings`.
+
+### Notes
+
+- Google Ads API pin stays **v25** — no wire-version change in this release.
+- Write testing for this release, as always, ran ONLY against the sandbox test child
+  (`6338615768`, `customer.test_account = true`) via `scripts/sandbox-check.sh --google` and
+  `qa_test_account.sh` — never a live/production account. See `AGENTS.md` § Sandbox & Test
+  Accounts and Hard Rule #11.
+
 ## [0.2.0] — 2026-09-09 (Google Ads API v25 · AI Max · synthetic-content attestation · typed experiments · plan-envelope v2)
 
 **A minor bump, not a patch:** the Google Ads API pin moves v24 → **v25** (a BREAKING wire change for
