@@ -43,6 +43,8 @@ Usage: apb-gads orchestrate ad-rotate [OPTIONS] --ad-group-id <AD_GROUP_ID>
 | `--ad-group-id <AD_GROUP_ID>` | Ad group ID. All referenced ads must belong to this ad group |
 | `--pause-ad-id <PAUSE_AD_ID>` | Ad ID(s) to set to PAUSED. Repeat the flag for each ID |
 | `--enable-ad-id <ENABLE_AD_ID>` | Ad ID(s) to set to ENABLED. Repeat the flag for each ID |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-ad-refresh"></a>
@@ -64,9 +66,11 @@ Usage: apb-gads orchestrate ad-refresh [OPTIONS] --ad-group-id <AD_GROUP_ID>
 | `--headline <HEADLINE>` | New RSA headline. Repeat the flag (3–15 required) |
 | `--description <DESCRIPTION>` | New RSA description. Repeat the flag (2–4 required) |
 | `--final-url <FINAL_URL>` | Final URL for the new ad. Repeat the flag |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--path1 <PATH1>` | Optional display path 1 (≤15 chars) |
 | `--path2 <PATH2>` | Optional display path 2 (≤15 chars) |
 | `--pause-ad-id <PAUSE_AD_ID>` | Old ad ID to PAUSE (destructive; needs --confirm). Omit to create only and get a recommended pause target |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--new-status <NEW_STATUS>` | New ad status: PAUSED (default, safe) or ENABLED [default: PAUSED] |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
@@ -88,6 +92,8 @@ Usage: apb-gads orchestrate campaign-launch [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON spec file |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. |
 
 <a id="apb-gads-orchestrate-pmax-build"></a>
@@ -106,6 +112,8 @@ Usage: apb-gads orchestrate pmax-build [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON PmaxLaunchPlanSpec file |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-demand-gen-build"></a>
@@ -124,6 +132,8 @@ Usage: apb-gads orchestrate demand-gen-build [OPTIONS] --from-file <FROM_FILE>
 | Option | Description |
 |---|---|
 | `--from-file <FROM_FILE>` | JSON DemandGenLaunchSpec file |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-weekly-optimization"></a>
@@ -143,6 +153,8 @@ Usage: apb-gads orchestrate weekly-optimization [OPTIONS]
 |---|---|
 | `--search-term-limit <SEARCH_TERM_LIMIT>` | Max search-term candidates to surface [default: 50] |
 | `--min-roas-for-expansion <MIN_ROAS_FOR_EXPANSION>` | Minimum ROAS for expansion readiness candidates [default: 2] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-monthly-review"></a>
@@ -160,6 +172,8 @@ Usage: apb-gads orchestrate monthly-review [OPTIONS]
 
 | Option | Description |
 |---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-orchestrate-rollback"></a>
@@ -179,4 +193,6 @@ Usage: apb-gads orchestrate rollback [OPTIONS]
 |---|---|
 | `--resource <RESOURCE>` | Resource name to remove. Repeat for each resource. Example: customers/123/campaigns/456 |
 | `--from-receipt <FROM_RECEIPT>` | A saved `orchestrate campaign-launch --execute` receipt (JSON). Removes everything that launch created — the head (budget/campaign/ad groups/ads/ keywords) AND every v2 tail resource — children first. Mutually exclusive with --resource |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

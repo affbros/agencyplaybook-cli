@@ -36,6 +36,8 @@ Usage: apb-gads recipe list [OPTIONS]
 
 | Option | Description |
 |---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-recipe-describe"></a>
@@ -59,6 +61,8 @@ Usage: apb-gads recipe describe [OPTIONS] <NAME>
 
 | Option | Description |
 |---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-recipe-build"></a>
@@ -81,10 +85,12 @@ Usage: apb-gads recipe build [OPTIONS]
 | `--brief <FILE>` | The brief (YAML or JSON). Mutually exclusive with --spec |
 | `--spec <FILE>` | A hand-edited spec.v2.json — skips research and re-enters the pipeline at the validate stage. Mutually exclusive with --brief |
 | `--out <DIR>` | Build directory. Default: ./build-<YYYYmmdd-HHMM>/ |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--stage <STAGE>` | Stop after this stage: research \| structure \| copy \| targeting \| assets \| bidding \| validate \| plan. Default: plan (the whole build) |
 | `--type <TYPE>` | search \| pmax \| demand-gen. Overrides the brief's `type:`; a disagreement fails loud rather than picking |
 | `--format <FORMAT>` | spec \| plan \| review \| html \| editor-csv \| all. `all` writes the whole build directory (spec.v2.json, plan.json, plan.md, plan.html, research/, editor/*.csv); `editor-csv` writes ONLY the Google Ads Editor CSV bundle |
 | `--provider <PROVIDER>` | heuristic \| agent. Overrides the brief's `copy.provider`. `agent` means the copy arrives in the brief — the binary writes none of it |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — `plan.html`'s font source. `web` adds a Google Fonts `<link>`; `system` stays fully offline-safe |
 
 <a id="apb-gads-recipe-search-terms"></a>
@@ -105,5 +111,7 @@ Usage: apb-gads recipe search-terms [OPTIONS]
 | `--out <OUT>` | Directory for review.json (and the CSVs with --format all). Default: build/search-terms |
 | `--format <FORMAT>` | summary \| json \| all \| editor-csv. `all` additionally writes negatives.csv + keywords.csv (legacy shape); `editor-csv` writes the same two tables in the Google Ads Editor import layout under `editor/` [default: summary] |
 | `--threshold-override <KEY=VALUE>` | Override a derived threshold input: waste_multiplier, promote_min_conversions, review_band_pct, spend_floor. Repeatable |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--review-file <REVIEW_FILE>` | Write the review bucket somewhere other than <out>/review.json |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

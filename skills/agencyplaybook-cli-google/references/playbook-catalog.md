@@ -1,4 +1,4 @@
-# apb-gads Playbook Catalog (66)
+# apb-gads Playbook Catalog (68)
 
 Every diagnostic playbook the CLI ships, grouped by section. All are **read-only** and return JSON.
 
@@ -95,7 +95,7 @@ apb-gads --pretty playbook list                        # the live registry (sour
 | `rsa-asset-performance` | 30d | Per-ad headline/description performance labels (LOW/GOOD/BEST/PENDING) surfacing swap candidates. Drives RSA iteration and message testing. |
 | `rsa-quality-audit` | 30d | 7-point copy-quality review of every live RSA (8-angle diversity, near-duplicates, keyword coverage, CTA/trust, DKI linter, policy-content) scored alongside ad_strength + approval_status; emits informational rsa_refresh_candidates for orchestrate ad-refresh. |
 
-## Performance Max (7)
+## Performance Max (9)
 
 | Slug | Window | What it surfaces |
 |---|---|---|
@@ -106,4 +106,6 @@ apb-gads --pretty playbook list                        # the live registry (sour
 | `shopping-feed-segmentation-audit` | 30d | For retail PMAX: enumerates the Merchant Center feed (products by brand, availability, status) and the current listing-group filter coverage per asset group; flags asset groups with only a root UNIT_INCLUDED (whole-feed targeting) and NOT_ELIGIBLE products that need feed remediation. |
 | `pmax-segmentation-audit` | 30d | Per-PMAX-campaign should-split / too-many-asset-groups recommendations based on spend, conversion volume, and asset-group count. |
 | `placement-leakage-audit` | 30d | Surface display + video placements (detail_placement_view) that consumed PMAX/DISPLAY/VIDEO budget with zero conversions. Mutation-ready for display exclusions; YouTube placements informational only (Google auto-targeting re-adds excluded channels). |
+| `pmax-brand-share` | 30d | Per-PMAX-campaign share of conversions/value on brand search terms (campaign_search_term_insight category labels joined against context.brand.terms ∪ --brand-term), plus true (non-brand) ROAS/CPA vs. reported. Read-only, advisory only. Fails loud (`context_missing: brand.terms`) rather than guessing a brand. |
+| `feed-health-audit` | 30d | Product-disapproval diagnostic (Path A — Ads API `shopping_product` only, no Merchant Center API): status breakdown (ELIGIBLE/ELIGIBLE_LIMITED/NOT_ELIGIBLE), top disapproval reasons with counts, disapproved-product samples, and an account-level listing-group coverage cross-ref (revenue-at-risk proxy; item-level cross-ref not possible via GAQL). Run before/after `plan campaign pmax --merchant-id` to check retail readiness. `--format json\|table`. |
 

@@ -1,7 +1,7 @@
 # apb-gads — Google Ads CLI documentation
 
 Operator-grade Google Ads + Performance Max management from the command line.
-**300 commands across 30 groups** — 123 gated mutations, 66 diagnostic playbooks, 24 reports —
+**307 commands across 30 groups** — 124 gated mutations, 68 diagnostic playbooks, 24 reports —
 every write dry-run by default behind a three-gate safety model. Google Ads API **v25**.
 
 `apb-gads` is the Google Ads sibling of `apb` (the Meta CLI). It connects through your
@@ -22,7 +22,7 @@ AgencyPlaybook account (the Google Ads add-on) and is driven by the same `APB_AP
 | [SAFETY_MODEL.md](SAFETY_MODEL.md) | The three-gate write model, sandbox/profile policy, capability tiers |
 | [CAPABILITY.md](CAPABILITY.md) | What's proven at which tier; how to confirm a write actually persisted |
 | [SCOPES_AND_TIERS.md](SCOPES_AND_TIERS.md) | The 7 Google add-on scopes × subscription tier |
-| [PLAYBOOK_CATALOG.md](PLAYBOOK_CATALOG.md) | All 66 diagnostic playbooks, grouped by section |
+| [PLAYBOOK_CATALOG.md](PLAYBOOK_CATALOG.md) | All 68 diagnostic playbooks, grouped by section |
 | [DOCTRINE.md](DOCTRINE.md) | Modern Google Ads doctrine (Smart Bidding, learning phase, RSA, PMAX) |
 | [POLICY_LIMITS.md](POLICY_LIMITS.md) | Field-level limits (RSA / PMAX / extensions / URLs / bid modifiers) |
 | [CAMPAIGN_BUILD.md](CAMPAIGN_BUILD.md) | Greenfield Search & PMAX launch pipeline + spec formats |

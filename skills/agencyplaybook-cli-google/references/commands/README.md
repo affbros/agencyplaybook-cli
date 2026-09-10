@@ -6,7 +6,7 @@ This is the **exhaustive, runtime-derived** reference for every command, subcomm
 
 For narrative, examples, and *how to think about* the CLI, see [`../commands.md`](../commands.md) (day-to-day reference), [`../playbooks.md`](../playbooks.md), and [`../mutations.md`](../mutations.md) (the safety model). This directory is the flat, complete enumeration those docs defer to.
 
-**At a glance:** 30 command groups · 300 total commands/subcommands · API version `v25`.
+**At a glance:** 30 command groups · 307 total commands/subcommands · API version `v25`.
 
 ## Global options
 
@@ -17,9 +17,11 @@ These are defined on the top-level parser and accepted by (almost) every command
 | `--config <CONFIG>` | Path to google-ads.yaml (credentials + safety config) [default: google-ads.yaml]. An explicit --config carrying developer_token + refresh_token takes precedence over ambient APB_API_KEY SaaS resolution for Google credentials. |
 | `--customer <CUSTOMER>` | — |
 | `--pretty` | Pretty-print JSON |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--execute` | Allow a mutating command to proceed past dry-run planning |
 | `--validate-only` | When combined with --execute, sets validateOnly=true on every googleAds:mutate call. Google validates schema + policy + auth server-side and returns empty results; no entities created or updated. Used by scripts/qa_test_account.sh Tier 3 SERVER_VALIDATED sweep. |
 | `--confirm` | Confirm operations whose amount_micros exceeds a safety profile's require_confirmation_above_micros threshold |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--lookback-days <LOOKBACK_DAYS>` | Override the per-playbook default lookback window (in days) for any read that uses a date range |
 | `--output <OUTPUT>` | Write JSON output to this file path instead of stdout |
 | `--save-plan <SAVE_PLAN>` | (deprecated — use --plan) After a dry-run mutation, write a normalized plan JSON to this path (re-playable via `mutate apply-plan`) |
@@ -52,14 +54,14 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`keyword`](keyword.md) | 👁️ read | 1 | Keyword reads: list ad-group keyword criteria. |
 | [`negative-keyword`](negative-keyword.md) | 👁️ read | 1 | Negative-keyword reads. |
 | [`asset`](asset.md) | 👁️ read | 1 | Asset reads: list account assets (images, text, video, etc.). |
-| [`mutate`](mutate.md) | ✍️ write | 123 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
+| [`mutate`](mutate.md) | ✍️ write | 124 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
 | [`gaql`](gaql.md) | 👁️ read | 1 | Run ad-hoc Google Ads Query Language (GAQL) against the searchStream endpoint. |
 | [`report`](report.md) | 👁️ read | 24 | Named, pre-built read reports (search terms, performance, PMAX, etc.). |
-| [`portfolio`](portfolio.md) | 👁️ read | 3 | Portfolio reporting — MCC-wide, per-currency roll-ups across every reportable child account (analytics-upgrade-001 S007). |
-| [`playbook`](playbook.md) | 👁️ read | 67 | Agency-style read playbooks: audits, scorecards, and hygiene readouts. |
+| [`portfolio`](portfolio.md) | 👁️ read | 4 | Portfolio reporting — MCC-wide, per-currency roll-ups across every reportable child account (analytics-upgrade-001 S007). |
+| [`playbook`](playbook.md) | 👁️ read | 69 | Agency-style read playbooks: audits, scorecards, and hygiene readouts. |
 | [`verdict`](verdict.md) | 👁️ read | 1 | Per-campaign decision verdict — one verb (SCALE / OPTIMIZE / TIGHTEN / CAP / HOLD / CUT) per ENABLED campaign across ALL channel types, from 3 gates (Efficiency / Delivery+headroom / Quality). |
 | [`campaign-type-advisor`](campaign-type-advisor.md) | 👁️ read | 1 | Campaign-type advisor (Search vs PMax vs Demand Gen) — prescriptive: given a goal, demand state, conversion-signal strength, and daily budget, recommend the primary engine + the maturity-ordered sequence (Search captures demand · PMax scales it · Demand Gen creates it). |
-| [`plan`](plan.md) | 👁️ read | 13 | Phase B1 (v24) — keyword planning surface (reads only). |
+| [`plan`](plan.md) | 👁️ read | 15 | Phase B1 (v24) — keyword planning surface (reads only). |
 | [`sandbox`](sandbox.md) | ✍️ write | 1 | Test-sandbox write flows: end-to-end helper(s) that exercise the $1 sandbox policy (create → verify → clean up) on a disposable entity. |
 | [`orchestrate`](orchestrate.md) | ✍️ write | 8 | Phase 3 composite workflows — orchestrators that compose primitives into end-to-end operator flows (ad-rotate, campaign-launch, etc.) |
 | [`audit`](audit.md) | 👁️ read | 3 | Sprint D — audit log inspection + replay |
@@ -71,7 +73,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`recipe`](recipe.md) | ✍️ write | 4 | Recipes — one verb, one job. |
 | [`context`](context.md) | 👁️ read | 2 | Per-customer goal/strategy context state. |
 | [`validate`](validate.md) | 👁️ read | 3 | Inspect planning artifacts for launch-readiness. |
-| [`experiment`](experiment.md) | 👁️ read | 1 | Google Ads experiment reads. |
+| [`experiment`](experiment.md) | 👁️ read | 2 | Google Ads experiment loop: `results` (read-only) and `promote` (creating/ending an experiment lives under `mutate experiment-*`; `promote` lives here for skill-vocabulary parity with Meta's `experiment create\|results\|promote`, planning-001 sprint-g09). |
 
 ## Full command index
 
@@ -252,6 +254,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads mutate customer-asset-detach`](mutate.md#apb-gads-mutate-customer-asset-detach)
 - [`apb-gads mutate experiment-create`](mutate.md#apb-gads-mutate-experiment-create) — Create a Google Ads experiment (control + treatment arm) on an existing base campaign
 - [`apb-gads mutate experiment-end`](mutate.md#apb-gads-mutate-experiment-end)
+- [`apb-gads mutate experiment-promote`](mutate.md#apb-gads-mutate-experiment-promote) — Graduate an experiment's treatment into the live change (the `GraduateExperiment` RPC — planning-001 sprint-g09).
 
 ### `gaql`
 
@@ -289,6 +292,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads portfolio summary`](portfolio.md#apb-gads-portfolio-summary) — MCC-wide account summary: per reportable child-account totals (cost, conversions, value, clicks, impressions, ctr, cpa, roas) plus a per-currency roll-up (never FX-blended).
 - [`apb-gads portfolio breakdown`](portfolio.md#apb-gads-portfolio-breakdown) — MCC-wide metric breakdown segmented by a single dimension, grouped per currency.
 - [`apb-gads portfolio trend`](portfolio.md#apb-gads-portfolio-trend) — MCC-wide daily trend: per-currency cost / conversions / conversions_value time-series across reportable children.
+- [`apb-gads portfolio plan`](portfolio.md#apb-gads-portfolio-plan) — Marginal-return budget allocator (planning-001 sprint-g10): per campaign, estimate marginal return from 30d/60d conversions-vs-cost slopes plus `impression-share-loss` headroom, move budget from below-median to above-median marginal return in steps ≤ `--max-step-pct`, never onto a LEARNING campaign, never across currencies, never onto a campaign that can't spend more (lost-IS-to-budget ≈ 0).
 
 ### `playbook`
 
@@ -329,6 +333,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads playbook pmax-maturity-gate`](playbook.md#apb-gads-playbook-pmax-maturity-gate) — Per-PMAX-campaign readiness verdict: maturity (age≥30d OR ≥50 conv), CPA-vs-target performance tier (star/performer/underperformer/problem/starved), learning-band approximation, and PMax-vs-Search ROAS ratio → ready_to_scale / optimize / collect_data / pause_candidate with named blockers.
 - [`apb-gads playbook pmax-scaling-plan`](playbook.md#apb-gads-playbook-pmax-scaling-plan) — Per-PMAX-campaign Go/No-Go budget-scaling decision (maturity + profitability vs target + no halt band + no bid+budget stacking checked vs audit.jsonl); on Go recommends a single-step budget increase capped at 50% and emits a budget_update_candidates spec → CampaignBudgetUpdateBulk (review-gated).
 - [`apb-gads playbook shopping-feed-segmentation-audit`](playbook.md#apb-gads-playbook-shopping-feed-segmentation-audit) — Shopping feed + PMAX listing-group-filter coverage audit.
+- [`apb-gads playbook feed-health-audit`](playbook.md#apb-gads-playbook-feed-health-audit) — Read-only product-disapproval / feed-health diagnostic (merchant-center-diagnostic-001 S001, Path A).
 - [`apb-gads playbook targeting-coverage`](playbook.md#apb-gads-playbook-targeting-coverage) — Per-campaign targeting-dimension scorecard (geo/language/device/schedule/audience/demographic/placement/topic/brand/content_label) with missing-targeting flags for ENABLED campaigns.
 - [`apb-gads playbook rsa-asset-performance`](playbook.md#apb-gads-playbook-rsa-asset-performance) — Per-ad headline/description performance labels (LOW/GOOD/BEST/PENDING) surfacing swap candidates.
 - [`apb-gads playbook rsa-quality-audit`](playbook.md#apb-gads-playbook-rsa-quality-audit) — 7-point copy-quality review of every live RSA (8-angle diversity, near-duplicates, keyword coverage, CTA/trust, DKI linter, policy-content) scored alongside ad_strength + approval_status; emits informational rsa_refresh_candidates for orchestrate ad-refresh.
@@ -353,6 +358,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads playbook landing-page-intent-drift-audit`](playbook.md#apb-gads-playbook-landing-page-intent-drift-audit) — Surface landing pages where Google's landing_page_view quality signals degraded — mobile-friendliness, post_click_quality_score — and pair with the keywords pointing at them.
 - [`apb-gads playbook pmax-segmentation-audit`](playbook.md#apb-gads-playbook-pmax-segmentation-audit) — Per-PMAX-campaign should-split / too-many-asset-groups recommendations based on spend, conversion volume, and asset-group count.
 - [`apb-gads playbook brand-exclusion-audit`](playbook.md#apb-gads-playbook-brand-exclusion-audit) — Audit account-wide customer_negative_criterion coverage against competitor-brand patterns from `competitor-keyword-bleed`.
+- [`apb-gads playbook pmax-brand-share`](playbook.md#apb-gads-playbook-pmax-brand-share) — Per-PMAX-campaign share of conversions/value on brand search terms (campaign_search_term_insight joined against context.brand.terms ∪ --brand-term), plus true (non-brand) ROAS/CPA vs.
 - [`apb-gads playbook campaign-consolidation-audit`](playbook.md#apb-gads-playbook-campaign-consolidation-audit) — Inverse of pmax-segmentation-audit: flag micro-campaigns (low spend, low conversion volume) sharing channel + bid-strategy that should be merged.
 - [`apb-gads playbook sandbox-campaign-audit`](playbook.md#apb-gads-playbook-sandbox-campaign-audit) — Enforce small-bets hygiene: sandbox / experiment campaigns must not share budgets, must not use portfolio bidding, and must stay below the operator-set account-spend share.
 - [`apb-gads playbook roas-nudge-recommendation`](playbook.md#apb-gads-playbook-roas-nudge-recommendation) — Per-campaign tROAS / tCPA micro-adjustment recommendations bounded by ±max_nudge_pct (default 10%) based on 14d actual-vs-target performance.
@@ -383,6 +389,8 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads plan campaign pmax`](plan.md#apb-gads-plan-campaign-pmax) — Assemble a launchable PmaxLaunchPlanSpec (bare JSON) for a single-asset-group Performance Max campaign (phase 1).
 - [`apb-gads plan campaign demand-gen`](plan.md#apb-gads-plan-campaign-demand-gen) — Assemble a launchable DemandGenLaunchSpec (bare JSON) for a single-ad-group Demand Gen campaign (decision-verdict-001 S004) — the third pillar alongside `search` / `pmax`.
 - [`apb-gads plan export`](plan.md#apb-gads-plan-export) — Render a plan envelope file (v1 lifted or native v2) into an artifact, read-only — no gates, no network.
+- [`apb-gads plan merge`](plan.md#apb-gads-plan-merge) — Merge N Google plan-envelope-v2 files (from separate `--plan`/`recipe build`/`recipe search-terms` runs) into ONE reviewable envelope: dedupe byte-identical actions, isolate contradictory bidding/target/ budget changes as unresolved conflicts, rank the survivors (growth/efficiency), and sequence them behind the learning-window guard — inserting `wait-for-status` pseudo-actions where needed.
+- [`apb-gads plan forecast`](plan.md#apb-gads-plan-forecast) — Forecast a campaign build via `GenerateKeywordForecastMetrics` (planning-001 sprint-g08).
 
 ### `sandbox`
 
@@ -465,4 +473,5 @@ Every leaf command, grouped. Click through to the parameter-level page.
 
 ### `experiment`
 
-- [`apb-gads experiment results`](experiment.md#apb-gads-experiment-results) — Read one experiment's outcome: the control arm's metrics, the treatment arm's metrics, and — per metric — Google's point estimate, margin of error and p-value for the difference between them
+- [`apb-gads experiment results`](experiment.md#apb-gads-experiment-results) — Read one experiment's outcome: the control arm's metrics, the treatment arm's metrics, and — per metric — Google's point estimate, margin of error and p-value for the difference between them, plus a WINNER/LOSER/INCONCLUSIVE verdict on the chosen `--metric` (planning-001 sprint-g09) using `metric_policy.experiment.{p_value, min_runtime_days}`
+- [`apb-gads experiment promote`](experiment.md#apb-gads-experiment-promote) — Graduate an experiment's treatment into the live production change (the `GraduateExperiment` RPC — a dedicated endpoint, not a `googleAds:mutate` operation, so it cannot be batched with other writes).

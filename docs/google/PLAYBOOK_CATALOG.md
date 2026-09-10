@@ -10,11 +10,11 @@ apb-gads --pretty playbook list
 
 ## Status snapshot
 
-- **Implemented:** 66
+- **Implemented:** 67
 - **Planned:** 0
-- **Total cataloged:** 66
+- **Total cataloged:** 67
 
-All 66 cataloged playbooks are Implemented and live-verified against a real Google Ads test account. Most recent additions: Agency Playbooks v2 Phase 3 — `placement-leakage-audit` (mutation-ready for display placements) and `pmax-url-exclusion-audit` (mutation-ready WEBPAGE negative spec for PMAX/DISPLAY waste URL coverage). The full v2 series (11 playbooks across 3 phases) shipped in May-16; see `docs/agency-playbooks-v2.md` for the design and `docs/playbooks.md` for the operator-oriented per-playbook detail.
+All 68 cataloged playbooks are Implemented and live-verified against a real Google Ads test account. Most recent additions: Agency Playbooks v2 Phase 3 — `placement-leakage-audit` (mutation-ready for display placements) and `pmax-url-exclusion-audit` (mutation-ready WEBPAGE negative spec for PMAX/DISPLAY waste URL coverage). The full v2 series (11 playbooks across 3 phases) shipped in May-16; see `docs/agency-playbooks-v2.md` for the design and `docs/playbooks.md` for the operator-oriented per-playbook detail.
 
 ## Sections
 
@@ -127,8 +127,10 @@ PMAX-specific inspection and diagnostics.
 | `pmax-maturity-gate` | IMPLEMENTED | 30d | Per-PMAX-campaign readiness verdict: maturity (age≥30d OR ≥50 conv), CPA-vs-target tier (star/performer/underperformer/problem/starved), learning-band approximation, PMax-vs-Search ROAS ratio → `ready_to_scale` / `optimize` / `collect_data` / `pause_candidate` + named blockers. Targets context-first. Honest limit: no API learning-status field; band is an age/volume approximation. |
 | `pmax-scaling-plan` | IMPLEMENTED | 30d | Per-PMAX-campaign Go/No-Go budget scaling (maturity + profitability vs target + no halt band CPA>1.2×/ROAS<0.8× + no bid+budget stacking, checked vs `audit.jsonl`); on Go recommends a single-step budget increase capped at 50% → emits `budget_update_candidates` spec → CampaignBudgetUpdateBulk (review-gated). Targets context-first. |
 | `shopping-feed-segmentation-audit` | IMPLEMENTED | 30d | Enumerates Merchant Center feed (by brand / availability / status) + PMAX listing-group-filter coverage per asset group; flags only-root-filter asset groups, NOT_ELIGIBLE inventory, and brand diversity without filter coverage. Does NOT recommend RETAIL_FILTER (v25 allowlist-only, §B2.1 gated). |
+| `feed-health-audit` | IMPLEMENTED | 30d | Read-only product-disapproval diagnostic (merchant-center-diagnostic-001 S001, Path A): status breakdown (ELIGIBLE/ELIGIBLE_LIMITED/NOT_ELIGIBLE), top disapproval reasons with counts, disapproved-product samples, listing-group coverage cross-ref (account-level revenue-at-risk proxy — item-level cross-ref not possible via GAQL). Ads API `shopping_product` resource only — no Merchant Center API call. `--format json\|table`. (sprint-q03) |
 | `pmax-segmentation-audit` | IMPLEMENTED | 30d | Per-PMAX-campaign rules: SHOULD_SPLIT (HIGH) when spend >= `--split-min-spend-micros` ($5k) + conv >= `--split-min-conversions` (50) + asset_group_count <= 1; TOO_MANY_GROUPS (MEDIUM) when count > `--asset-groups-per-campaign-max` (7). Emits a fixed `suggested_segments` menu (Brand Defense / High Intent / Prospecting / etc.). |
 | `placement-leakage-audit` | IMPLEMENTED | 30d | Surface display + video placements (`detail_placement_view`) that consumed PMAX/DISPLAY/VIDEO budget with zero conversions over the lookback. Severity HIGH at >= 4× the `--leakage-min-cost-micros` floor (default $25), MEDIUM otherwise. `mutation_eligible` flag set for WEBSITE / MOBILE_APP / GOOGLE_PRODUCTS placement types; YouTube placements informational only (auto-targeting re-adds excluded channels). Mutation-ready `placement_exclusion_candidates` spec via `--output-spec`. |
+| `pmax-brand-share` | IMPLEMENTED | 30d | Per-PMAX-campaign share of conversions/value on brand search terms (`campaign_search_term_insight` category labels joined against `context.brand.terms` ∪ `--brand-term`), plus true (non-brand) ROAS/CPA vs. reported, verdict per `--brand-share-warn-pct` (50%) / `--brand-share-critical-pct` (70%). Advisory only (no `--output-spec`). Fails loud with `context_missing: brand.terms` when no brand terms are available anywhere. (sprint-q01) |
 
 ---
 

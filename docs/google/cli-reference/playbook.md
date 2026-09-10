@@ -4,7 +4,7 @@
 
 Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 
-**Surface:** 👁️ Read-only · **67 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **69 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -49,6 +49,7 @@ Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 | [`pmax-maturity-gate`](#apb-gads-playbook-pmax-maturity-gate) | Per-PMAX-campaign readiness verdict: maturity (age≥30d OR ≥50 conv), CPA-vs-target performance tier (star/performer/underperformer/problem/starved), learning-band approximation, and PMax-vs-Search ROAS ratio → ready_to_scale / optimize / collect_data / pause_candidate with named blockers. |
 | [`pmax-scaling-plan`](#apb-gads-playbook-pmax-scaling-plan) | Per-PMAX-campaign Go/No-Go budget-scaling decision (maturity + profitability vs target + no halt band + no bid+budget stacking checked vs audit.jsonl); on Go recommends a single-step budget increase capped at 50% and emits a budget_update_candidates spec → CampaignBudgetUpdateBulk (review-gated). |
 | [`shopping-feed-segmentation-audit`](#apb-gads-playbook-shopping-feed-segmentation-audit) | Shopping feed + PMAX listing-group-filter coverage audit. |
+| [`feed-health-audit`](#apb-gads-playbook-feed-health-audit) | Read-only product-disapproval / feed-health diagnostic (merchant-center-diagnostic-001 S001, Path A). |
 | [`targeting-coverage`](#apb-gads-playbook-targeting-coverage) | Per-campaign targeting-dimension scorecard (geo/language/device/schedule/audience/demographic/placement/topic/brand/content_label) with missing-targeting flags for ENABLED campaigns. |
 | [`rsa-asset-performance`](#apb-gads-playbook-rsa-asset-performance) | Per-ad headline/description performance labels (LOW/GOOD/BEST/PENDING) surfacing swap candidates. |
 | [`rsa-quality-audit`](#apb-gads-playbook-rsa-quality-audit) | 7-point copy-quality review of every live RSA (8-angle diversity, near-duplicates, keyword coverage, CTA/trust, DKI linter, policy-content) scored alongside ad_strength + approval_status; emits informational rsa_refresh_candidates for orchestrate ad-refresh. |
@@ -73,6 +74,7 @@ Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 | [`landing-page-intent-drift-audit`](#apb-gads-playbook-landing-page-intent-drift-audit) | Surface landing pages where Google's landing_page_view quality signals degraded — mobile-friendliness, post_click_quality_score — and pair with the keywords pointing at them. |
 | [`pmax-segmentation-audit`](#apb-gads-playbook-pmax-segmentation-audit) | Per-PMAX-campaign should-split / too-many-asset-groups recommendations based on spend, conversion volume, and asset-group count. |
 | [`brand-exclusion-audit`](#apb-gads-playbook-brand-exclusion-audit) | Audit account-wide customer_negative_criterion coverage against competitor-brand patterns from `competitor-keyword-bleed`. |
+| [`pmax-brand-share`](#apb-gads-playbook-pmax-brand-share) | Per-PMAX-campaign share of conversions/value on brand search terms (campaign_search_term_insight joined against context.brand.terms ∪ --brand-term), plus true (non-brand) ROAS/CPA vs. |
 | [`campaign-consolidation-audit`](#apb-gads-playbook-campaign-consolidation-audit) | Inverse of pmax-segmentation-audit: flag micro-campaigns (low spend, low conversion volume) sharing channel + bid-strategy that should be merged. |
 | [`sandbox-campaign-audit`](#apb-gads-playbook-sandbox-campaign-audit) | Enforce small-bets hygiene: sandbox / experiment campaigns must not share budgets, must not use portfolio bidding, and must stay below the operator-set account-spend share. |
 | [`roas-nudge-recommendation`](#apb-gads-playbook-roas-nudge-recommendation) | Per-campaign tROAS / tCPA micro-adjustment recommendations bounded by ±max_nudge_pct (default 10%) based on 14d actual-vs-target performance. |
@@ -91,7 +93,13 @@ Agency-style read playbooks: audits, scorecards, and hygiene readouts.
 Usage: apb-gads playbook list [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-weekly-audit"></a>
 ### `apb-gads playbook weekly-audit`
@@ -106,7 +114,13 @@ Account spend snapshot, top campaigns, search terms, and PMAX presence in one bu
 Usage: apb-gads playbook weekly-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-waste-audit"></a>
 ### `apb-gads playbook waste-audit`
@@ -121,7 +135,13 @@ Identify expensive search terms with poor or zero conversions plus other obvious
 Usage: apb-gads playbook waste-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-pmax-audit"></a>
 ### `apb-gads playbook pmax-audit`
@@ -136,7 +156,13 @@ PMAX summary, asset groups, asset-group assets, asset-group performance, plus di
 Usage: apb-gads playbook pmax-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-launch-check"></a>
 ### `apb-gads playbook launch-check`
@@ -151,7 +177,13 @@ Verify presence of campaigns, ad groups, ads, keywords, and PMAX entities before
 Usage: apb-gads playbook launch-check [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-creative-refresh"></a>
 ### `apb-gads playbook creative-refresh`
@@ -166,7 +198,13 @@ Ad inventory + asset usage + top search-term inputs for the next creative iterat
 Usage: apb-gads playbook creative-refresh [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-account-health"></a>
 ### `apb-gads playbook account-health`
@@ -181,7 +219,13 @@ Structured health scorecard with status counts, trailing-365-day spend signals, 
 Usage: apb-gads playbook account-health [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-search-term-cleanup"></a>
 ### `apb-gads playbook search-term-cleanup`
@@ -201,6 +245,9 @@ Usage: apb-gads playbook search-term-cleanup [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 25] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-account-structure-audit"></a>
 ### `apb-gads playbook account-structure-audit`
@@ -215,7 +262,13 @@ Density mapping: ads per ad group, keywords per ad group, ad groups per campaign
 Usage: apb-gads playbook account-structure-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-conversion-tracking-check"></a>
 ### `apb-gads playbook conversion-tracking-check`
@@ -230,7 +283,13 @@ List configured conversion actions and flag REMOVED, HIDDEN, or unverified ones.
 Usage: apb-gads playbook conversion-tracking-check [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-conversion-tracking-audit"></a>
 ### `apb-gads playbook conversion-tracking-audit`
@@ -245,7 +304,13 @@ Comprehensive v24 audit: tag health, full conversion-action settings (attributio
 Usage: apb-gads playbook conversion-tracking-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-geo-performance"></a>
 ### `apb-gads playbook geo-performance`
@@ -265,6 +330,9 @@ Usage: apb-gads playbook geo-performance [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 25] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-device-performance"></a>
 ### `apb-gads playbook device-performance`
@@ -284,6 +352,9 @@ Usage: apb-gads playbook device-performance [OPTIONS]
 | Option | Description |
 |---|---|
 | `--by-platform` | v24.1: REPLACE the segments.device dimension with segments.mobile_device_platform (iOS/Android) — Google rejects selecting both in the same query. Non-mobile rows report UNKNOWN |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-dayparting-analysis"></a>
 ### `apb-gads playbook dayparting-analysis`
@@ -298,7 +369,13 @@ Performance by day-of-week and hour-of-day to inform ad scheduling adjustments.
 Usage: apb-gads playbook dayparting-analysis [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-ad-extension-coverage"></a>
 ### `apb-gads playbook ad-extension-coverage`
@@ -313,7 +390,13 @@ Per-campaign sitelink, callout, and structured snippet coverage; flag thin exten
 Usage: apb-gads playbook ad-extension-coverage [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-budget-pacing"></a>
 ### `apb-gads playbook budget-pacing`
@@ -328,7 +411,13 @@ Compare daily-budget * days-elapsed against actual cost for the current month pe
 Usage: apb-gads playbook budget-pacing [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-impression-share-loss"></a>
 ### `apb-gads playbook impression-share-loss`
@@ -343,7 +432,13 @@ Surface impression share lost to budget and lost to rank per campaign.
 Usage: apb-gads playbook impression-share-loss [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-quality-score-audit"></a>
 ### `apb-gads playbook quality-score-audit`
@@ -358,7 +453,13 @@ Distribution of keyword quality scores; flag low-QS keywords with significant sp
 Usage: apb-gads playbook quality-score-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-naming-convention-audit"></a>
 ### `apb-gads playbook naming-convention-audit`
@@ -373,7 +474,13 @@ Flag campaigns and ad groups whose names don't match common operator patterns.
 Usage: apb-gads playbook naming-convention-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-campaign-bid-strategy-audit"></a>
 ### `apb-gads playbook campaign-bid-strategy-audit`
@@ -388,7 +495,13 @@ Mix of bidding strategies in use across campaigns with status and channel contex
 Usage: apb-gads playbook campaign-bid-strategy-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-campaign-type-fit"></a>
 ### `apb-gads playbook campaign-type-fit`
@@ -403,7 +516,13 @@ Per-ENABLED-campaign channel-type fit vs conversion signal (decision-verdict S00
 Usage: apb-gads playbook campaign-type-fit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-seasonality-overview"></a>
 ### `apb-gads playbook seasonality-overview`
@@ -418,7 +537,13 @@ _No command-specific options — uses only the [global options](README.md#global
 Usage: apb-gads playbook seasonality-overview [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-keyword-match-type-mix"></a>
 ### `apb-gads playbook keyword-match-type-mix`
@@ -433,7 +558,13 @@ Distribution of BROAD/PHRASE/EXACT keywords; flag campaigns with imbalanced mix.
 Usage: apb-gads playbook keyword-match-type-mix [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-duplicate-keywords"></a>
 ### `apb-gads playbook duplicate-keywords`
@@ -448,7 +579,13 @@ Find keywords with the same text + match-type appearing across multiple ad group
 Usage: apb-gads playbook duplicate-keywords [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-broad-match-conversion-rate"></a>
 ### `apb-gads playbook broad-match-conversion-rate`
@@ -463,7 +600,13 @@ Identify broad-match keywords with poor conversion rates that should be paused o
 Usage: apb-gads playbook broad-match-conversion-rate [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-negative-keyword-coverage"></a>
 ### `apb-gads playbook negative-keyword-coverage`
@@ -478,7 +621,13 @@ Per-ad-group negative-keyword counts; flag groups with zero or very few negative
 Usage: apb-gads playbook negative-keyword-coverage [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-competitor-keyword-bleed"></a>
 ### `apb-gads playbook competitor-keyword-bleed`
@@ -498,6 +647,9 @@ Usage: apb-gads playbook competitor-keyword-bleed [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 25] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-ad-rotation-audit"></a>
 ### `apb-gads playbook ad-rotation-audit`
@@ -512,7 +664,13 @@ Ads per ad group; flag ad groups with fewer than 3 active ads (Google's minimum)
 Usage: apb-gads playbook ad-rotation-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-landing-page-audit"></a>
 ### `apb-gads playbook landing-page-audit`
@@ -527,7 +685,13 @@ Group ads by final URL; flag URLs with very low traffic or used by only one ad.
 Usage: apb-gads playbook landing-page-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-budget-rebalance"></a>
 ### `apb-gads playbook budget-rebalance`
@@ -542,7 +706,13 @@ Rank campaigns by ROAS and recommend shifting budget from low-ROAS to high-ROAS 
 Usage: apb-gads playbook budget-rebalance [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-anomaly-detection"></a>
 ### `apb-gads playbook anomaly-detection`
@@ -557,7 +727,13 @@ Week-over-week spend / clicks / conversion change alerts; flags newly-active and
 Usage: apb-gads playbook anomaly-detection [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-cross-network-performance"></a>
 ### `apb-gads playbook cross-network-performance`
@@ -572,7 +748,13 @@ Split metrics by Search vs Display vs YouTube vs Partner Search networks with pe
 Usage: apb-gads playbook cross-network-performance [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-audience-performance"></a>
 ### `apb-gads playbook audience-performance`
@@ -587,7 +769,13 @@ Per-audience-type aggregation across in-market, remarketing, demographics; surfa
 Usage: apb-gads playbook audience-performance [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-pmax-asset-coverage"></a>
 ### `apb-gads playbook pmax-asset-coverage`
@@ -602,7 +790,13 @@ Per-asset-group field-type completeness scoring with policy-configurable minimum
 Usage: apb-gads playbook pmax-asset-coverage [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-pmax-maturity-gate"></a>
 ### `apb-gads playbook pmax-maturity-gate`
@@ -624,6 +818,9 @@ Usage: apb-gads playbook pmax-maturity-gate [OPTIONS]
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | Override the context/account target CPA (micros) for the performance tier. |
 | `--target-roas <TARGET_ROAS>` | Override the context/account target ROAS (ratio, e.g. 3.0). |
 | `--aov-micros <AOV_MICROS>` | Average order value (micros) for the pause exception. Default: computed from account conv-value/conversions. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-pmax-scaling-plan"></a>
 ### `apb-gads playbook pmax-scaling-plan`
@@ -645,7 +842,10 @@ Usage: apb-gads playbook pmax-scaling-plan [OPTIONS]
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | Override the context/account target CPA (micros). |
 | `--target-roas <TARGET_ROAS>` | Override the context/account target ROAS (ratio, e.g. 4.0). |
 | `--increment-pct <INCREMENT_PCT>` | Single-step budget increase percent for Go campaigns. Default 20; capped at 50. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a budget_update_candidates spec (→ CampaignBudgetUpdateBulk, review-gated). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-shopping-feed-segmentation-audit"></a>
 ### `apb-gads playbook shopping-feed-segmentation-audit`
@@ -660,7 +860,36 @@ Shopping feed + PMAX listing-group-filter coverage audit. Enumerates the Merchan
 Usage: apb-gads playbook shopping-feed-segmentation-audit [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
+
+<a id="apb-gads-playbook-feed-health-audit"></a>
+### `apb-gads playbook feed-health-audit`
+
+Read-only product-disapproval / feed-health diagnostic (merchant-center-diagnostic-001 S001, Path A). Status breakdown (ELIGIBLE/ELIGIBLE_LIMITED/NOT_ELIGIBLE), top disapproval reasons, disapproved-product samples, and a listing-group coverage cross-ref — all via the Ads API shopping_product resource (existing adwords scope). No Merchant Center API call; see the output `note`
+
+*Section `performance_max` · default lookback 30d · status `implemented`*
+
+**Usage**
+
+```
+Usage: apb-gads playbook feed-health-audit [OPTIONS]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--limit <LIMIT>` | Max shopping_product rows to read (ORDER BY item_id). [default: 500] |
+| `--format <FORMAT>` | json (default) \| table. `table` prints a human-readable status + top-reasons preview to stderr in ADDITION to the normal JSON on stdout — JSON stays the output contract (see CLAUDE.md "JSON is the output contract"); `--format table` never replaces it [default: json] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-targeting-coverage"></a>
 ### `apb-gads playbook targeting-coverage`
@@ -675,7 +904,13 @@ Per-campaign targeting-dimension scorecard (geo/language/device/schedule/audienc
 Usage: apb-gads playbook targeting-coverage [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-rsa-asset-performance"></a>
 ### `apb-gads playbook rsa-asset-performance`
@@ -695,6 +930,9 @@ Usage: apb-gads playbook rsa-asset-performance [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational swap-candidate list |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-rsa-quality-audit"></a>
 ### `apb-gads playbook rsa-quality-audit`
@@ -714,6 +952,9 @@ Usage: apb-gads playbook rsa-quality-audit [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational rsa_refresh_candidates spec (for orchestrate ad-refresh) |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-experiment-readiness"></a>
 ### `apb-gads playbook experiment-readiness`
@@ -728,7 +969,13 @@ Flag ENABLED campaigns with sufficient baseline (30d conversions + clicks) that 
 Usage: apb-gads playbook experiment-readiness [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-policy-compliance"></a>
 ### `apb-gads playbook policy-compliance`
@@ -748,6 +995,9 @@ Usage: apb-gads playbook policy-compliance [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational ad-fix list |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-smart-bidding-readiness"></a>
 ### `apb-gads playbook smart-bidding-readiness`
@@ -767,6 +1017,9 @@ Usage: apb-gads playbook smart-bidding-readiness [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a campaign-update-bidding-strategy-bulk-compatible spec |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-match-type-sculpting"></a>
 ### `apb-gads playbook match-type-sculpting`
@@ -786,6 +1039,9 @@ Usage: apb-gads playbook match-type-sculpting [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a keyword-update-match-type-bulk-compatible spec |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-expansion-readiness"></a>
 ### `apb-gads playbook expansion-readiness`
@@ -806,6 +1062,9 @@ Usage: apb-gads playbook expansion-readiness [OPTIONS]
 |---|---|
 | `--min-roas <MIN_ROAS>` | [default: 3] |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a campaign-budget-update-bulk-compatible spec |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-quality-score-root-cause"></a>
 ### `apb-gads playbook quality-score-root-cause`
@@ -825,6 +1084,9 @@ Usage: apb-gads playbook quality-score-root-cause [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational remediation list |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-search-term-promotion"></a>
 ### `apb-gads playbook search-term-promotion`
@@ -847,11 +1109,14 @@ Usage: apb-gads playbook search-term-promotion [OPTIONS]
 | `--min-clicks <MIN_CLICKS>` | Only promote terms with ≥ this many clicks. Disabled when unset. |
 | `--min-cost-micros <MIN_COST_MICROS>` | Only promote terms with ≥ this spend (micros). Disabled when unset. |
 | `--min-conversions <MIN_CONVERSIONS>` | Only promote terms with ≥ this many conversions. Default 1. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--min-conv-value-micros <MIN_CONV_VALUE_MICROS>` | Only promote terms with ≥ this conversion value (micros). Disabled when unset. |
 | `--min-roas <MIN_ROAS>` | Only promote terms with ROAS ≥ this (conv_value / cost). Disabled when unset. |
 | `--max-cpa-micros <MAX_CPA_MICROS>` | Only promote terms with CPA ≤ this (micros). Disabled when unset. |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--top-n <TOP_N>` | Cap the number of promoted candidates (highest-converting first). Disabled when unset. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a keyword-add-bulk-compatible spec (spec_type keyword_promotion_candidates) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-competitor-pressure"></a>
 ### `apb-gads playbook competitor-pressure`
@@ -873,8 +1138,11 @@ Usage: apb-gads playbook competitor-pressure [OPTIONS]
 | `--windows <WINDOWS>` | Number of consecutive lookback-day windows to trend impression share over (most-recent first). Default 2 (preserves the 30d-vs-prior-30d rank-lost semantics; top/abs-top trending is added). |
 | `--level <LEVEL>` | Localize impression share to: campaign (default), ad_group, or keyword (per-keyword IS via keyword_view). [default: campaign] |
 | `--under-pressure-delta <UNDER_PRESSURE_DELTA>` | Flag a TIGHTEN verdict when rank-lost IS rises by at least this fraction window-over-window (e.g. 0.05 = 5pp). Default 0.05. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--under-pressure-floor <UNDER_PRESSURE_FLOOR>` | …and absolute rank-lost IS in the most-recent window is at least this (e.g. 0.10 = 10%). Default 0.10. Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational bid-response list (the under-pressure entities) |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-waste-cluster-audit"></a>
 ### `apb-gads playbook waste-cluster-audit`
@@ -897,7 +1165,10 @@ Usage: apb-gads playbook waste-cluster-audit [OPTIONS]
 | `--match-type-token-cutoff <MATCH_TYPE_TOKEN_CUTOFF>` | Suggested negatives with ≤ this many tokens become EXACT, otherwise PHRASE. Default 2. Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a mutation-ready negative-keyword spec |
 | `--negatives-to <NEGATIVES_TO>` | Where --output-spec negatives apply: ad-group (default; per-ad-group negatives), campaign (campaign-scoped negatives), or shared (a shared negative-keyword list — requires --shared-set). [default: ad-group] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--shared-set <SHARED_SET>` | Target shared negative-keyword list for --negatives-to shared: a customers/<id>/sharedSets/<id> resource OR a numeric shared-set id. Add to an existing list (the additive auto-apply path). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-search-term-analysis"></a>
 ### `apb-gads playbook search-term-analysis`
@@ -920,10 +1191,13 @@ Usage: apb-gads playbook search-term-analysis [OPTIONS]
 | `--min-roas <MIN_ROAS>` | Promote split: only promote terms with ROAS ≥ this (conv_value / cost). Default 1.0. Set 0 to disable. Overrides customer policy. |
 | `--min-cost-micros <MIN_COST_MICROS>` | Negate split: minimum combined cluster cost (micros) to qualify as wasted spend. Default 200000000 ($200). Overrides customer policy. |
 | `--match-type-token-cutoff <MATCH_TYPE_TOKEN_CUTOFF>` | Negate split: suggested negatives with ≤ this many tokens become EXACT, otherwise PHRASE. Default 2. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--limit <LIMIT>` | Max search_term_view rows to read (ORDER BY cost DESC). [default: 5000] |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write ONE combined spec (spec_type search_term_analysis; per-item finding_type routes promotes → KeywordAddBulk, negates → NegativeKeywordAddBulk) |
 | `--negatives-to <NEGATIVES_TO>` | Where the negate split's --output-spec negatives apply: ad-group (default; per-ad-group negatives), campaign (campaign-scoped negatives), or shared (a shared negative-keyword list — requires --shared-set). Promotes are unaffected. [default: ad-group] |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--shared-set <SHARED_SET>` | Target shared negative-keyword list for --negatives-to shared: a customers/<id>/sharedSets/<id> resource OR a numeric shared-set id. Add to an existing list (the additive auto-apply path). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-search-term-ngram-audit"></a>
 ### `apb-gads playbook search-term-ngram-audit`
@@ -946,9 +1220,12 @@ Usage: apb-gads playbook search-term-ngram-audit [OPTIONS]
 | `--min-cost-micros <MIN_COST_MICROS>` | Minimum summed spend (micros) for an n-gram to qualify as wasteful. Default 200000000 ($200). Overrides customer policy. |
 | `--max-conversions <MAX_CONVERSIONS>` | An n-gram with conversions ≤ this is wasteful. Default 0 (zero-conversion). Overrides customer policy. |
 | `--limit <LIMIT>` | Max search_term_view rows to read (ORDER BY cost DESC). [default: 5000] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--shared-set <SHARED_SET>` | Target shared negative-keyword list for --output-spec: a customers/<id>/sharedSets/<id> resource OR a numeric shared-set id. REQUIRED when --output-spec is set (wasteful n-grams emit as shared negatives). |
 | `--include-unigram-negatives` | Also emit single-word (1-gram) wasteful n-grams as negatives. OFF by default — a single-word negative is high-blast-radius. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a shared_negative_candidates spec (→ SharedCriterionAddBulk) of the wasteful multi-word n-grams. Requires --shared-set. |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-keyword-prune-audit"></a>
 ### `apb-gads playbook keyword-prune-audit`
@@ -971,13 +1248,16 @@ Usage: apb-gads playbook keyword-prune-audit [OPTIONS]
 | `--max-conversions <MAX_CONVERSIONS>` | $ mode: flag a spender with conversions ≤ this. Default 0 (zero-conversion). Overrides customer policy. |
 | `--max-cpa-micros <MAX_CPA_MICROS>` | $ mode: absolute CPA ceiling (micros) — conv>0 AND CPA > this → prune. Disabled when unset. |
 | `--max-cpa-pct <MAX_CPA_PCT>` | % mode: flag a spender whose CPA exceeds this percent of target CPA (e.g. 130). Needs a target. Disabled when unset. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--max-roas-pct <MAX_ROAS_PCT>` | % mode: flag a spender whose ROAS is below this percent of target ROAS (e.g. 70). Needs a target. Disabled when unset. |
 | `--min-clicks <MIN_CLICKS>` | # mode: flag a zero-conversion keyword with clicks below this floor. Disabled when unset. |
 | `--min-impressions <MIN_IMPRESSIONS>` | # mode: flag a zero-conversion keyword with impressions below this floor. Disabled when unset. |
 | `--bottom-n <BOTTOM_N>` | # mode: also flag the worst N spenders by CPA (conv>0). Disabled when unset. |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | Override the context target CPA (micros) used by % mode. |
 | `--target-roas <TARGET_ROAS>` | Override the context target ROAS (ratio, e.g. 3.0) used by % mode. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a mutation-ready keyword-remove spec (spec_type keyword_prune_candidates) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-conversion-value-gap"></a>
 ### `apb-gads playbook conversion-value-gap`
@@ -997,6 +1277,9 @@ Usage: apb-gads playbook conversion-value-gap [OPTIONS]
 | Option | Description |
 |---|---|
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational conversion-tracking-gap review list |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-campaign-cannibalization"></a>
 ### `apb-gads playbook campaign-cannibalization`
@@ -1019,14 +1302,17 @@ Usage: apb-gads playbook campaign-cannibalization [OPTIONS]
 | `--min-spend-per-campaign <MIN_SPEND_PER_CAMPAIGN>` | MEDIUM tier: minimum spend per campaign (micros). Default 10000000 ($10). Overrides customer policy. |
 | `--min-combined-spend <MIN_COMBINED_SPEND>` | MEDIUM tier: minimum combined spend (micros). Default 50000000 ($50). Overrides customer policy. |
 | `--cpa-ratio-critical <CPA_RATIO_CRITICAL>` | CRITICAL tier: worst/best CPA ratio threshold. Default 1.5. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--critical-combined-spend <CRITICAL_COMBINED_SPEND>` | CRITICAL tier: minimum combined spend (micros). Default 100000000 ($100). Overrides customer policy. |
 | `--high-each-clicks-min <HIGH_EACH_CLICKS_MIN>` | HIGH tier: minimum clicks per campaign. Default 10. Overrides customer policy. |
 | `--high-each-spend <HIGH_EACH_SPEND>` | HIGH tier: minimum spend per campaign (micros). Default 25000000 ($25). Overrides customer policy. |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--high-combined-spend <HIGH_COMBINED_SPEND>` | HIGH tier: minimum combined spend (micros). Default 100000000 ($100). Overrides customer policy. |
 | `--low-combined-spend <LOW_COMBINED_SPEND>` | LOW tier: minimum combined spend (micros). Default 25000000 ($25). Overrides customer policy. |
 | `--severity-mode <SEVERITY_MODE>` | Severity gate: standard \| strict \| diagnostic [default: standard] |
 | `--include-brand` | Include brand-token queries in the analysis |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational query-cannibalization review list |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-qs-cpc-tax"></a>
 ### `apb-gads playbook qs-cpc-tax`
@@ -1049,8 +1335,11 @@ Usage: apb-gads playbook qs-cpc-tax [OPTIONS]
 | `--low-qs-max <LOW_QS_MAX>` | Low-QS range inclusive upper bound (keywords ≤ this value treated as low-QS). Default 4. Overrides customer policy. |
 | `--high-qs-min <HIGH_QS_MIN>` | High-QS cohort threshold (keywords ≥ this value form the peer cohort). Default 7. Overrides customer policy. |
 | `--cohort-min-size <COHORT_MIN_SIZE>` | Minimum cohort size (keywords with non-zero clicks) at each hierarchical level. Default 3. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--heuristic-multiplier <HEURISTIC_MULTIPLIER>` | L4 fallback heuristic multiplier in (target_qs − qs) × multiplier × cost. Default 0.167. Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational low-QS keyword review list |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-bid-strategy-mismatch"></a>
 ### `apb-gads playbook bid-strategy-mismatch`
@@ -1072,15 +1361,18 @@ Usage: apb-gads playbook bid-strategy-mismatch [OPTIONS]
 | `--manual-cpc-conv-threshold <MANUAL_CPC_CONV_THRESHOLD>` | manual_cpc_with_strong_conversions rule: conv threshold. Default 30. Overrides customer policy. |
 | `--max-clicks-conv-threshold <MAX_CLICKS_CONV_THRESHOLD>` | max_clicks_with_strong_conversions rule: conv threshold. Default 20. Overrides customer policy. |
 | `--tcpa-budget-lost-is-threshold <TCPA_BUDGET_LOST_IS_THRESHOLD>` | tcpa_budget_throttled rule: search_budget_lost_impression_share floor. Default 0.20. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--tcpa-budget-conv-threshold <TCPA_BUDGET_CONV_THRESHOLD>` | tcpa_budget_throttled rule: conv floor. Default 10. Overrides customer policy. |
 | `--tcpa-target-too-low-median-multiplier <TCPA_TARGET_TOO_LOW_MEDIAN_MULTIPLIER>` | tcpa_target_too_low rule: target_cpa < median(actual_cpa) × this. Default 0.6. Overrides customer policy. |
 | `--tcpa-rank-lost-is-threshold <TCPA_RANK_LOST_IS_THRESHOLD>` | tcpa_target_too_low rule: search_rank_lost_impression_share floor. Default 0.30. Overrides customer policy. |
 | `--maximize-conversions-conv-threshold <MAXIMIZE_CONVERSIONS_CONV_THRESHOLD>` | maximize_conversions_without_target_cpa rule: conv threshold. Default 100. Overrides customer policy. |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--learning-stuck-days <LEARNING_STUCK_DAYS>` | learning_stuck rule: campaign-age cutoff in days. Default 14. Overrides customer policy. |
 | `--learning-stuck-conv-max <LEARNING_STUCK_CONV_MAX>` | learning_stuck rule: conv-count ceiling. Default 5. Overrides customer policy. |
 | `--tcpa-min-conversions <TCPA_MIN_CONVERSIONS>` | tcpa_insufficient_conversions rule: TARGET_CPA below this conv count over the window is smart-bidding misapplication → recommend Maximize Conversions. Default 30 (Google Search tCPA floor; best-practice guidance, not an API gate). Overrides customer policy. |
 | `--troas-min-conversions <TROAS_MIN_CONVERSIONS>` | troas_insufficient_conversions rule: TARGET_ROAS below this conv count over the window is smart-bidding misapplication → recommend Maximize Conversion Value (or Maximize Conversions if value tracking is unhealthy). Default 15 (Google Search/Shopping tROAS floor, NOT 50). Overrides customer policy. |
 | `--max-conv-value-min-conversions <MAX_CONV_VALUE_MIN_CONVERSIONS>` | max_conv_value_insufficient_conversions rule: MAXIMIZE_CONVERSION_VALUE below this conv count over the window → tROAS not yet advisable; keep it uncapped. Default 15. Overrides customer policy. |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write an informational bid-strategy-mismatch review list |
 
 <a id="apb-gads-playbook-audience-burnout-detection"></a>
@@ -1104,6 +1396,9 @@ Usage: apb-gads playbook audience-burnout-detection [OPTIONS]
 | `--burnout-cvr-drop-pp-high <BURNOUT_CVR_DROP_PP_HIGH>` | HIGH tier: CVR percentage-point drop threshold. Default 0.3. Overrides customer policy. |
 | `--burnout-cpa-rise-pct-high <BURNOUT_CPA_RISE_PCT_HIGH>` | HIGH tier: CPA percent-rise threshold. Default 25.0. Overrides customer policy. |
 | `--burnout-min-clicks <BURNOUT_MIN_CLICKS>` | Skip audiences with fewer clicks than this in either period. Default 50. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-geo-bid-drift-audit"></a>
 ### `apb-gads playbook geo-bid-drift-audit`
@@ -1126,6 +1421,9 @@ Usage: apb-gads playbook geo-bid-drift-audit [OPTIONS]
 | `--geo-cpa-drift-pct-medium <GEO_CPA_DRIFT_PCT_MEDIUM>` | MEDIUM tier: CPA percent-drift threshold. Default 25.0. Overrides customer policy. |
 | `--geo-min-cost-share-pct <GEO_MIN_COST_SHARE_PCT>` | HIGH tier: geo's share of campaign spend threshold. Default 2.0. Overrides customer policy. |
 | `--geo-min-clicks <GEO_MIN_CLICKS>` | Skip geos with fewer clicks than this in either period. Default 30. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-landing-page-intent-drift-audit"></a>
 ### `apb-gads playbook landing-page-intent-drift-audit`
@@ -1147,6 +1445,9 @@ Usage: apb-gads playbook landing-page-intent-drift-audit [OPTIONS]
 | `--lp-below-avg-keyword-share-pct <LP_BELOW_AVG_KEYWORD_SHARE_PCT>` | Flag URL when this share or more of its keywords show post_click_quality_score=BELOW_AVERAGE. Default 50.0. Overrides customer policy. |
 | `--lp-min-mobile-friendly-pct <LP_MIN_MOBILE_FRIENDLY_PCT>` | Flag URL when mobile_friendly_clicks_percentage drops below this. Default 80.0. Overrides customer policy. |
 | `--lp-min-clicks <LP_MIN_CLICKS>` | Skip URLs with fewer total clicks than this in the lookback. Default 100. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-pmax-segmentation-audit"></a>
 ### `apb-gads playbook pmax-segmentation-audit`
@@ -1169,6 +1470,9 @@ Usage: apb-gads playbook pmax-segmentation-audit [OPTIONS]
 | `--split-min-conversions <SPLIT_MIN_CONVERSIONS>` | SHOULD_SPLIT (HIGH): minimum 30d conversions. Default 50. Overrides customer policy. |
 | `--asset-groups-per-campaign-max <ASSET_GROUPS_PER_CAMPAIGN_MAX>` | TOO_MANY_GROUPS (MEDIUM): asset-group count ceiling. Default 7. Overrides customer policy. |
 | `--asset-groups-per-campaign-min <ASSET_GROUPS_PER_CAMPAIGN_MIN>` | Floor for asset-group counts (drives segmentation suggestions). Default 3. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-brand-exclusion-audit"></a>
 ### `apb-gads playbook brand-exclusion-audit`
@@ -1190,6 +1494,34 @@ Usage: apb-gads playbook brand-exclusion-audit [OPTIONS]
 | `--bleed-min-cost-micros <BLEED_MIN_COST_MICROS>` | Only emit negatives for competitor-bleed terms above this cost (micros). Default 10_000_000 ($10). Overrides customer policy. |
 | `--brand-token-list <BRAND_TOKEN_LIST>` | Optional path to a one-token-per-line brand list (overrides the hardcoded competitor list). Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a mutation-ready customer_negative_criterion_candidates spec (consumer mutation `customer-negative-criterion-add-bulk` ships separately). |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
+
+<a id="apb-gads-playbook-pmax-brand-share"></a>
+### `apb-gads playbook pmax-brand-share`
+
+Per-PMAX-campaign share of conversions/value on brand search terms (campaign_search_term_insight joined against context.brand.terms ∪ --brand-term), plus true (non-brand) ROAS/CPA vs. reported. Fails loud with context_missing: brand.terms when no brand terms are available.
+
+*Section `performance_max` · default lookback 30d · status `implemented`*
+
+**Usage**
+
+```
+Usage: apb-gads playbook pmax-brand-share [OPTIONS]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--campaign-id <CAMPAIGN_ID>` | Restrict to a single PMAX campaign id. Default: all enabled PMAX campaigns. |
+| `--brand-term <TERM>` | Brand term to classify search-term-insight categories as brand traffic. Repeatable; unioned with context.brand.terms. Missing on both sides fails loudly with `context_missing: brand.terms` rather than guessing. |
+| `--brand-share-warn-pct <BRAND_SHARE_WARN_PCT>` | WARN verdict floor: brand-share percent of a campaign's conversions. Default 50.0. Overrides customer policy. |
+| `--brand-share-critical-pct <BRAND_SHARE_CRITICAL_PCT>` | CRITICAL verdict floor: brand-share percent of a campaign's conversions. Default 70.0. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-campaign-consolidation-audit"></a>
 ### `apb-gads playbook campaign-consolidation-audit`
@@ -1211,6 +1543,9 @@ Usage: apb-gads playbook campaign-consolidation-audit [OPTIONS]
 | `--micro-max-spend-micros <MICRO_MAX_SPEND_MICROS>` | Micro-campaign cost ceiling (micros). Default 500_000_000 ($500). Overrides customer policy. |
 | `--micro-max-conversions <MICRO_MAX_CONVERSIONS>` | Micro-campaign conversion ceiling. Default 5. Overrides customer policy. |
 | `--min-micros-in-cluster <MIN_MICROS_IN_CLUSTER>` | Minimum micro-campaigns to form a consolidation candidate. Default 2. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-sandbox-campaign-audit"></a>
 ### `apb-gads playbook sandbox-campaign-audit`
@@ -1231,6 +1566,9 @@ Usage: apb-gads playbook sandbox-campaign-audit [OPTIONS]
 |---|---|
 | `--sandbox-tag-list <SANDBOX_TAG_LIST>` | Comma-separated case-insensitive substrings flagging sandbox candidates. Default 'sandbox,test,experiment,pilot'. Overrides customer policy. |
 | `--sandbox-budget-share-pct-max <SANDBOX_BUDGET_SHARE_PCT_MAX>` | Maximum permitted sandbox-spend share of account spend (percent). Default 10.0. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-roas-nudge-recommendation"></a>
 ### `apb-gads playbook roas-nudge-recommendation`
@@ -1252,6 +1590,9 @@ Usage: apb-gads playbook roas-nudge-recommendation [OPTIONS]
 | `--max-nudge-pct <MAX_NUDGE_PCT>` | Maximum per-recommendation target adjustment in percent (clamped ±). Default 10.0. Overrides customer policy. |
 | `--min-conversions-for-nudge <MIN_CONVERSIONS_FOR_NUDGE>` | Skip campaigns with fewer 14d conversions than this (too noisy). Default 15. Overrides customer policy. |
 | `--target-roas-tolerance-pct <TARGET_ROAS_TOLERANCE_PCT>` | Don't nudge if actual within ±this percent of current target. Default 5.0. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-conversion-value-tier-audit"></a>
 ### `apb-gads playbook conversion-value-tier-audit`
@@ -1273,6 +1614,9 @@ Usage: apb-gads playbook conversion-value-tier-audit [OPTIONS]
 | `--tier-placeholder-count <TIER_PLACEHOLDER_COUNT>` | Placeholder-pattern threshold: this many actions sharing a placeholder default_value flag the category. Default 2. Overrides customer policy. |
 | `--tier-high-variance-ratio <TIER_HIGH_VARIANCE_RATIO>` | High-variance threshold: max/min ratio of default_value within a category. Default 100.0. Overrides customer policy. |
 | `--tier-placeholder-values <TIER_PLACEHOLDER_VALUES>` | Comma-separated f64 values treated as obvious placeholders. Default '0.0,1.0'. Overrides customer policy. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-placement-leakage-audit"></a>
 ### `apb-gads playbook placement-leakage-audit`
@@ -1294,6 +1638,9 @@ Usage: apb-gads playbook placement-leakage-audit [OPTIONS]
 | `--leakage-min-cost-micros <LEAKAGE_MIN_COST_MICROS>` | Flag placements with at least this cost and zero conversions. Default 25_000_000 ($25). Overrides customer policy. |
 | `--leakage-include-channels <LEAKAGE_INCLUDE_CHANNELS>` | Comma-separated channel allowlist. Default 'PERFORMANCE_MAX,DISPLAY,VIDEO'. Overrides customer policy. |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a mutation-ready placement_exclusion_candidates spec (display-side placements only; YouTube excluded per Google's auto-targeting behavior). |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-playbook-pmax-url-exclusion-audit"></a>
 ### `apb-gads playbook pmax-url-exclusion-audit`
@@ -1315,3 +1662,6 @@ Usage: apb-gads playbook pmax-url-exclusion-audit [OPTIONS]
 | `--waste-url-patterns <WASTE_URL_PATTERNS>` | Comma-separated URL path prefixes treated as common-waste patterns. Default '/blog,/careers,/privacy,/terms,/about,/affiliate,/coupon,/jobs,/legal'. Overrides customer policy. |
 | `--include-display-channels <INCLUDE_DISPLAY_CHANNELS>` | Also audit DISPLAY campaigns alongside PERFORMANCE_MAX. Default true. [possible values: true, false] |
 | `--output-spec <OUTPUT_SPEC>` | Optional: path to write a mutation-ready campaign_negative_webpage_candidates spec — apply with `mutate campaign-negative-webpage-add-bulk --from-file <path>`. |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

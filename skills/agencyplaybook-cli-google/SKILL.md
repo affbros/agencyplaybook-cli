@@ -1,7 +1,7 @@
 ---
 name: agencyplaybook-cli-google
 description: |
-  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 66 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 123 gated mutations; run raw GAQL; schedule read-only audits. Covers all 300 commands across 30 groups against Google Ads API v25.
+  AgencyPlaybook Google Ads CLI (`apb-gads`) — operator-grade command-line automation for Google Ads + Performance Max: read/report on accounts; run 68 diagnostic playbooks (account-health, waste-audit, campaign-bid-strategy-audit, pmax-audit, rsa-quality-audit, learning/scaling/turnaround audits); plan growth-first changes and execute them through a dry-run-first three-gate safety model; build greenfield Search & PMAX campaigns end-to-end (research → structure → RSA → validate → launch); manage keywords, negatives, bidding strategies, conversion actions, audiences, assets, and extensions via 124 gated mutations; run raw GAQL; schedule read-only audits. Covers all 307 commands across 30 groups against Google Ads API v25.
 
   USE WHEN the user mentions Google Ads, "apb-gads", "gads", "google ads cli", "agencyplaybook google", "apb google", PMAX / Performance Max, RSA / responsive search ads, smart bidding, tCPA / tROAS / target CPA / target ROAS, learning phase, search themes, brand exclusions, negative keywords, keyword planning, conversion value rules, bid adjustments / bid modifiers, account health, waste audit, scaling ad spend, campaign launch, ad-strength / ad rotation, quality score, impression share, dayparting, geo/device performance, GAQL, or wants ANY Google Ads account read, audit, plan, report, or change — even if they don't name the CLI. NOT for Meta/Facebook/Instagram ads (use the agencyplaybook-cli skill) or generic SEO.
 ---
@@ -12,14 +12,14 @@ Drive the `apb-gads` CLI — a safe, triple-gated Rust Google Ads operator tool 
 judgment layer it doesn't ship with: which lever for which situation, in what order, framed
 for growth, and never at the cost of a converged Smart-Bidding campaign.
 
-**Division of labor.** The CLI owns the mechanics: **300 commands across 30 groups** —
-123 gated mutations, 66 diagnostic playbooks, 24 reports, MCC-wide portfolio roll-ups — every
+**Division of labor.** The CLI owns the mechanics: **307 commands across 30 groups** —
+124 gated mutations, 68 diagnostic playbooks, 24 reports, MCC-wide portfolio roll-ups — every
 write dry-run by default behind three independent gates, every response JSON. This skill owns
 the *operating model*. Never reimplement what the CLI does; orchestrate it, and read the
 references below for depth.
 
-> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 30 groups · 300 leaf
-> commands · 123 `mutate` subcommands · 66 playbooks (6 sections) · 24 reports · Google Ads
+> Surface (verify with `apb-gads --help` / `apb-gads playbook list`): 30 groups · 307 leaf
+> commands · 123 `mutate` subcommands · 68 playbooks (6 sections) · 24 reports · Google Ads
 > **API v25**. The runtime is the source of truth — when a doc and the binary disagree, the binary wins.
 
 ## Routing — open the right reference for the task
@@ -30,7 +30,7 @@ Load `references/` files **as needed** (progressive disclosure — don't read th
 |---|---|
 | Exact flags/params for a command ("what does `mutate campaign-budget-update` take?") | `references/commands/<group>.md` (one page per group — `mutate`, `playbook`, `report`, `plan`, `campaign`, …) |
 | Switch which account commands target (agency multi-account: "use account X", "set/show current account") | `references/commands/account.md` (`account use`/`current`/`clear`/`list` — persists a current MCC child to `~/.apb-gads/state.json`; precedence `--customer` > persisted > config default) |
-| To pick a playbook by symptom ("why won't this exit learning?", "find waste") | `references/playbook-catalog.md` (66 playbooks by section) |
+| To pick a playbook by symptom ("why won't this exit learning?", "find waste") | `references/playbook-catalog.md` (68 playbooks by section) |
 | Do a whole recurring job end-to-end ("clean up my search terms", "what's wasting spend and what should I promote?") | `references/commands/recipe.md` — `recipe list` / `recipe describe <name>` / `recipe search-terms`; the SOP paragraph is § *Recipes* below |
 | **Build** a new campaign from a brief ("set up a search campaign for X", "build me a keyword list with ads and negatives", "launch a new campaign") | `references/commands/recipe.md` — `recipe build`; the SOP is § *Build a whole campaign from a brief* below |
 | Turn a diagnosis into ONE decisive verb per campaign ("which should I scale / cap?") — SCALE / TIGHTEN / OPTIMIZE / CAP (/ HOLD / CUT) | `references/verdict-framework.md` |
@@ -314,6 +314,14 @@ apb-gads mutate apply-plan --from-file waste.md.json --execute
   per asset group, 3-7 groups by margin/objective (not by audience); watch `report pmax-placements`
   for junk; turn off Final URL expansion for lead-gen
   (`mutate campaign-update-url-expansion-opt-out`).
+- **Retail readiness (Shopping/PMAX with `--merchant-id`):** run `playbook feed-health-audit`
+  **before and after** `plan campaign pmax --merchant-id` — before, to confirm the feed has
+  serving inventory (a disapproved-heavy feed wastes the new campaign's budget from day one);
+  after, to confirm status didn't regress once traffic starts. It's Path A only (the Ads API
+  `shopping_product` resource, existing `adwords` scope — no Merchant Center API), so it reports
+  the real `ELIGIBLE`/`ELIGIBLE_LIMITED`/`NOT_ELIGIBLE` status set, not Merchant-Center-native
+  PENDING/EXPIRING granularity. Pair it with `playbook shopping-feed-segmentation-audit` for
+  listing-group filter coverage.
 - **RSA:** 1 strong RSA per ad group; 8-10 sentence-case headlines (several <20 chars);
   descriptions 61-70 chars; **partial pinning only** (2-3 variants per pinned position); refresh
   **only on POOR** ad strength — AVERAGE with good CPA is healthy. Never rewrite a converting ad to
@@ -360,7 +368,7 @@ Three cadence tiers plus a shared library:
 | File | What it covers |
 |---|---|
 | `references/commands/<group>.md` | Per-group command + flag reference (generated from the binary — accurate) |
-| `references/playbook-catalog.md` | All 66 playbooks by section, with purpose + default window |
+| `references/playbook-catalog.md` | All 68 playbooks by section, with purpose + default window |
 | `references/verdict-framework.md` | Gate-based decision verdicts — one verb per campaign (SCALE/TIGHTEN/OPTIMIZE/CAP/HOLD/CUT) |
 | `references/campaign-type-selection.md` | Search vs PMax vs Demand Gen — when to use what (2026) |
 | `references/doctrine.md` | Modern Google Ads doctrine cheat-sheet (Smart Bidding, learning, RSA, PMAX) |

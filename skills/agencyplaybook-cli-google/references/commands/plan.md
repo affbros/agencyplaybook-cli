@@ -4,7 +4,7 @@
 
 Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaService / KeywordPlanService. Does not write; no three-gate safety applied. Expert copy + brief: install the agencyplaybook-planner skill (see /downloads)
 
-**Surface:** 👁️ Read-only · **13 command(s)** · [← back to index](README.md)
+**Surface:** 👁️ Read-only · **15 command(s)** · [← back to index](README.md)
 
 ---
 
@@ -22,6 +22,8 @@ Phase B1 (v24) — keyword planning surface (reads only). Wraps KeywordPlanIdeaS
 | [`tracking`](#apb-gads-plan-tracking) | Emit a static conversion-tracking setup template for the given mode. |
 | [`campaign`](#apb-gads-plan-campaign) | Greenfield campaign planning: assemble a launchable CampaignLaunchSpec from planning artifacts (`search`). |
 | [`export`](#apb-gads-plan-export) | Render a plan envelope file (v1 lifted or native v2) into an artifact, read-only — no gates, no network. |
+| [`merge`](#apb-gads-plan-merge) | Merge N Google plan-envelope-v2 files (from separate `--plan`/`recipe build`/`recipe search-terms` runs) into ONE reviewable envelope: dedupe byte-identical actions, isolate contradictory bidding/target/ budget changes as unresolved conflicts, rank the survivors (growth/efficiency), and sequence them behind the learning-window guard — inserting `wait-for-status` pseudo-actions where needed. |
+| [`forecast`](#apb-gads-plan-forecast) | Forecast a campaign build via `GenerateKeywordForecastMetrics` (planning-001 sprint-g08). |
 
 ---
 
@@ -43,10 +45,12 @@ Usage: apb-gads plan keyword-ideas [OPTIONS]
 | `--seed-keyword <SEED_KEYWORD>` | Seed keyword. Repeatable. At least one of --seed-keyword, --seed-url, --seed-site, or --seed-keyword-file is required |
 | `--seed-url <SEED_URL>` | URL seed. Combine with --seed-keyword for keywordAndUrlSeed; alone, uses urlSeed (exact URL only — for site-wide use --seed-site) |
 | `--seed-site <SEED_SITE>` | Site seed. Site-wide crawl. Mutually exclusive with --seed-keyword and --seed-url |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--seed-keyword-file <SEED_KEYWORD_FILE>` | Path to newline-separated keyword file; each line is appended to --seed-keyword |
 | `--geo-target-id <GEO_TARGET_ID>` | Geo target constant ID (numeric). Default: 2840 (United States). Repeatable [default: 2840] |
 | `--language-id <LANGUAGE_ID>` | Language constant ID (numeric). Default: 1000 (English) [default: 1000] |
 | `--network <NETWORK>` | Network: GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS [default: GOOGLE_SEARCH] |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--limit <LIMIT>` | Page size (1..=10000) [default: 100] |
 | `--include-adult` | Include adult keywords in results |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
@@ -70,9 +74,11 @@ Usage: apb-gads plan keyword-historical-metrics [OPTIONS]
 | `--keyword-file <KEYWORD_FILE>` | Path to newline-separated keyword file; each line is appended to --keyword |
 | `--geo-target-id <GEO_TARGET_ID>` | [default: 2840] |
 | `--language-id <LANGUAGE_ID>` | [default: 1000] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--network <NETWORK>` | [default: GOOGLE_SEARCH] |
 | `--include-adult` | — |
 | `--include-average-cpc` | Request the averageCpcMicros field in the response (adds historicalMetricsOptions.includeAverageCpc to the request) |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-from-audit"></a>
@@ -93,6 +99,8 @@ Usage: apb-gads plan from-audit [OPTIONS] --spec-file <SPEC_FILE> --playbook <PL
 | `--spec-file <SPEC_FILE>` | Path to the spec envelope JSON (the `--output-spec` output) |
 | `--playbook <PLAYBOOK>` | Source playbook slug, recorded in the artifact for traceability (e.g. `waste-cluster-audit`) |
 | `--rank-by <RANK_BY>` | Action ranking: `growth-first` (default — lead with the biggest scaling upside, never bury a scale-up under a cut) or `efficiency-first` (the legacy savings-weighted priority order) [default: growth-first] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-goals"></a>
@@ -113,6 +121,8 @@ Usage: apb-gads plan goals [OPTIONS] --mode <MODE>
 | `--mode <MODE>` | Campaign mode: lead-gen \| ecommerce \| brand \| app |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD (e.g. 25.0). Omit to use MAXIMIZE_CONVERSIONS |
 | `--target-roas <TARGET_ROAS>` | Target ROAS as a multiplier (e.g. 4.0 = 400%). Omit unless ROAS-focused |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-keywords"></a>
@@ -133,9 +143,11 @@ Usage: apb-gads plan keywords [OPTIONS]
 | `--seed-keyword <SEED_KEYWORD>` | Seed keyword. Repeatable |
 | `--geo-target-id <GEO_TARGET_ID>` | Geo target constant ID (numeric). Default: 2840 (United States) [default: 2840] |
 | `--language-id <LANGUAGE_ID>` | Language constant ID (numeric). Default: 1000 (English) [default: 1000] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
 | `--position-target <POSITION_TARGET>` | Where to aim each keyword's suggested bid within its top-of-page range: first-page (low) \| top-of-page (midpoint, default) \| first-position (high) [default: top-of-page] |
 | `--intent-file <INTENT_FILE>` | Path to an intent-keywords YAML file. Each present category (commercial, coupon, free, jobs, support, branded, competitors) REPLACES the built-in defaults — edit the lists to add/remove terms. See docs/planning.md |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-structure"></a>
@@ -154,6 +166,8 @@ Usage: apb-gads plan structure [OPTIONS] --from <FROM>
 | Option | Description |
 |---|---|
 | `--from <FROM>` | Path to the keywords-plan JSON produced by `plan keywords` |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-rsa"></a>
@@ -175,6 +189,8 @@ Usage: apb-gads plan rsa [OPTIONS] --from <FROM>
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
 | `--brand <BRAND>` | Brand name to inject into templates (e.g. "Scandalous Coffee") [default: ""] |
 | `--final-url <FINAL_URL>` | Base final URL for the ads (e.g. "https://www.scandalouscoffee.com") [default: ""] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-tracking"></a>
@@ -193,6 +209,8 @@ Usage: apb-gads plan tracking [OPTIONS] --mode <MODE>
 | Option | Description |
 |---|---|
 | `--mode <MODE>` | Campaign mode: lead-gen \| ecommerce \| brand \| app |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-plan-campaign"></a>
@@ -234,15 +252,17 @@ Usage: apb-gads plan campaign search [OPTIONS] --structure <STRUCTURE> --rsa <RS
 | `--rsa <RSA>` | Path to the rsa JSON (`plan rsa` output). Required — supplies ad copy |
 | `--goals <GOALS>` | Path to the goals JSON (`plan goals` output). Optional — sets bidding |
 | `--keywords-plan <KEYWORDS_PLAN>` | Path to the keywords-plan JSON (`plan keywords` output). Optional — supplies seeded negative keywords |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--negatives-file <NEGATIVES_FILE>` | Path to a campaign-negatives JSON list — `[{"text": "...", "match_type": "BROAD\|PHRASE\|EXACT"}]`. Merged into the exported spec's `campaign_negative_keywords` (deduped against the keywords-plan seeds), so global exclusions no longer have to be hand-injected |
 | `--intent <INTENT>` | Which intent-campaign to emit (e.g. commercial). Omit to use the single campaign, or the highest-volume one for a multi-campaign structure |
 | `--campaign-name <CAMPAIGN_NAME>` | Override the campaign name (defaults to the structure's campaign name) |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--landing-page <LANDING_PAGE>` | Landing page URL — overrides the RSA artifact's final_urls for every ad group |
 | `--daily-budget <DAILY_BUDGET>` | Daily budget in USD (e.g. 500). Required; converted to micros |
 | `--geo-target-id <GEO_TARGET_ID>` | Positive geo-target-constant ID (numeric). Repeatable. Default 2840 (US) |
-| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--location <LOCATION>` | Geo-target NAME (e.g. "United States"). Repeatable; resolved to an ID |
 | `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD — sets/overrides TARGET_CPA bidding |
 | `--bid-aggressiveness <BID_AGGRESSIVENESS>` | Per-keyword CPC aggressiveness: conservative (0.75x) \| balanced (1.0x) \| aggressive (1.25x), or a raw multiplier like 0.85. Each keyword's bid = its suggested top-of-page bid × this. Requires --keywords-plan |
@@ -267,15 +287,17 @@ Usage: apb-gads plan campaign full [OPTIONS] --landing-page <LANDING_PAGE> --dai
 | `--seed-keywords <SEED_KEYWORDS>` | Seed keywords. Repeatable, and each value may be comma-separated. Required |
 | `--landing-page <LANDING_PAGE>` | Landing page URL for the ads. Required |
 | `--campaign-name <CAMPAIGN_NAME>` | Campaign name for the primary (highest-volume) campaign. Optional |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--mode <MODE>` | Goal mode: lead-gen \| ecommerce \| brand \| app [default: lead-gen] |
 | `--geo-target-id <GEO_TARGET_ID>` | Geo-target-constant ID (numeric). Repeatable. Default 2840 (US) |
 | `--location <LOCATION>` | Geo-target NAME (e.g. "United States"). Repeatable; resolved to an ID |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English) |
 | `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
 | `--network <NETWORK>` | Network: GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS [default: GOOGLE_SEARCH] |
 | `--daily-budget <DAILY_BUDGET>` | Total daily budget in USD (split across campaigns by volume share) |
-| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD (sets TARGET_CPA bidding) |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--target-roas <TARGET_ROAS>` | Target ROAS multiplier (e.g. 4.0) |
 | `--brand <BRAND>` | Brand name injected into RSA templates [default: ""] |
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
@@ -302,15 +324,17 @@ Usage: apb-gads plan campaign pmax [OPTIONS] --campaign-name <CAMPAIGN_NAME> --b
 | `--budget-micros <BUDGET_MICROS>` | Daily budget in micros (e.g. 50000000 = $50.00) |
 | `--final-url <FINAL_URL>` | Final URL for the asset group |
 | `--geo-target-id <GEO_TARGET_ID>` | Geo-target-constant ID (numeric). Repeatable. Default 2840 (US) |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--location <LOCATION>` | Geo-target NAME (e.g. "United States"). Repeatable; resolved to an ID |
 | `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English) |
 | `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
 | `--bidding-strategy <BIDDING_STRATEGY>` | Bidding: MAXIMIZE_CONVERSIONS \| MAXIMIZE_CONVERSION_VALUE (PMAX-only) [default: MAXIMIZE_CONVERSIONS] |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | Target CPA micros (MAXIMIZE_CONVERSIONS only) |
 | `--target-roas <TARGET_ROAS>` | Target ROAS (MAXIMIZE_CONVERSION_VALUE only, e.g. 3.5) |
-| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--negative-keyword <NEGATIVE_KEYWORD>` | Campaign negative keyword as `text:match_type` (PHRASE\|EXACT). Repeatable |
 | `--brand-guidelines` | Enable PMAX brand guidelines (campaign-level brand assets). Needs a logo |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--headline <HEADLINE>` | Headline (3–15 required). Repeatable |
 | `--long-headline <LONG_HEADLINE>` | Long headline (0–5). Repeatable |
 | `--description <DESCRIPTION>` | Description (2–5 required; at least one < 60 chars). Repeatable |
@@ -349,15 +373,17 @@ Usage: apb-gads plan campaign demand-gen [OPTIONS] --campaign-name <CAMPAIGN_NAM
 | `--budget-micros <BUDGET_MICROS>` | — |
 | `--final-url <FINAL_URL>` | — |
 | `--geo-target-id <GEO_TARGET_ID>` | Positive geo-target-constant id (numeric, e.g. 2840 = USA). Repeatable |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--language-id <LANGUAGE_ID>` | Language-constant id (numeric, e.g. 1000 = English). Repeatable |
 | `--bidding-strategy <BIDDING_STRATEGY>` | Bidding: MAXIMIZE_CLICKS \| MAXIMIZE_CONVERSIONS \| MAXIMIZE_CONVERSION_VALUE [default: MAXIMIZE_CONVERSIONS] |
 | `--target-cpa-micros <TARGET_CPA_MICROS>` | Target CPA micros (MAXIMIZE_CONVERSIONS) |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--target-roas <TARGET_ROAS>` | Target ROAS (MAXIMIZE_CONVERSION_VALUE, e.g. 3.5) |
 | `--ad-group-name <AD_GROUP_NAME>` | — |
 | `--audience-id <AUDIENCE_ID>` | Existing AUDIENCE id (numeric). Repeatable |
-| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--video-asset <VIDEO_ASSET>` | Video asset resource name (≥1 required). Repeatable |
 | `--logo-asset <LOGO_ASSET>` | Logo image asset resource name (≥1 required). Repeatable |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 | `--headline-asset <HEADLINE_ASSET>` | — |
 | `--long-headline-asset <LONG_HEADLINE_ASSET>` | — |
 | `--description-asset <DESCRIPTION_ASSET>` | — |
@@ -383,4 +409,55 @@ Usage: apb-gads plan export [OPTIONS] --from-file <FILE> --format <FORMAT> --out
 | `--format <FORMAT>` | editor-csv \| html \| md. `editor-csv` writes `<out>/editor/*.csv`; `html`/`md` write a single file at `--out` |
 | `--out <PATH>` | Output path: a directory for `editor-csv`, a file for `html`/`md` |
 | `--fonts <FONTS>` | system (default) \| web — only meaningful with `--format html` [default: system] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--allow-edited-plan` | Proceed even if the envelope's recomputed hash no longer matches its stored value (same override `apply-plan` uses) |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+
+<a id="apb-gads-plan-merge"></a>
+### `apb-gads plan merge`
+
+Merge N Google plan-envelope-v2 files (from separate `--plan`/`recipe build`/`recipe search-terms` runs) into ONE reviewable envelope: dedupe byte-identical actions, isolate contradictory bidding/target/ budget changes as unresolved conflicts, rank the survivors (growth/efficiency), and sequence them behind the learning-window guard — inserting `wait-for-status` pseudo-actions where needed. `mutate apply-plan` honours those waits (planning-001 sprint-g07)
+
+**Usage**
+
+```
+Usage: apb-gads plan merge [OPTIONS] --out <FILE>
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--from <FILE>` | Path to an input plan file (v1 or v2 envelope). Repeatable — give at least one |
+| `--mode <MODE>` | Ranking mode: growth (default — growth score desc, then impact/ confidence/effort) \| efficiency (impact score first) [default: growth] |
+| `--horizon <HORIZON>` | Sequencing horizon fallback when no live/per-target window is known, e.g. "14d". Google campaigns use the live channel-type default (Search 14 / PMAX 28) instead when `--customer` is given and `--offline` is not set [default: 14d] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--offline` | Skip every live learning-window/status read even if `--customer` is set: every gated target falls back to the channel default window and an Unknown status (never assumed cleared) |
+| `--out <FILE>` | Path to write the merged plan-envelope-v2 JSON |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
+
+<a id="apb-gads-plan-forecast"></a>
+### `apb-gads plan forecast`
+
+Forecast a campaign build via `GenerateKeywordForecastMetrics` (planning-001 sprint-g08). Reads a CampaignLaunchSpec (`--spec`, the shape `recipe build`/`plan campaign search` emit) or a live campaign (`--campaign-id`), fans out one forecast call per budget/target scenario (paced ~1 QPS/CID), and prints a scenario table. With `--plan`, stamps `score.growth_micros` / `preview.forecast` onto the emitted envelope's build/budget actions. PMAX/Demand Gen campaigns (via `--campaign-id`) have no forecast API and return `{"forecast": null}` with exit 0
+
+**Usage**
+
+```
+Usage: apb-gads plan forecast [OPTIONS]
+```
+
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--spec <SPEC>` | Path to a CampaignLaunchSpec JSON. Mutually exclusive with `--campaign-id` |
+| `--campaign-id <CAMPAIGN_ID>` | A live campaign id to forecast instead of a spec file. Reads keywords/geo/language/bidding via GAQL. Mutually exclusive with `--spec` |
+| `--budget-scenarios <BUDGET_SCENARIOS>` | Comma-separated daily budget scenarios in USD, e.g. "50,100,150". Each becomes `manualCpcBiddingStrategy.dailyBudgetMicros` — a real Google-enforced daily budget cap. Mutually exclusive with --target-scenarios (different bidding strategies) |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--target-scenarios <TARGET_SCENARIOS>` | Comma-separated daily target-spend scenarios in USD, e.g. "25,50,75", forecast under `maximizeConversionsBiddingStrategy` (what Google forecasts if Smart Bidding maximizes conversions within that daily spend). Mutually exclusive with --budget-scenarios |
+| `--period <PERIOD>` | Forecast window: "<n>d" (e.g. 30d) or "YYYY-MM-DD..YYYY-MM-DD" [default: 30d] |
+| `--out <OUT>` | Write the raw scenario JSON to this path in addition to stdout |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
