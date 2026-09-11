@@ -208,6 +208,28 @@ Hard rules:
 
 See `reference/anti-patterns.md` for the failure modes to avoid.
 
+## Effective planning
+
+Plan EFFECTIVELY — pick the smallest tool that gets a real human YES on the change:
+
+| Situation | Tool | Gate | What the human reviews |
+|---|---|---|---|
+| One bounded change | `meta_preview_change` → YES → `meta_apply_change` | single-use approval token (~10 min) | the projected change-set |
+| ≥2 linked changes | `meta_create_plan` → `meta_validate_plan` | `pending → approved` | `meta_get_plan` / review.html |
+| A whole new campaign from a brief | `agency_build_plan {channel:"meta", ...}` | validated + approved before execute | the build artifact / review URL |
+| N plans that might collide, or touch a mid-learning ad set | `agency_merge_plans` | `wait-for-status` clears | `conflicts[]`, waves |
+| A scale/budget decision | `agency_forecast_plan` first — read-only, no token needed | none | the scenario table |
+| Undoing a landed (or partially-failed) change | `agency_rollback_plan` | `executed`, or `failed` with `completed_through > 0` | resources the undo removes |
+
+Full decision table + anti-patterns: MCP resource `guide://planning/doctrine`
+(and `guide://planning/overview` for states/blast-radius/`{{ref:aN}}`); the
+`plan_effectively` prompt takes a situation and returns the tool sequence +
+gates. In-app: the **Planning Reference** (`/planning-reference`). Anti-
+patterns worth repeating: executing a create-class plan with no rollback
+path in mind; merging plans without letting `wait-for-status` gate a
+mid-learning target; scaling a budget without forecasting first; hand-editing
+an envelope's `{{ref:aN}}` placeholder (the executor binds it at run time).
+
 ## Reporting shape
 
 Lead with the answer, then the evidence: **finding → recommended action → projected impact →

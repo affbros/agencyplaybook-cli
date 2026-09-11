@@ -1,6 +1,6 @@
 # `apb auth` — Command Reference
 
-11 commands. Auto-generated from the apb binary on 2026-09-10.
+11 commands. Auto-generated from the apb binary on 2026-09-11.
 
 ### `apb auth accounts add`
 

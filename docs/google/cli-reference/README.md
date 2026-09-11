@@ -54,7 +54,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`keyword`](keyword.md) | 👁️ read | 1 | Keyword reads: list ad-group keyword criteria. |
 | [`negative-keyword`](negative-keyword.md) | 👁️ read | 1 | Negative-keyword reads. |
 | [`asset`](asset.md) | 👁️ read | 1 | Asset reads: list account assets (images, text, video, etc.). |
-| [`mutate`](mutate.md) | ✍️ write | 123 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
+| [`mutate`](mutate.md) | ✍️ write | 124 | Every write surface. Dry-run by default; gated behind the three-gate safety model. |
 | [`gaql`](gaql.md) | 👁️ read | 1 | Run ad-hoc Google Ads Query Language (GAQL) against the searchStream endpoint. |
 | [`report`](report.md) | 👁️ read | 24 | Named, pre-built read reports (search terms, performance, PMAX, etc.). |
 | [`portfolio`](portfolio.md) | 👁️ read | 4 | Portfolio reporting — MCC-wide, per-currency roll-ups across every reportable child account (analytics-upgrade-001 S007). |
@@ -73,7 +73,7 @@ There is no bypass flag. The global `--validate-only` flag turns any `mutate` in
 | [`recipe`](recipe.md) | ✍️ write | 4 | Recipes — one verb, one job. |
 | [`context`](context.md) | 👁️ read | 2 | Per-customer goal/strategy context state. |
 | [`validate`](validate.md) | 👁️ read | 3 | Inspect planning artifacts for launch-readiness. |
-| [`experiment`](experiment.md) | 👁️ read | 1 | Google Ads experiment reads. |
+| [`experiment`](experiment.md) | 👁️ read | 2 | Google Ads experiment loop: `results` (read-only) and `promote` (creating/ending an experiment lives under `mutate experiment-*`; `promote` lives here for skill-vocabulary parity with Meta's `experiment create\|results\|promote`, planning-001 sprint-g09). |
 
 ## Full command index
 
@@ -254,6 +254,7 @@ Every leaf command, grouped. Click through to the parameter-level page.
 - [`apb-gads mutate customer-asset-detach`](mutate.md#apb-gads-mutate-customer-asset-detach)
 - [`apb-gads mutate experiment-create`](mutate.md#apb-gads-mutate-experiment-create) — Create a Google Ads experiment (control + treatment arm) on an existing base campaign
 - [`apb-gads mutate experiment-end`](mutate.md#apb-gads-mutate-experiment-end)
+- [`apb-gads mutate experiment-promote`](mutate.md#apb-gads-mutate-experiment-promote) — Graduate an experiment's treatment into the live change (the `GraduateExperiment` RPC — planning-001 sprint-g09).
 
 ### `gaql`
 
@@ -472,4 +473,5 @@ Every leaf command, grouped. Click through to the parameter-level page.
 
 ### `experiment`
 
-- [`apb-gads experiment results`](experiment.md#apb-gads-experiment-results) — Read one experiment's outcome: the control arm's metrics, the treatment arm's metrics, and — per metric — Google's point estimate, margin of error and p-value for the difference between them
+- [`apb-gads experiment results`](experiment.md#apb-gads-experiment-results) — Read one experiment's outcome: the control arm's metrics, the treatment arm's metrics, and — per metric — Google's point estimate, margin of error and p-value for the difference between them, plus a WINNER/LOSER/INCONCLUSIVE verdict on the chosen `--metric` (planning-001 sprint-g09) using `metric_policy.experiment.{p_value, min_runtime_days}`
+- [`apb-gads experiment promote`](experiment.md#apb-gads-experiment-promote) — Graduate an experiment's treatment into the live production change (the `GraduateExperiment` RPC — a dedicated endpoint, not a `googleAds:mutate` operation, so it cannot be batched with other writes).

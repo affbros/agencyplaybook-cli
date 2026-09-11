@@ -147,6 +147,28 @@ Always, in this order (matches the CLI's plan-first format):
   = true` before any write test (`scripts/sandbox-check.sh` does this for you).
 - The CLI's lint, validate and gate results win over any skill's advice, including this one's.
 
+## Effective planning
+
+A plan is overhead — pay it only when it buys you something. Decision table:
+
+| Situation | Verb/tool | Gate | What the human reviews |
+|---|---|---|---|
+| One entity, one change | direct mutation (`--execute`) | the write gate's own confirm | the dry-run diff |
+| ≥2 linked changes (a whole build) | `recipe build` → `plan.json` | validate → approve → execute | `plan.html` / review.html |
+| N already-produced plans that might collide, or touch a mid-`LEARNING` target | `plan merge` | conflicts resolved + `wait-for-status` clears | `conflicts[]`, waves, `.status` |
+| "What would this budget/bid change actually deliver?" | `plan forecast` | none — read-only, no spend | scenario table (`basis: delivery_estimate\|heuristic\|unavailable`) |
+| Handing the plan to a reviewer or another tool | SaaS import (`agency_export_plan` / `POST .../plans/import`) | `pending → approved` | the Plans page / review.html |
+| Undoing a landed change | `agency_rollback_plan` / `apb(-gads) ... rollback --from-receipt` | `executed`, or `failed` with `completed_through > 0` | the resources the undo removes |
+
+Full doctrine + anti-patterns + when-to-merge/forecast: the in-app **Planning
+Reference** (`/planning-reference`) and `guide://planning/doctrine` (MCP
+resource). Anti-patterns most relevant here: don't wrap a single, already-
+approved status flip in a plan just for ceremony; never hand-edit a
+`{{ref:aN}}` placeholder (the executor binds it at run time — a hand edit
+either fails `unresolved_ref` or silently targets the wrong entity); re-run
+`recipe build` rather than replaying a plan against a since-changed account
+(`apply-plan` refuses on `plan_envelope_mismatch` rather than guessing).
+
 ## References
 
 - `references/brief-template.yaml` — the intake form, with defaults and which fields are v1 vs v2.

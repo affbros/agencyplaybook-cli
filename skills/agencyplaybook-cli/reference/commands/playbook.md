@@ -1,6 +1,6 @@
 # `apb playbook` — Command Reference
 
-34 commands. Auto-generated from the apb binary on 2026-09-10.
+34 commands. Auto-generated from the apb binary on 2026-09-11.
 
 ### `apb playbook advantage-adoption`
 

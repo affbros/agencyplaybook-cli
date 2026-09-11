@@ -380,6 +380,99 @@ $B validate campaign-spec --from-file /tmp/launch.json \
 
 `plan campaign full` (§9) is the fast path; this is the same pipeline broken into inspectable stages — useful when you want to hand-edit the keyword clusters, RSA copy, or bidding between steps. Each stage is a pure transform (`plan structure` / `plan rsa` take no API), so you can iterate on the intermediate JSON freely. The terminal `validate campaign-spec && orchestrate campaign-launch` is the same halt-on-fail launch from §14.
 
+## 20. `recipe build` — a whole campaign from a brief
+
+One verb, one job: read a **brief** (YAML/JSON), run research → structure →
+copy → targeting → assets → bidding → validate → plan, write a build
+directory, launch nothing unless asked.
+
+```bash
+# 1. dry-run the whole build (nothing reaches the account)
+apb-gads --customer 1234567890 recipe build --brief briefs/whole-bean.yaml --out build/
+
+# 2. inspect a single stage while iterating
+apb-gads recipe build --brief b.yaml --stage research
+
+# 3. server-validate the whole launch body — still creates nothing
+apb-gads --customer 1234567890 recipe build --brief b.yaml --validate-only
+
+# 4. ONLY after an explicit human YES: launch it, born PAUSED
+APB_GADS_ALLOW_MUTATIONS=true apb-gads --customer 1234567890 \
+    recipe build --brief b.yaml --out build/ --execute
+
+# 5. the undo
+apb-gads --customer 1234567890 orchestrate rollback --from-receipt build/launch.json --execute
+```
+
+Writes `build/{spec.v2.json, plan.json, plan.md, plan.html, research/, structure.json, rsa.json,
+validate.json, editor/*.csv}`. Full doctrine: `docs/RECIPE_BUILD.md`.
+
+## 21. `plan merge` — combine plans, respect the learning window
+
+Fold N independently-produced plans (a build + a playbook, say) into one:
+dedupe, isolate contradictory bidding/targeting/budget changes into
+`conflicts`, and insert a `wait-for-status` gate ahead of anything still
+mid-`LEARNING` so `plan apply` never resets a learning window.
+
+```bash
+apb-gads recipe build --brief brief.yaml --out build/ >/dev/null   # build/plan.json
+apb-gads playbook waste-audit --plan waste.json >/dev/null         # global --plan writes waste.json
+
+apb-gads plan merge --from build/plan.json --from waste.json \
+  --out merged.json --plan merged.html
+
+# Read-only check — does anything still need to wait? (--validate-only reads
+# drift/waiting state and submits nothing.)
+apb-gads --customer 1234567890 mutate apply-plan --from-file merged.json --validate-only | jq '.waiting, .status'
+
+# Apply — anything still `waiting` is skipped, never a failure.
+APB_GADS_ALLOW_MUTATIONS=true apb-gads --customer 1234567890 \
+    mutate apply-plan --from-file merged.json --execute
+```
+
+## 22. `plan forecast` — delivery-estimate scenarios before you spend
+
+```bash
+# From a CampaignLaunchSpec (same one `recipe build` / `plan campaign search` emit):
+apb-gads plan forecast --spec build/spec.v2.json --budget-scenarios 50,75,100
+
+# Against a live campaign instead:
+apb-gads plan forecast --campaign-id 18765432109 --out forecast.json --plan forecast.html
+```
+
+No mutation. An unforecastable target (no manual targeting, fully-automated)
+comes back with an honest `note` and `basis: "unavailable"` rather than a
+guessed number.
+
+## 23. Handing a plan to AgencyPlaybook, and picking one back up
+
+**CLI → SaaS**: build a plan, hand it to the SaaS Google Plans page for a human approve:
+
+```bash
+apb-gads recipe build --brief briefs/client.yaml --out build/          # writes build/plan.json, born PAUSED
+curl -s -X POST https://api.agencyplaybook.io/api/v1/gads/plans/import \
+  -H "Authorization: Bearer $APB_API_KEY" -H "Content-Type: application/json" \
+  --data-binary @build/plan.json                                       # -> { plan_id, state: "pending" }
+# now approve/execute on /gads/plans/<plan_id>, or via the MCP: gads_export_plan / gads_execute_plan
+```
+
+**SaaS → CLI**: pull an approved (or already-executed) plan back down and run or re-inspect it
+from a terminal:
+
+```bash
+curl -s https://api.agencyplaybook.io/api/v1/gads/plans/pln_g_9a3f \
+  -H "Authorization: Bearer $APB_API_KEY" | jq .envelope > plan.json   # or: agency_export_plan over the MCP
+apb-gads --customer 1234567890 mutate apply-plan --from-file plan.json --validate-only  # dry run first
+APB_GADS_ALLOW_MUTATIONS=true apb-gads --customer 1234567890 \
+    mutate apply-plan --from-file plan.json --execute                 # the three write gates
+apb-gads plan export --from-file plan.json --format html --out review.html   # human-readable render
+apb-gads plan export --from-file plan.json --format editor-csv --out build/  # Google Ads Editor bundle
+```
+
+If the envelope still carries `{{ref:aN}}` / `{{account}}` placeholders,
+never substitute them by hand — the executor (SaaS job runner or either CLI)
+binds them at run time from its own ref map for the run.
+
 ---
 
 ## Cross-references

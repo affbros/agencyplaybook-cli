@@ -35,8 +35,16 @@ Usage: apb-gads context init [OPTIONS] --mode <MODE>
 | `--mode <MODE>` | Goal/bidding mode. E.g. target_cpa, target_roas, maximize_conversions, maximize_conversion_value, manual_cpc |
 | `--target-cpa <TARGET_CPA>` | Target CPA in dollars (optional, used with target_cpa mode) |
 | `--target-roas <TARGET_ROAS>` | Target ROAS as a multiplier (optional, used with target_roas mode) |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--primary-kpi <PRIMARY_KPI>` | Primary KPI (default: conversions) |
 | `--from <FROM>` | Optional path to a `plan goals` artifact JSON whose goals fields override the explicit --mode / --target-cpa / --target-roas flags |
+| `--brand-term <TERM>` | Schema v2 — a brand term recipes must never negate or auto-promote. Repeatable. Omitting it leaves any existing terms in place |
+| `--brand-domain <DOMAIN>` | Schema v2 — a domain the brand owns. Repeatable; omitting preserves |
+| `--brand-competitor <BRAND>` | Schema v2 — a competitor brand. Competitor traffic is account-wide junk, so it seeds the canonical negative list. Repeatable |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--canonical-negative-set <SHARED_SET>` | Schema v2 — the account's canonical NEGATIVE_KEYWORDS shared set (resource name or bare id). Where account-wide negatives go |
+| `--protected-shared-set <SHARED_SET>` | Schema v2 — a shared set recipes must not modify. Repeatable |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-context-show"></a>
 ### `apb-gads context show`
@@ -49,4 +57,10 @@ Show the current context for a customer. Errors if not yet initialized
 Usage: apb-gads context show [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

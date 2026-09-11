@@ -136,12 +136,25 @@ Single bounded change (one campaign/ad-set/keyword op, not a whole build): Googl
 `gads_verify_execution`. Meta: `meta_preview_change` → YES → `meta_apply_change` →
 `meta_verify_execution`.
 
+```json
+{"tool": "gads_preview_change", "arguments": {"customer_id": "1234567890", "change_set": {"op": "campaign-update-status", "entity_id": "18765432109", "params": {"status": "PAUSED"}}}}
+```
+
 Spec/build → plan → execute (either channel): `gads_resolve_customer` → `gads_build_campaign_spec`
 (emits the spec; after S5 accepts the brief) → `gads_validate_spec` / `gads_export_plan` (produces
 the envelope, imports it, mints the token) → YES → `gads_execute_plan` (approve + execute + poll).
 Meta: `meta_build_campaign_spec` → `meta_create_plan` → `meta_validate_plan` (mints the token) →
 YES → `meta_execute_plan` (imports + approves + executes + polls). Both channels share the same
 plan states: `pending → approved → executing → executed | failed`.
+
+```json
+{"tool": "gads_export_plan", "arguments": {"customer_id": "1234567890", "change_set": {"op": "campaign-update-status", "entity_id": "18765432109", "params": {"status": "PAUSED"}}}}
+{"tool": "gads_execute_plan", "arguments": {"plan_id": "pln_g_9a3f", "approval_token": "apt_...", "operator_confirmation": true}}
+
+{"tool": "meta_create_plan", "arguments": {"action": "campaign.update-status", "target_id": "120212345678901", "payload": {"status": "PAUSED"}}}
+{"tool": "meta_validate_plan", "arguments": {"plan_id": "pln_abc123"}}
+{"tool": "meta_execute_plan", "arguments": {"plan_id": "pln_abc123", "approval_token": "apt_...", "operator_confirmation": true}}
+```
 
 Whole-brief build (`recipe build`, either channel): `agency_build_plan` (spec + plan envelope +
 verdict, imported to the Plans page on a SaaS session, born PAUSED) → human reviews the artifact
@@ -150,6 +163,11 @@ verdict, imported to the Plans page on a SaaS session, born PAUSED) → human re
 `agency_rollback_plan` (channel-aware; also rollback-eligible for a `failed` plan whose receipt
 created at least one resource — read `completed_through` first, don't just build a fresh plan on
 top of live orphans).
+
+```json
+{"tool": "agency_build_plan", "arguments": {"channel": "google", "customer_id": "1234567890", "brief": {"objective": "leads", "final_url": "https://example.com", "daily_budget_micros": 20000000}}}
+{"tool": "agency_rollback_plan", "arguments": {"channel": "google", "plan_id": "pln_g_9a3f", "operator_confirmation": true, "confirm_destructive": true}}
+```
 
 ### Handing a plan to AgencyPlaybook, and picking one back up (both directions)
 

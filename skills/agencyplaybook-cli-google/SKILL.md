@@ -234,6 +234,29 @@ candidates listed — show the user the candidates and ask which they meant; nev
 `--type pmax` build refuses by name any brief block PMAX has no equivalent for. A failing
 validation exits **3** and emits no plan.
 
+## Effective planning
+
+Decision table — pick the smallest tool that gets a real review before anything mutates:
+
+| Situation | Verb | Gate | What the human reviews |
+|---|---|---|---|
+| One entity, one change | direct mutation, `--execute` | the three-gate write model's own confirm | the dry-run diff |
+| A whole Search/PMAX build from a brief | `recipe build` → `plan.json` | `plan validate` → approve → `mutate apply-plan --execute` | `plan.html` / review.html / `editor/*.csv` |
+| N already-produced plans that might collide, or touch a `LEARNING` target | `plan merge` | live learning status clears `wait-for-status` | `conflicts[]`, waves, `.status` |
+| "What would this budget/target change deliver?" | `plan forecast` | none — read-only | scenario table |
+| Handing the plan to a reviewer / another tool | `POST /api/v1/gads/plans/import`, or the `/gads/plans` page | `pending → approved` | the Plans page / review.html / `editor.zip` |
+| Undoing a landed change | `orchestrate rollback --from-receipt build/launch.json --execute` | `executed`, or `failed` with a created resource | the resources the undo removes |
+| Re-exporting an already-built plan (no network call) | `plan export --from-file build/plan.json --format <fmt>` | none | the re-rendered artifact |
+
+Anti-patterns: wrapping a single already-approved status flip in a plan for
+ceremony; hand-editing a `{{ref:aN}}` placeholder (fails `unresolved_ref` or
+silently targets the wrong entity); replaying a stale plan against a changed
+account instead of regenerating it (`apply-plan` refuses on
+`plan_envelope_mismatch`); merging without checking `--offline` vs live
+learning status; scaling a budget without `plan forecast` first. Full
+doctrine + when-to-merge/forecast: the in-app **Planning Reference**
+(`/planning-reference`).
+
 ## Safety doctrine (apply to every mutation)
 
 1. **Dry-run first.** Every `mutate`/`orchestrate`/`changes apply` write needs `--execute`.

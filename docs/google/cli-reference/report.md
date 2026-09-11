@@ -53,6 +53,9 @@ Usage: apb-gads report account-summary-365d [OPTIONS]
 | Option | Description |
 |---|---|
 | `--include-non-biddable` | Include non-biddable metrics (all_conversions family, COGS, gross profit, revenue micros). See docs/v24-non-biddable-metrics.md for the compatibility matrix |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-campaign-performance-365d"></a>
 ### `apb-gads report campaign-performance-365d`
@@ -69,6 +72,9 @@ Usage: apb-gads report campaign-performance-365d [OPTIONS]
 |---|---|
 | `--limit <LIMIT>` | [default: 10] |
 | `--include-non-biddable` | Include non-biddable metrics alongside biddable metrics |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-monthly-breakdown-365d"></a>
 ### `apb-gads report monthly-breakdown-365d`
@@ -79,7 +85,13 @@ Usage: apb-gads report campaign-performance-365d [OPTIONS]
 Usage: apb-gads report monthly-breakdown-365d [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-search-terms-365d"></a>
 ### `apb-gads report search-terms-365d`
@@ -95,6 +107,9 @@ Usage: apb-gads report search-terms-365d [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-summary"></a>
 ### `apb-gads report pmax-summary`
@@ -105,7 +120,13 @@ Usage: apb-gads report search-terms-365d [OPTIONS]
 Usage: apb-gads report pmax-summary [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-asset-usage"></a>
 ### `apb-gads report asset-usage`
@@ -121,6 +142,9 @@ Usage: apb-gads report asset-usage [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-asset-groups"></a>
 ### `apb-gads report pmax-asset-groups`
@@ -136,6 +160,9 @@ Usage: apb-gads report pmax-asset-groups [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-asset-group-assets"></a>
 ### `apb-gads report pmax-asset-group-assets`
@@ -151,6 +178,9 @@ Usage: apb-gads report pmax-asset-group-assets [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-asset-group-performance"></a>
 ### `apb-gads report pmax-asset-group-performance`
@@ -166,6 +196,9 @@ Usage: apb-gads report pmax-asset-group-performance [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-placements"></a>
 ### `apb-gads report pmax-placements`
@@ -183,6 +216,9 @@ Usage: apb-gads report pmax-placements [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 50] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-network-placements"></a>
 ### `apb-gads report pmax-network-placements`
@@ -200,6 +236,9 @@ Usage: apb-gads report pmax-network-placements [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 50] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-campaign-settings"></a>
 ### `apb-gads report campaign-settings`
@@ -215,6 +254,9 @@ Usage: apb-gads report campaign-settings [OPTIONS] --campaign-id <CAMPAIGN_ID>
 | Option | Description |
 |---|---|
 | `--campaign-id <CAMPAIGN_ID>` | — |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-campaign-criteria"></a>
 ### `apb-gads report campaign-criteria`
@@ -230,6 +272,9 @@ Usage: apb-gads report campaign-criteria [OPTIONS] --campaign-id <CAMPAIGN_ID>
 | Option | Description |
 |---|---|
 | `--campaign-id <CAMPAIGN_ID>` | — |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-shared-sets"></a>
 ### `apb-gads report shared-sets`
@@ -245,6 +290,9 @@ Usage: apb-gads report shared-sets [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 50] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-shared-criteria"></a>
 ### `apb-gads report shared-criteria`
@@ -260,6 +308,9 @@ Usage: apb-gads report shared-criteria [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 200] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-campaign-shared-sets"></a>
 ### `apb-gads report campaign-shared-sets`
@@ -275,6 +326,9 @@ Usage: apb-gads report campaign-shared-sets [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 100] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-pmax-audience-signals"></a>
 ### `apb-gads report pmax-audience-signals`
@@ -290,6 +344,9 @@ Usage: apb-gads report pmax-audience-signals [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 50] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-experiments"></a>
 ### `apb-gads report experiments`
@@ -305,6 +362,9 @@ Usage: apb-gads report experiments [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 50] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-ad-approval-status"></a>
 ### `apb-gads report ad-approval-status`
@@ -320,6 +380,9 @@ Usage: apb-gads report ad-approval-status [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 200] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-impression-share-detail"></a>
 ### `apb-gads report impression-share-detail`
@@ -330,7 +393,13 @@ Usage: apb-gads report ad-approval-status [OPTIONS]
 Usage: apb-gads report impression-share-detail [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-shopping-products"></a>
 ### `apb-gads report shopping-products`
@@ -348,6 +417,9 @@ Usage: apb-gads report shopping-products [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 100] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-shopping-performance"></a>
 ### `apb-gads report shopping-performance`
@@ -365,6 +437,9 @@ Usage: apb-gads report shopping-performance [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 100] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-cart-data-sales"></a>
 ### `apb-gads report cart-data-sales`
@@ -382,6 +457,9 @@ Usage: apb-gads report cart-data-sales [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 100] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-report-customer-settings"></a>
 ### `apb-gads report customer-settings`
@@ -394,4 +472,10 @@ Customer-level settings (v24). Surfaces customer.video_brand_safety_suitability 
 Usage: apb-gads report customer-settings [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

@@ -37,7 +37,13 @@ Report the live-verify policy shape for the target customer. Pure config check �
 Usage: apb-gads verify preflight [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-noop"></a>
 ### `apb-gads verify noop`
@@ -50,7 +56,13 @@ W2 scaffold probe: exercises the verification state machine end-to-end (lock →
 Usage: apb-gads verify noop [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-smoke"></a>
 ### `apb-gads verify smoke`
@@ -63,7 +75,13 @@ W2 server-side gate: submit a synthetic Scandalous-shaped campaign-budget create
 Usage: apb-gads verify smoke [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-search-lifecycle"></a>
 ### `apb-gads verify search-lifecycle`
@@ -76,7 +94,13 @@ W3 Chain 1: full search-campaign lifecycle, CampaignLaunchSpec v2 shape. PREFLIG
 Usage: apb-gads verify search-lifecycle [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-pmax-launch"></a>
 ### `apb-gads verify pmax-launch`
@@ -89,7 +113,13 @@ W4 Chain 2: full PMAX launch (Path 3 — production-asset reuse). Atomic create 
 Usage: apb-gads verify pmax-launch [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-rsa-lifecycle"></a>
 ### `apb-gads verify rsa-lifecycle`
@@ -102,7 +132,13 @@ P5 Chain 3: full RSA create + refresh lifecycle. PREFLIGHT → VALIDATE → CREA
 Usage: apb-gads verify rsa-lifecycle [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-bootstrap-pmax-assets"></a>
 ### `apb-gads verify bootstrap-pmax-assets`
@@ -120,6 +156,9 @@ Usage: apb-gads verify bootstrap-pmax-assets [OPTIONS]
 | Option | Description |
 |---|---|
 | `--fixtures <FIXTURES>` | Directory containing the 3 image fixtures (logo.png, marketing_image.png, square_marketing_image.png). Defaults to the repo's committed fixtures [default: scripts/fixtures/test-pmax-assets] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-list"></a>
 ### `apb-gads verify list`
@@ -137,6 +176,9 @@ Usage: apb-gads verify list [OPTIONS]
 | Option | Description |
 |---|---|
 | `--limit <LIMIT>` | [default: 20] |
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
 <a id="apb-gads-verify-cleanup"></a>
 ### `apb-gads verify cleanup`
@@ -149,4 +191,10 @@ List pending cleanup entries from prior crashed or partial runs. W3+ extends thi
 Usage: apb-gads verify cleanup [OPTIONS]
 ```
 
-_No command-specific options — uses only the [global options](README.md#global-options)._
+**Options** (command-specific; the [global options](README.md#global-options) also apply)
+
+| Option | Description |
+|---|---|
+| `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
+| `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |

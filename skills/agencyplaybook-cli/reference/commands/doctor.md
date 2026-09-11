@@ -1,6 +1,6 @@
 # `apb doctor` — Command Reference
 
-4 commands. Auto-generated from the apb binary on 2026-09-10.
+4 commands. Auto-generated from the apb binary on 2026-09-11.
 
 ### `apb doctor api-compat`
 

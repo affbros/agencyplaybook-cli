@@ -229,6 +229,30 @@ four, say plainly it isn't executable via the managed path yet (follow-up `fup-0
 and offer the analysis + a proposed change instead. Full enumeration + every refusal reason:
 `reference/safety-and-approval.md`.
 
+## Effective planning
+
+Plan EFFECTIVELY — pick the smallest tool that gets a real human YES on the change:
+
+| Situation | Tool | Gate | What the human reviews |
+|---|---|---|---|
+| One bounded change | `gads_preview_change` → YES → `gads_apply_change` | single-use approval token (~10 min) | the projected change-set |
+| ≥2 linked changes | `gads_build_campaign_spec` → `gads_validate_spec` / `gads_export_plan` | `pending → approved` | `agency_get_plan` / review.html |
+| A whole Search/PMAX build from a brief | `agency_build_plan {channel:"google", ...}` | validated + approved before execute | build artifact / review URL / `editor.zip` |
+| N plans that might collide, or touch a mid-learning campaign | `agency_merge_plans` | `wait-for-status` clears | `conflicts[]`, waves |
+| A scale/budget decision | `agency_forecast_plan` first — read-only, no token needed | none | the scenario table |
+| Undoing a landed (or partially-failed) change | `agency_rollback_plan` | `executed`, or `failed` with the receipt showing a created resource | resources the undo removes |
+
+Full decision table + anti-patterns: MCP resource `guide://planning/doctrine`
+(and `guide://planning/overview` for states/blast-radius/`{{ref:aN}}`,
+`guide://planning/google` for a full Search+PMAX worked example); the
+`plan_effectively` prompt takes a situation and returns the tool sequence +
+gates. In-app: the **Planning Reference** (`/planning-reference`). Anti-
+patterns worth repeating: executing a create-class plan with no rollback
+path in mind; merging plans without letting `wait-for-status` gate a
+mid-learning campaign; scaling a budget without forecasting first;
+hand-editing an envelope's `{{ref:aN}}` placeholder (the executor binds it
+at run time).
+
 ## Reporting shape
 
 Lead with the answer, then the evidence: **finding → recommended action → projected impact →

@@ -18,6 +18,13 @@ tool as documented below). Of the Google-named tools, the **9 read tools** carry
 explicit human YES); `gads_verify_execution` is a read-only post-write readback. Full execution
 doctrine: `reference/safety-and-approval.md`.
 
+**MCP resources + prompts** (planning-docs-001 sprint-pd-003): `resources/read guide://planning/{overview,doctrine,meta,google,handoff}`
+for the pipeline/states/blast-radius model, the full plan-EFFECTIVELY decision table + anti-patterns,
+and worked examples per channel (`guide://planning/google` covers Search + PMAX build → execute,
+plus the live-Google connected-account caveat); `prompts/get plan_effectively` (situation → verb/tool
++ gates), `build_campaign_from_brief`, `review_and_execute_plan`, `undo_plan`. See also
+`## Effective planning` in `SKILL.md`.
+
 > Every Google read is an `apb-gads` SUBPROCESS in SaaS-managed mode (`APB_API_KEY` resolves the
 > Google token server-side; argv-only `execFile`, no shell, a hard read-flag allowlist that refuses
 > `--execute` / `--config` / any write flag pre-spawn). Money is reported in **MICROS verbatim**.
@@ -184,6 +191,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   daily_budget?, budget_micros?, campaign_name?, landing_page?, target_cpa? }`. Search needs
   `structure_path` + `rsa_path` + `daily_budget`; PMAX needs `campaign_name` + `final_url` +
   `business_name` + a budget.
+
+  ```json
+  {"spec_kind": "pmax_spec", "campaign_name": "Holiday PMAX", "final_url": "https://example.com", "business_name": "Acme Co", "daily_budget": 200}
+  ```
 - **Output:** `{ kind, customer_id, mode:"dry_run", spec_preview, result_id?, note }`. The full spec
   is at `result_id` — page via `agency_get_result`.
 
@@ -193,6 +204,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 - **Backing (NO `--execute`):** `apb-gads validate campaign-spec|pmax-spec --from-file <f>`.
 - **Input:** `{ spec_kind?, customer_id?, spec? (inline object) | from_file? (path) }` — provide one
   of `spec` / `from_file`.
+
+  ```json
+  {"spec_kind": "campaign_spec", "spec": {"campaign_name": "...", "budget_micros": 50000000}}
+  ```
 - **Output:** `{ kind, customer_id, overall ("pass"|"fail"), report, requires_confirm_destructive
   (false for a spec), approval_token? (ONLY on pass), change_set_hash?, expires_at?, risk?, note }`.
   A failing validation mints **no token** — fix `report.errors` and re-validate.
@@ -210,6 +225,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 - **Input:** `{ customer_id?, change_set?:{op,entity_id,params?} | spec?:<object>,
   spec_kind?("campaign_spec"|"pmax_spec", default campaign_spec), out?("envelope"|"file") }` —
   provide exactly one of `change_set` / `spec`.
+
+  ```json
+  {"customer_id": "1234567890", "change_set": {"op": "campaign-update-status", "entity_id": "18765432109", "params": {"status": "PAUSED"}}}
+  ```
 - **Output:** `{ customer_id, kind, plan_id?, hash, summary, envelope? (or result_id? when
   out:"file"), review_url?, approval_token, change_set_hash, expires_at, risk:"mutation", note }`.
   `plan_id`/`review_url` are present only on a SaaS session with a successful import — the envelope
@@ -269,6 +288,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   audit-trail artifact only, never pass this `plan_id` to `gads_execute_plan`. (The SaaS Google
   executor itself is live — see `gads_execute_plan` for the path that DOES execute an imported
   plan.) This is best-effort and does not block or change the local execution.
+
+  ```json
+  {"customer_id": "1234567890", "change": {"op": "campaign-update-status", "entity_id": "18765432109", "params": {"status": "PAUSED"}}, "approval_token": "apt_...", "operator_confirmation": true}
+  ```
 - **Path selection is credential routing, NOT a fence.** Production (no BYO yaml) → the apb-api
   `/google` managed-write proxy (`googleAds:mutate`; scope `write:google:mutations` + `write_policy`
   gated upstream). The BYO sandbox test path (a configured write yaml) → the gads subprocess with
@@ -292,6 +315,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   Plans page) → `POST /gads/plans/:id/execute` (202) → poll `GET /gads/plans/:id` to terminal →
   best-effort `gads_verify_execution` readback → audit.
 - **Input:** `{ plan_id, approval_token, operator_confirmation:true, confirm_destructive? }`.
+
+  ```json
+  {"plan_id": "pln_g_9a3f", "approval_token": "apt_...", "operator_confirmation": true}
+  ```
 - **Output:** `{ customer_id, plan_id, channel:"google", state, job_id, requires_confirm, summary,
   approved, executed, completed_through?, execution_receipt?, result, poll_timed_out,
   verify_result?, approval_jti, audit_id, note }` (or `{error}`). A terminal `failed` reports
@@ -312,6 +339,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   the inverse plan inherits its approval. Requires `operator_confirmation:true` AND
   `confirm_destructive:true` instead (an undo removes created entities).
 - **Input:** `{ channel:"google", plan_id, operator_confirmation:true, confirm_destructive:true }`.
+
+  ```json
+  {"channel": "google", "plan_id": "pln_g_9a3f", "operator_confirmation": true, "confirm_destructive": true}
+  ```
 - **Output:** `{ channel, plan_id, account, state_before, state_after, rollback_plan_id, job_id,
   actions, not_invertible, rolled_back, poll_timed_out, result, audit_id, note }` (or `{error}`).
   `not_invertible` is REPORTED, never guessed at — still live, needs a manual decision.
@@ -323,6 +354,10 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   imported by `gads_export_plan` and shows on the same `/plans/<id>` Plans page for a human
   Approve.
 - **Input:** `{ channel:"google", plan_id, format?:"envelope"(default)|"handoff" }`.
+
+  ```json
+  {"channel": "google", "plan_id": "pln_g_9a3f", "format": "handoff"}
+  ```
 - **Output:** `{ plan_id, channel, state, plan_hash, has_temp_refs, envelope?, summary,
   cli:{apply_command, validate_command, rollback_command}, urls:{review_html, editor_zip?}, note }`
   (or `{error}`). `apply_command` — `apb-gads mutate apply-plan --from-file plan.json --execute`
@@ -343,6 +378,12 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 - **Input:** `{ channel:"google", brief (YAML string | object), customer_id?, stage?
   ("research"|"structure"|"copy"|"targeting"|"assets"|"bidding"|"validate"|"plan", default "plan"),
   format?:"envelope"|"handoff" }`.
+
+
+
+  ```json
+  {"channel": "google", "customer_id": "1234567890", "brief": {"objective": "leads", "final_url": "https://example.com", "daily_budget_micros": 20000000}}
+  ```
 - **Output:** `{ channel, account, stage, plan_id?, plan_hash, has_temp_refs, action_count,
   blast_radius, summary, spec, verdict, artifacts[], envelope?, result_id?, review_url,
   approval_token, change_set_hash, expires_at, cli:{apply_command,validate_command,
@@ -352,8 +393,12 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 ### `agency_merge_plans`
 - **Purpose:** merge N plan envelopes into ONE ranked, wave-sequenced envelope
   (`plan merge`) — read-only producer.
-- **Input:** `{ channel:"google", envelopes[] (plan-envelope-v2 documents or plan_ids), mode?
+- **Input:** `{ channel:"google", plans[] (1..20 — plan_id strings and/or inline plan-envelope-v2 objects), mode?
   ("growth"|"efficiency"), customer_id?, format? }`.
+
+  ```json
+  {"channel": "google", "plans": ["pln_g_waste", "pln_g_scale"], "mode": "efficiency"}
+  ```
 - **Output:** `{ channel, account, inputs, mode, plan_id?, plan_hash, has_temp_refs, action_count,
   blast_radius, summary, waves, conflicts, envelope?, result_id?, review_url, approval_token,
   change_set_hash, expires_at, cli, note }`. `waves` carries `wait-for-status` pseudo-actions the
@@ -363,8 +408,13 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 ### `agency_forecast_plan`
 - **Purpose:** forecast a build spec (`agency_build_plan`'s `spec`) or a live campaign
   (`plan forecast`) — read-only, no plan artifact produced.
-- **Input:** `{ channel:"google", spec? | campaign_id?, customer_id? }` — exactly one of
-  `spec`/`campaign_id`.
+- **Input:** `{ channel:"google", spec? | campaign_id?, plan_id? (account-resolution only),
+  budget_scenarios? (array, max 10) | target_scenarios? (array, max 10 — GOOGLE ONLY, mutually
+  exclusive with budget_scenarios), period?, customer_id? }` — exactly one of `spec`/`campaign_id`.
+
+  ```json
+  {"channel": "google", "campaign_id": "18765432109", "customer_id": "1234567890", "budget_scenarios": [50, 100, 150]}
+  ```
 - **Output:** `{ channel, account, source, forecast, scenarios?, result_id?, caveats[], note }` (or
   `{error}`). PMAX / Demand Gen have no forecast API and return `forecast:null` — read `caveats`
   before quoting a number to a client.

@@ -1,6 +1,6 @@
 # `apb context` — Command Reference
 
-2 commands. Auto-generated from the apb binary on 2026-09-10.
+2 commands. Auto-generated from the apb binary on 2026-09-11.
 
 ### `apb context init`
 

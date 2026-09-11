@@ -14,6 +14,12 @@ agency-entitled); the `gads_*` Google tools beyond `gads_health` are NOT yours t
 **channel-aware**: pass `channel:"meta"` and they behave exactly as documented here, but the same
 tools work identically for a Google plan row (`channel:"google"`).
 
+**MCP resources + prompts** (planning-docs-001 sprint-pd-003): `resources/read guide://planning/{overview,doctrine,meta,google,handoff}`
+for the pipeline/states/blast-radius model, the full plan-EFFECTIVELY decision table + anti-patterns,
+and worked examples per channel; `prompts/get plan_effectively` (situation → verb/tool + gates),
+`build_campaign_from_brief`, `review_and_execute_plan`, `undo_plan`. See also `## Effective planning`
+in `SKILL.md`.
+
 Read tools (Groups A–G, K, L below) carry `readOnlyHint:true` and mutate nothing. The plan/spec
 artifacts in Group G are `readOnlyHint:false` (a record is created) but `destructiveHint:false` — no
 account changes. The **write tools** (Group I — `meta_apply_change` / `meta_execute_plan`, plus the
@@ -199,6 +205,10 @@ live change is a later, gated phase (validate → approve → execute, Groups H/
   best-effort import that puts the plan on the tenant's Plans page immediately; absent on a
   non-SaaS session or if the import didn't succeed (the plan record itself is unaffected either way).
 
+  ```json
+  {"action": "campaign.update-status", "target_id": "120212345678901", "payload": {"status": "PAUSED"}}
+  ```
+
 ### `meta_build_campaign_spec`
 - **Purpose:** build a launch-ready Meta campaign SPEC and preview it in DRY-RUN mode — the
   structure is validated + costed but NOTHING is created.
@@ -216,6 +226,10 @@ live change is a later, gated phase (validate → approve → execute, Groups H/
 - **Backing:** `GET /api/v1/plans` (each plan's `{plan_id, action, target_id, status, risk_level,
   created_at}`). Large lists offload to the result store.
 - **Input:** `{ page? (first-page size, default 50, max 500) }`.
+
+  ```json
+  {"status": "VALIDATED"}
+  ```
 - **Output:** `{ platform, items[], total, count, result_id?, cursor?, has_more, note? }`. Page the
   rest via `agency_get_result`.
 
@@ -226,6 +240,10 @@ live change is a later, gated phase (validate → approve → execute, Groups H/
 - **Input:** `{ plan_id (from `meta_create_plan` / `agency_list_plans`) }`.
 - **Output:** `{ plan_id, found, state?, action?, target_id?, risk_level?, created_at?, doctor?,
   note }`. An unknown id returns `found:false` (NOT an error).
+
+  ```json
+  {"plan_id": "pln_abc123"}
+  ```
 
 ### `meta_get_plan` (saas-plans SP4)
 - **Purpose:** read one plan as its **plan-envelope-v2 document**. `readOnlyHint:true`.
@@ -240,6 +258,10 @@ live change is a later, gated phase (validate → approve → execute, Groups H/
   envelope form (e.g. a `cap` bookkeeping plan).
 - **On a SaaS session:** this is how you check on a plan that lives on the tenant's Plans page —
   see `reference/safety-and-approval.md` § SaaS sessions.
+
+  ```json
+  {"plan_id": "pln_abc123"}
+  ```
 
 ---
 
@@ -279,6 +301,10 @@ These produce a dry-run preview / validate a plan and **MINT a single-use, hash-
   requires_confirm_destructive, approval_token?(only on VALIDATED), change_set_hash?, expires_at?,
   risk?, note }`. INVALID ⇒ **no token** (fix + re-validate).
 
+  ```json
+  {"plan_id": "pln_abc123"}
+  ```
+
 ---
 
 ## Group I — Execute (WRITE behind the handshake)
@@ -317,6 +343,10 @@ from configuration — NOT a restriction.
   `execution_receipt`/`poll_timed_out` are present only on this path. A plan with no envelope form
   falls back to the pre-SP4 direct execute unchanged. See `reference/safety-and-approval.md`.
 
+  ```json
+  {"plan_id": "pln_abc123", "approval_token": "apt_...", "operator_confirmation": true}
+  ```
+
 ---
 
 ## Group — Plan handoff (channel-aware: works for BOTH `meta` and `google` plan rows)
@@ -337,6 +367,10 @@ from configuration — NOT a restriction.
   manual decision. Eligibility refusals: `plan_not_executed` (a `failed` plan that created nothing),
   `no_execution_receipt`, `plan_not_invertible`.
 
+  ```json
+  {"channel": "meta", "plan_id": "pln_abc123", "operator_confirmation": true, "confirm_destructive": true}
+  ```
+
 ### `agency_export_plan`
 - **Purpose:** hand a stored SaaS plan row BACK to the CLI as its plan-envelope-v2 document.
   `readOnlyHint:true` — never approves, executes or mutates anything. This is the **SaaS → CLI**
@@ -354,6 +388,10 @@ from configuration — NOT a restriction.
   file edited after export needs `--allow-edited-plan`, and you should say so explicitly rather
   than adding it silently. `has_temp_refs:true` means the envelope still carries `{{ref:aN}}` /
   `{{account}}` — the EXECUTOR binds those at run time; never substitute them by hand.
+
+  ```json
+  {"channel": "google", "plan_id": "pln_g_9a3f", "format": "handoff"}
+  ```
 
 ---
 
@@ -373,11 +411,19 @@ from configuration — NOT a restriction.
   `{error}`). Next step after human YES: `meta_execute_plan` or `agency_export_plan` → CLI apply.
   Undo an executed build with `agency_rollback_plan`.
 
+  ```json
+  {"channel": "meta", "brief": {"customer_id": "act_1476889130308799", "objective": "leads", "final_url": "https://example.com", "daily_budget": 50}}
+  ```
+
 ### `agency_merge_plans`
 - **Purpose:** merge N plan envelopes into ONE ranked, wave-sequenced envelope (`plan merge`) —
   read-only producer.
-- **Input:** `{ channel:"meta", envelopes[] (plan-envelope-v2 documents or plan_ids), mode?
+- **Input:** `{ channel:"meta", plans[] (1..20 — plan_id strings and/or inline plan-envelope-v2 objects), mode?
   ("growth"|"efficiency"), account_id?, format? }`. (`--learning-window-days` is Meta-only.)
+
+  ```json
+  {"channel": "meta", "plans": ["pln_waste_audit", "pln_scale"], "mode": "efficiency"}
+  ```
 - **Output:** `{ channel, account, inputs, mode, plan_id?, plan_hash, has_temp_refs, action_count,
   blast_radius, summary, waves, conflicts, envelope?, result_id?, review_url, approval_token,
   change_set_hash, expires_at, cli, note }`. `waves` carries `wait-for-status` pseudo-actions the
@@ -387,7 +433,12 @@ from configuration — NOT a restriction.
 ### `agency_forecast_plan`
 - **Purpose:** forecast a build spec (`agency_build_plan`'s `spec`) or a live ad set
   (`plan forecast`) — read-only, no plan artifact produced.
-- **Input:** `{ channel:"meta", spec? | adset_id?, account_id? }` — exactly one of `spec`/`adset_id`.
+- **Input:** `{ channel:"meta", spec? | adset_id?, plan_id? (account-resolution only),
+  budget_scenarios? (array, max 10), period?, account_id? }` — exactly one of `spec`/`adset_id`.
+
+  ```json
+  {"channel": "meta", "adset_id": "120210000000000", "budget_scenarios": [50, 75, 100]}
+  ```
 - **Output:** `{ channel, account, source, forecast, scenarios?, result_id?, caveats[], note }` (or
   `{error}`). Meta returns the delivery-estimate scenario table — read `caveats` before quoting a
   number to a client.

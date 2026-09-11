@@ -26,6 +26,8 @@ AgencyPlaybook account (the Google Ads add-on) and is driven by the same `APB_AP
 | [DOCTRINE.md](DOCTRINE.md) | Modern Google Ads doctrine (Smart Bidding, learning phase, RSA, PMAX) |
 | [POLICY_LIMITS.md](POLICY_LIMITS.md) | Field-level limits (RSA / PMAX / extensions / URLs / bid modifiers) |
 | [CAMPAIGN_BUILD.md](CAMPAIGN_BUILD.md) | Greenfield Search & PMAX launch pipeline + spec formats |
+| [RECIPE_BUILD.md](RECIPE_BUILD.md) | `recipe build` — a whole campaign from a brief: research → structure → copy → targeting → assets → bidding → validate → plan |
+| [MCP.md](MCP.md) | Driving apb-gads through the AgencyPlaybook MCP server — tools, resources, prompts |
 | [CLI_AUTOMATION.md](CLI_AUTOMATION.md) | Exit codes, `--validate-only`, JSON contract, CI/agent patterns, self-hosting |
 | [examples/](examples/) | Validated launch-spec samples (`campaign-launch-spec.json`, `pmax-launch-spec.json`) |
 

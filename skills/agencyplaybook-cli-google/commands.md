@@ -1,6 +1,6 @@
 # apb-gads command index
 
-**300 leaf commands across 30 groups** (Google Ads API v25). Per-group flag references live in
+**307 leaf commands across 30 groups** (Google Ads API v25). Per-group flag references live in
 `references/commands/<group>.md` (generated from the binary — the accurate per-param source). The
 live registry is `apb-gads --help` and `apb-gads playbook list`.
 
@@ -36,7 +36,7 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 | `report` | 24 | performance/asset/PMAX/shopping/settings reports | `references/commands/report.md` |
 | `experiment` | 2 | `results --experiment-id` — one experiment's outcome: control vs treatment metrics + point estimate / margin of error / p-value per metric (read-only); `promote --id` — graduate the treatment into the live production change (real write, dry-run first, `--execute` to graduate; `--plan` emits a reviewable envelope). | `references/commands/experiment.md` |
 | `portfolio` | 4 | MCC-wide per-currency roll-ups: `summary` (+`--compare`), `breakdown --dimension device\|network\|campaign_type`, `trend` — sequential fan-out, money never summed across currencies — plus `plan --objective --budget-total` (marginal-return cross-account budget allocator: shifts budget from below- to above-median marginal-return campaigns, never onto LEARNING or currency-crossing; read-only, writes a `campaign-budget-update-bulk` envelope to `--out`, never executes) | `references/commands/portfolio.md` |
-| `playbook` | 67 | `list` + **66 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
+| `playbook` | 69 | `list` + **68 diagnostic playbooks** (6 sections) | `references/commands/playbook.md`, `references/playbook-catalog.md` |
 | `verdict` | 1 | one decisive verb per campaign (SCALE/OPTIMIZE/TIGHTEN/CAP/HOLD/CUT) from 3 gates | `references/commands/verdict.md`, `references/verdict-framework.md` |
 | `campaign-type-advisor` | 1 | prescriptive engine choice (Search vs PMax vs Demand Gen) for a goal | `references/commands/campaign-type-advisor.md`, `references/campaign-type-selection.md` |
 | `growth` | 5 | weekly/monthly reviews, `scale-up`, `consolidation`, `monitor` | `references/commands/growth.md` |
@@ -45,21 +45,21 @@ Global flags (on every command): `--config <PATH>` · `--customer <CID>` · `--p
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `plan` | 11 | keyword ideas/metrics; build Search/PMAX launch specs (`plan campaign …`); `merge --from … --mode --horizon` (N envelopes → one ranked, wave-sequenced envelope); `forecast --spec … / --campaign-id …` (delivery-estimate scenarios, read-only); `export --from-file --format html\|editor-csv` (render an existing envelope) | `references/commands/plan.md` |
-| `validate` | 2 | check a launch spec (`campaign-spec` / `pmax-spec`) — **exit 3 on fail** | `references/commands/validate.md` |
+| `plan` | 15 | keyword ideas/metrics; build Search/PMAX/Demand Gen launch specs (`plan campaign …`); `merge --from … --mode --horizon` (N envelopes → one ranked, wave-sequenced envelope); `forecast --adset-spec … / --campaign-id …` (delivery-estimate scenarios, read-only); `export --from-file --format html\|editor-csv` (render an existing envelope) | `references/commands/plan.md` |
+| `validate` | 3 | check a launch spec (`campaign-spec` / `pmax-spec` / `demand-gen-spec`) — **exit 3 on fail** | `references/commands/validate.md` |
 | `context` | 2 | per-customer goal/strategy state, **schema v2** — goals + `brand` (terms/domains/competitors) + `lists` (canonical negative shared set) + per-recipe tunables (local JSON) | `references/commands/context.md` |
 
 ## Recipes — one verb for a whole job
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `recipe` | 3 | `list` · `describe <name>` · **`search-terms`** — read the account's context, derive thresholds from its targets, classify every row into negate/promote/review/skip with a reason, and emit a plan envelope + `review.json`. Dry-run by default; `--execute` routes through `mutate apply-plan`'s three gates | `references/commands/recipe.md`, SKILL.md § *Recipes* |
+| `recipe` | 4 | `list` · `describe <name>` · **`build`** — brief → research → structure → copy → targeting → assets → bidding → validate → plan, launches nothing unless `--execute` · **`search-terms`** — read the account's context, derive thresholds from its targets, classify every row into negate/promote/review/skip with a reason, and emit a plan envelope + `review.json`. Dry-run by default; `--execute` routes through `mutate apply-plan`'s three gates | `references/commands/recipe.md`, `docs/RECIPE_BUILD.md`, SKILL.md § *Recipes* |
 
 ## Mutations & orchestration (write-capable — see `safety-model.md`)
 
 | Group | # | Purpose | Reference |
 |---|--:|---|---|
-| `mutate` | 123 | the full gated mutation surface (budgets, keywords, ads, bidding, PMAX, assets, criteria, **AI Max**, **synthetic-content attestation**) | `references/commands/mutate.md` |
+| `mutate` | 124 | the full gated mutation surface (budgets, keywords, ads, bidding, PMAX, assets, criteria, **AI Max**, **synthetic-content attestation**, `experiment-promote`) | `references/commands/mutate.md` |
 | `orchestrate` | 8 | composite flows (`campaign-launch` (spec v2, 8 tail stages), `rollback --from-receipt`, `pmax-build`, `ad-refresh`, …) | `references/commands/orchestrate.md` |
 | `changes` | 3 | turn a scored plan into a reviewable changeset and apply it | `references/commands/changes.md` |
 | `sandbox` | 1 | `helper full-flow` — exercises the $1 sandbox write policy | `references/commands/sandbox.md` |

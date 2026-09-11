@@ -8,7 +8,7 @@ description: |
 
 # AgencyPlaybook CLI Skill
 
-This skill packages working knowledge of every `apb` command. Generated on 2026-09-10 from the live binary — 279 commands across 42 domains.
+This skill packages working knowledge of every `apb` command. Generated on 2026-09-11 from the live binary — 279 commands across 42 domains.
 
 ## Routing
 
@@ -180,6 +180,27 @@ Rules to honour when you write a brief:
 - Meta has no Ads-Editor export, so a Meta build writes no Editor CSV.
 - Per-account goals and brand terms live in `apb context init|show` (a local file, no Graph
   call). A recipe reads it for defaults; it never overrides what the brief states.
+
+## Effective planning
+
+Decision table — pick the smallest tool that gets a real review before anything mutates:
+
+| Situation | Verb | Gate | What the human reviews |
+|---|---|---|---|
+| One entity, one change | direct mutation, `--execute` | the write gate's own confirm | the dry-run diff |
+| ≥2 linked changes (a whole build) | `recipe build` → `plan.json` | `apb plan validate` → approve → `apb plan apply --execute` | `plan.html` / review.html |
+| N already-produced plans that might collide, or touch a `LEARNING` target | `apb plan merge` | live learning status clears `wait-for-status` | `conflicts[]`, waves, `.status` |
+| "What would this budget/bid change deliver?" | `apb plan forecast` | none — read-only | scenario table (`basis`) |
+| Handing the plan to a reviewer / another tool | `POST /api/v1/plans/import`, or the Plans page | `pending → approved` | the Plans page / review.html |
+| Undoing a landed change | `apb plan apply --from-file rollback.json --execute --confirm-destructive` | `executed`, or `failed` with a created resource | `launch.json.rollback_envelope` |
+
+Anti-patterns: wrapping a single already-approved status flip in a plan for
+ceremony; hand-editing a `{{ref:aN}}` placeholder (fails `unresolved_ref` or
+silently targets the wrong entity); replaying a stale plan against a changed
+account instead of regenerating it (`apply-plan` refuses on
+`plan_envelope_mismatch`); merging without checking `--offline` vs live
+learning status. Full doctrine + when-to-merge/forecast: the in-app
+**Planning Reference** (`/planning-reference`).
 
 ## Tier-aware planning
 
