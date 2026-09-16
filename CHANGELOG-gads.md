@@ -4,6 +4,35 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.3] — 2026-09-16 (developer_token optional)
+
+**A patch bump — config/docs change, no new commands.** google-devtoken-sunset-001 gd-003:
+Google stopped enforcing `developer-token` on 2026-09-09 and will reject it in a future major
+version; API access level is now bound to the OAuth client's Cloud project instead. `apb-gads`
+no longer requires or unconditionally sends `developer_token` — the field stays parseable so
+every existing `google-ads.yaml` keeps working unchanged.
+
+### Changed
+
+- **`Config.developer_token`** is now `#[serde(default)]` — a `google-ads.yaml` that omits the
+  key entirely loads cleanly (previously required, if empty-string-tolerant). Existing yamls
+  that still carry the key keep working (back-compat).
+- **Every `.header("developer-token", …)` call site** in `ads-core/src/client/` now goes through
+  a `with_dev_token` helper that sets the header only when the value is non-empty, instead of
+  sending an empty header unconditionally.
+- **`--config` explicit-credential precedence** (`ads-cli/src/main.rs`) now requires only a
+  non-empty `refresh_token` — `developer_token` dropped out of the predicate, since Google
+  ignores it either way.
+- **`GoogleSaasContext` parsing** (`ads-core/src/saas.rs`) confirmed to tolerate a resolve
+  payload that omits `developer_token` entirely (already true since gd-002/gd-005; a test now
+  pins it).
+- **Docs**: removed "obtain a developer token" as a setup prerequisite across
+  `docs/getting-started.md`, `docs/configuration.md`, `docs/troubleshooting.md`,
+  `docs/public/GETTING_STARTED.md`, `docs/public/CLI_AUTOMATION.md`, and the skill's
+  `references/automation.md`; added guidance pointing at Cloud Console → Google Ads API →
+  Overview → Access level instead. `google-ads.example.yaml` now comments the
+  `developer_token` line out with an explanatory note.
+
 ## [0.3.2] — 2026-09-16 (Disconnect UX: fail-loud "reconnect" message)
 
 **A patch bump — parity fix, no new commands.** google-devtoken-sunset-001 gd-005: when a
