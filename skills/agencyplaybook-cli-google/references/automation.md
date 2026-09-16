@@ -37,6 +37,17 @@ case $? in
 esac
 ```
 
+## Machine-readable error codes
+
+A handful of well-known failures carry a `"code"` field in the JSON error document so agents can
+branch on it instead of matching message text:
+
+| `code` | Exit | Meaning | Fix |
+|---|---|---|---|
+| `google_not_connected` | `1` | Managed (SaaS) mode: `APB_API_KEY` resolves to a tenant with no active Google Ads connection (never connected, revoked, or erroring). The CLI fails at bootstrap — it never sends the APB key to Google as a bearer (gd-005). | Reconnect in the web app (Settings → Integrations) or run `apb-gads auth connect-google`. An explicit `--config <path>` with real Google credentials bypasses this check entirely. |
+| `gate_refused` | `3` | A write-gate (CLI/config/env/profile) blocked a mutation. | Read `blocked_reasons` in the JSON body; pass `--execute`, flip the config/env gate, or use a matching sandbox/profile. |
+| `plan_not_invertible` | `3` | A plan/rollback couldn't be safely inverted. | Read `reason`; the operation isn't reversible as requested. |
+
 ## Proving a write without performing it (SERVER_VALIDATED)
 
 ```bash
@@ -72,10 +83,12 @@ apb-gads --customer "$CID" report campaign-performance-365d --limit 10 \
 ## Self-hosting / BYO token (developers)
 
 The default path is the SaaS broker (`APB_API_KEY` → the dashboard connection). To run your **own**
-Google Ads developer token instead (local dev / self-host):
+Google Ads OAuth credentials instead (local dev / self-host):
 
 1. Copy the template: `cp google-ads.example.yaml google-ads.yaml` (the real file is gitignored).
-2. Fill in `developer_token`, `client_id`, `client_secret`, `refresh_token`, `login_customer_id`.
+2. Fill in `client_id`, `client_secret`, `refresh_token`, `login_customer_id`. (`developer_token`
+   is optional/legacy since 2026-09-09 — Google ignores it; access level now comes from the
+   Cloud project that owns `client_id`.)
 3. Point the CLI at it with `--config google-ads.yaml` (the default) and set
    `safety.allow_writes`/`read_only`/`require_mutation_env` to taste (see `safety-model.md`).
 

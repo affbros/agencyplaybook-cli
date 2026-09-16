@@ -14,7 +14,7 @@ These are defined on the top-level parser and accepted by (almost) every command
 
 | Option | Description |
 |---|---|
-| `--config <CONFIG>` | Path to google-ads.yaml (credentials + safety config) [default: google-ads.yaml]. An explicit --config carrying developer_token + refresh_token takes precedence over ambient APB_API_KEY SaaS resolution for Google credentials. |
+| `--config <CONFIG>` | Path to google-ads.yaml (credentials + safety config) [default: google-ads.yaml]. An explicit --config carrying a refresh_token takes precedence over ambient APB_API_KEY SaaS resolution for Google credentials. |
 | `--customer <CUSTOMER>` | — |
 | `--pretty` | Pretty-print JSON |
 | `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |

@@ -114,10 +114,12 @@ apb-gads --customer "$CID" report campaign-performance-365d --limit 10 \
 ## Self-hosting / BYO token (developers)
 
 The default path is the SaaS broker (`APB_API_KEY` → the dashboard connection). To run your **own**
-Google Ads developer token instead (local dev / self-host):
+Google Ads OAuth credentials instead (local dev / self-host):
 
 1. Copy the template: `cp google-ads.example.yaml google-ads.yaml` (the real file is gitignored).
-2. Fill in `developer_token`, `client_id`, `client_secret`, `refresh_token`, `login_customer_id`.
+2. Fill in `client_id`, `client_secret`, `refresh_token`, `login_customer_id`. (`developer_token`
+   is optional/legacy since 2026-09-09 — Google ignores it; access level now comes from the
+   Cloud project that owns `client_id`.)
 3. Point the CLI at it with `--config google-ads.yaml` (the default) and set
    `safety.allow_writes`/`read_only`/`require_mutation_env` to taste (see `SAFETY_MODEL.md`).
 
