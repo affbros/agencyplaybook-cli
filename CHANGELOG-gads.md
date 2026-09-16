@@ -4,6 +4,36 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.2] — 2026-09-16 (Disconnect UX: fail-loud "reconnect" message)
+
+**A patch bump — parity fix, no new commands.** google-devtoken-sunset-001 gd-005: when a
+tenant's Google Ads connection is missing/revoked/errored, `apb-gads` no longer sends the
+operator's `apb_…` API key as a bearer straight to `googleads.googleapis.com` (which surfaced
+as Google's raw `401`, pointing at Google's own sign-in docs). It now fails loud and
+actionable at bootstrap instead, mirroring `apb`'s existing not-connected message.
+
+### Fixed
+
+- **Managed-mode bootstrap** (`ads-cli/src/main.rs`) now checks `ctx.connected` after `resolve()`
+  succeeds and, on the fall-through of the explicit-`--config` precedence check (an explicit yaml
+  with real Google credentials still wins), fails with a clear reconnect message instead of
+  proceeding with a broken credential.
+- **Proxy-mode bearer** (`ads-core/src/config.rs::apply_saas`) — `access_token_override` (the
+  `APB_API_KEY`) is now set **only** when the endpoint was actually rewritten to the SaaS proxy
+  (`proxy_base` present, `saas_proxy_active == true`). Previously the key could be set even when
+  `proxy_base` was absent, sending it straight to Google's default endpoint as an OAuth bearer.
+- **Stale disconnected cache** (`ads-core/src/saas.rs::resolve`) — a `connected:false` resolve
+  response is no longer cached at `~/.apb/tenant_context.google_ads.json`. Previously a
+  disconnected result could sit in the 30s-TTL cache and keep failing the connected check for
+  up to 30s after a tenant actually reconnected.
+- **One message, one place** — `ads_core::saas::not_connected_message()` (new) is now the single
+  source of the "Google Ads is not connected for this API key" text, used by both the fatal
+  bootstrap check and the existing `auth login` NOTE, so the wording can never drift between them.
+- **Machine-readable** — the JSON error document for this failure carries
+  `"code": "google_not_connected"` (new typed error `ads_core::saas::GoogleNotConnected`), exit
+  code `1` (the existing runtime/auth-failure code — no new exit code added). Documented in
+  `docs/troubleshooting.md` and the skill's `references/automation.md` error table.
+
 ## [0.3.1] — 2026-09-10 (Planning verbs: merge · forecast · experiments · portfolio — executor-facing fixes)
 
 **A patch bump:** ships **30 groups · 307 leaf commands · 124 gated mutations ·
