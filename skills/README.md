@@ -93,3 +93,22 @@ tar xzf agencyplaybook-planner.tar.gz -C ~/.claude/skills/
 ### Pair it with the CLIs
 
 The planner hands its output to `apb` and `apb-gads` — grab both from [`../bin`](../bin) and set your API key once (see the `agencyplaybook-cli` / `agencyplaybook-cli-google` sections above).
+
+## `agencyplaybook-google-researcher`
+
+A research skill for the read-only `apb-gads-researcher` binary. It teaches Claude how to investigate why a Google Ads account's economics broke, mine its history for statistically proven opportunities (geo, device, hour, intent cluster), mine negatives, and review creative, always citing evidence ids and never changing the ad account. Five SOPs: account intake, decline investigation, opportunity hunt, negative mining, creative forensics.
+
+| | |
+|---|---|
+| **Browse the skill** | [`agencyplaybook-google-researcher/`](./agencyplaybook-google-researcher) — `SKILL.md`, `sops/`, `reference/` |
+| **One-step install** | [`agencyplaybook-google-researcher.tar.gz`](./agencyplaybook-google-researcher.tar.gz) |
+
+### Install
+
+```bash
+mkdir -p ~/.claude/skills
+tar xzf agencyplaybook-google-researcher.tar.gz -C ~/.claude/skills/
+# Restart Claude Code. Ask "why did this Google Ads account decline?" to verify the skill activates.
+```
+
+Needs `apb-gads-researcher` from [`../bin`](../bin) and your `APB_API_KEY` (the same key and Google Ads add-on as `apb-gads`).
