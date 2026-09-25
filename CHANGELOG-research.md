@@ -11,6 +11,10 @@ see `rust/gads/crates/ads-research/Cargo.toml`.
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.3] — 2026-09-25
+
+- `plan`: RSA headlines and descriptions are de-duplicated (case-insensitively) after they are fitted to length; truncation could make two seeds identical, which `apb-gads recipe build` rejects (`rsa_headline_unique`).
+
 ## [0.1.2] — 2026-09-25
 
 - `market refresh --scope opportunities` priced nothing on real workspaces: it skipped every label equal to its cluster id, but the cluster id is the representative search term. It now enriches those terms.
