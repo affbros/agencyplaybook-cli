@@ -108,6 +108,30 @@ apb plan list                                     # see saved mutation plans
 
 Every mutating command requires `--execute` to actually run; without it you get a dry-run preview. See `docs/SAFETY_MODEL.md` for the full write-gate model.
 
+## Google Ads: `apb-gads` and `apb-gads-researcher`
+
+This repo also ships two Google Ads binaries, beside `apb` in every `bin/<platform>/` folder, each with its own `<binary>.sha256.txt`. Both use the same AgencyPlaybook API key and need the Google Ads add-on plus a connected account.
+
+| Binary | What it does | Changelog |
+|---|---|---|
+| `apb-gads` | Manage Google Ads: reporting, diagnostics, gated mutations, campaign builds | [`CHANGELOG-gads.md`](CHANGELOG-gads.md) |
+| `apb-gads-researcher` | **Read-only.** Mines an account's history (optionally plus DataForSEO market data) for statistically proven opportunities, explains declines, and hands a winner to `apb-gads` as a build spec. It never changes an ad account. | [`CHANGELOG-research.md`](CHANGELOG-research.md) |
+
+```bash
+# Linux (swap linux-x86_64 for macos; Windows: bin/windows-x86_64/apb-gads-researcher.exe)
+curl -fsSL https://raw.githubusercontent.com/affbros/agencyplaybook-cli/main/bin/linux-x86_64/apb-gads-researcher -o /usr/local/bin/apb-gads-researcher
+chmod +x /usr/local/bin/apb-gads-researcher
+sha256sum /usr/local/bin/apb-gads-researcher  # compare to bin/linux-x86_64/apb-gads-researcher.sha256.txt
+
+apb-gads-researcher auth test                     # uses APB_API_KEY from ~/.apb/.env
+apb-gads-researcher --customer 1234567890 inspect # what history the account holds
+apb-gads-researcher --customer 1234567890 extract # pull history into a local workspace
+apb-gads-researcher --customer 1234567890 opportunities --target-cpa 80
+apb-gads-researcher --customer 1234567890 plan <opportunity-id>   # writes spec.v2.json for apb-gads
+```
+
+Every researcher command prints one JSON document (`{data, evidence, run_id, provenance}`); add `--format text` for a readable view. Exit code 3 means "not enough data", "blocked by policy" or "not entitled", never a crash.
+
 ## Documentation
 
 - [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) — onboarding walkthrough
