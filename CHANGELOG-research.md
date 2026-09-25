@@ -11,6 +11,10 @@ see `rust/gads/crates/ads-research/Cargo.toml`.
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.2] — 2026-09-25
+
+- `market refresh --scope opportunities` priced nothing on real workspaces: it skipped every label equal to its cluster id, but the cluster id is the representative search term. It now enriches those terms.
+
 ## [0.1.1] — 2026-09-25
 
 Fixes from the first full real-account run of 0.1.0.
