@@ -11,6 +11,18 @@ see `rust/gads/crates/ads-research/Cargo.toml`.
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.1.1] — 2026-09-25
+
+Fixes from the first full real-account run of 0.1.0.
+
+- `plan`: intent-cluster, device and hour opportunities now get the account's historically targeted, policy-permitted geos (previously none, so `apb-gads recipe build` rejected them with `geo_required`). Keywords and headlines come from the account's mined search terms; campaign names use readable labels instead of raw ids.
+- `opportunities`: each opportunity appears once (duplicates across grain tiers are merged; `n_duplicates_merged`). Conversion value now flows into segment ROAS (it was always 0). New `--target-roas` (also on `economics` and `analyze readiness`). The market block reads fresh cached DataForSEO data without needing credentials.
+- `analyze readiness`: checks the workspace's own account instead of the SaaS default, reads what it can from the workspace, and reports `not_assessed` instead of `ok` when there is no data.
+- `market refresh`: the cost estimate now matches what DataForSEO charges and the cap is enforced after every call; new `--scope opportunities` prices the stored opportunities' terms.
+- `competitors discover`: requests organic and paid results, parses the real response shape, filters out platforms/marketplaces/government/encyclopedia/social/news domains (`n_filtered`), and every candidate cites valid evidence.
+- `explain` / `opportunity` / `plan` given a rejected-candidate key explain that only confirmed opportunities have ids.
+- `--config` help text: `APB_API_KEY` is still required for entitlement on public builds.
+
 ## [0.1.0] — 2026-09-25
 
 First public release of `apb-gads-researcher` (historical-alpha-001, 31 sprints).
