@@ -41,6 +41,8 @@ Doctrine on top of the limits (see `doctrine.md`): aim for **8–10 sentence-cas
 | LANDSCAPE_LOGO | 0–5 | 4:1 | 512×128 | optional |
 | YOUTUBE_VIDEO | 0–5 | — | — | by video id |
 
+CLI enforcement (0.3.5): `youtube_video_asset_resources` > 5 → error `youtube_video_count`; `portrait_marketing_image_asset_resources` > 20 → `portrait_image_count`; `call_to_action` must be a v25 `CallToActionType` (else `invalid_call_to_action`); none of video / portrait → warnings `pmax_no_video` / `pmax_no_portrait` (advisory, exit 0).
+
 PMAX build hard facts: needs a **non-shared** budget (shared + portfolio strategies are rejected);
 bidding at create is `MAXIMIZE_CONVERSIONS` (+optional tCPA) or `MAXIMIZE_CONVERSION_VALUE`
 (+optional tROAS) only; assets must exist before the asset group references them (the orchestrator

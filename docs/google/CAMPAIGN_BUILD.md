@@ -83,7 +83,8 @@ a **`CampaignLaunchSpec`**. Annotated reference — see the full working file at
 | `campaign_name` | ✅ | Non-empty. The launched campaign's name. |
 | `budget_micros` | ✅ | Daily budget in micros (`50000000` = $50.00). Must be `> 0`. |
 | `geo_target_ids` | ✅ | Numeric geo-target-constant IDs, e.g. `["2840"]` = USA. **At least one** — every campaign must carry positive geo. |
-| `language_ids` | ✅ | Numeric language-constant IDs, e.g. `["1000"]` = English. At least one. |
+| `language_ids` | — | **Deprecated for Search (Sept 2026).** Google rejects a manual language criterion on Search campaigns (`OPERATION_NOT_PERMITTED_FOR_CONTEXT`). Not required; if present it is **skipped at launch** with a `language_criterion_skipped` warning (also a `validate campaign-spec` warning, never an error). Language is research-only for Search (`plan keyword-ideas --language-id`). PMax / Demand Gen specs still take `language_ids`. |
+| `settings.search_partners`, `settings.display_expansion` | recommended | Network opt-ins. Always set them explicitly: when `settings` is absent or a field is unset, launch fills `false` and warns `network_setting_defaulted` (naming the field). `plan campaign search`/`full` and `recipe build` always emit them (`false`/`false` by default; `--search-partners <bool>` / `--display-expansion <bool>`, or the brief's `settings.networks`, override). A new Search campaign otherwise inherits Google's defaults (Search Network + Display Network ON), which is rarely what you want. |
 | `bidding_strategy` | optional | `{strategy_type, target_cpa_micros?, target_roas?, enhanced_cpc?}`. Omit → launches `MANUAL_CPC` (validator emits a `bidding_unset` warning, still passes). |
 | `campaign_negative_keywords` | optional | Global exclusions `[{text, match_type}]`; `match_type` is `PHRASE` or `EXACT`. The right home for jobs/free/competitor terms. |
 | `ad_groups[]` | ✅* | Multi-ad-group form: each `{name, cpc_bid_micros?, rsa, keywords[], negative_keywords?}`. |
@@ -225,6 +226,29 @@ Required-asset facts (all are existing-asset resource names shaped
 Optional: `path1`/`path2` (display-URL paths, ≤ 15 chars, path2 requires path1),
 `signals[]` (per-asset-group `SEARCH_THEME`/`AUDIENCE`), `brand_exclusions`,
 `ad_schedules[]`, `customer_acquisition`.
+
+**Video, portrait, CTA, tracking (0.3.5)** — all optional, per asset group (or the flat single-group fields), all additive:
+
+- **`youtube_video_asset_resources[]`** — existing YouTube video assets (≤ 5), linked as `YOUTUBE_VIDEO`. With none, Google auto-generates a video and `validate pmax-spec` warns `pmax_no_video` (add one for control; create it with `asset-create-youtube-video`).
+- **`portrait_marketing_image_asset_resources[]`** — existing 4:5 image assets (≤ 20), linked as `PORTRAIT_MARKETING_IMAGE`. With none, `pmax_no_portrait` warns (weaker Shorts/Discover inventory).
+- **`call_to_action`** — a v25 `CallToActionType` (`LEARN_MORE`, `GET_QUOTE`, `APPLY_NOW`, `SIGN_UP`, `CONTACT_US`, `SUBSCRIBE`, `DOWNLOAD`, `BOOK_NOW`, `SHOP_NOW`, `BUY_NOW`, `DONATE_NOW`, `ORDER_NOW`, `PLAY_NOW`, `SEE_MORE`, `START_NOW`, `VISIT_SITE`, `WATCH_NOW`). Anything else is the error `invalid_call_to_action`.
+- **`tracking_url_template`**, **`final_url_suffix`**, **`url_custom_parameters`** (`{key: value}`) — written on the asset group at create. `recipe build --type pmax` maps `business.url_template` / `final_url_suffix` / `custom_params` onto them.
+- Limits are errors: more than 5 videos (`youtube_video_count`) or 20 portrait images (`portrait_image_count`) in one asset group.
+
+**`asset_automation`** (spec level, optional) maps to the campaign's asset-automation settings, set at create:
+
+```json
+"asset_automation": {
+  "final_url_expansion": false,
+  "text_asset_automation": true,
+  "automated_video_crawl": { "enabled": true, "urls": [ { "url": "https://example.com", "source_platform": "LANDING_PAGE" } ] }
+}
+```
+
+`plan campaign pmax` (and `recipe build --type pmax`) **always emit this block explicitly** — there is no silent default.
+`final_url_expansion` is the operator's flag (`--final-url-expansion <bool>`); with no flag it is `true` (Google's default) plus
+the info warning `final_url_expansion_defaulted_on`; lead-gen / single-landing-page operators pass `--final-url-expansion false`. A hand-written spec without the block is unchanged (Google's defaults: expansion on). Flags:
+`--text-asset-automation <bool>`, `--automated-video-crawl <bool>`, `--video-crawl-url <url>` (repeatable).
 
 ## Validate before you launch
 

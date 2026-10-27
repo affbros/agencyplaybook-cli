@@ -72,7 +72,7 @@ Exact commands, artifact paths and the JSON contracts are in `references/cli-han
 | Structure | `plan structure --from research/keywords.json --output build/structure.json` | Enforce `structure.max_ad_groups` and the consolidation doctrine — few ad groups, one strong RSA each |
 | Copy | **`--provider heuristic`** → `plan rsa --from build/structure.json --brand … --final-url … --output build/rsa.json` **or `agent`** → you write `build/rsa.json` in the same shape (§3) | Lint result goes in the summary either way |
 | Goals | `plan goals --mode … --target-cpa … --output build/goals.json` | From `context show`, never from memory |
-| Assemble | `plan campaign search --structure build/structure.json --rsa build/rsa.json --goals build/goals.json --keywords-plan research/keywords.json --campaign-name … --landing-page … --daily-budget … --geo-target-id … --language-id … --export build/spec.json` | PMAX / Demand Gen: `plan campaign pmax` / `demand-gen` |
+| Assemble | `plan campaign search --structure build/structure.json --rsa build/rsa.json --goals build/goals.json --keywords-plan research/keywords.json --campaign-name … --landing-page … --daily-budget … --geo-target-id … [--search-partners false] [--display-expansion false] --export build/spec.json` | Language is research-only for Search (Sept 2026): `--language-id` scopes the Research row only, never goes into the spec. Network settings are always written explicitly (default false/false; a brief `settings.networks` wins). PMAX / Demand Gen: `plan campaign pmax` / `demand-gen`. PMAX adds `--youtube-video-asset` / `--portrait-marketing-image-asset` / `--call-to-action` and the explicit `asset_automation` block (`--final-url-expansion <bool>`; default `true` + info warning `final_url_expansion_defaulted_on`; lead-gen: `false`) — see `references/cli-handoff.md` |
 | Validate | `validate campaign-spec --from-file build/spec.json` (exit 3 = fail; fix, don't override) | Plus `playbook launch-check`, `playbook smart-bidding-readiness` |
 | Plan | `orchestrate campaign-launch --from-file build/spec.json > build/launch-dryrun.json` (dry-run; the `steps[]` JSON + guard verdict IS the review artifact). ⚠️ `--plan build/plan.md` currently writes an EMPTY doc for launches (plan-first renderer only knows bulk-mutation ops — campaign-build-001 followup P1); write `build/SUMMARY.md` from the dry-run instead | Add `--validate-only --execute` (with `APB_GADS_ALLOW_MUTATIONS=true`) for a SERVER_VALIDATED round-trip |
 | Launch | **Only after a human YES:** `… --execute` (born PAUSED) → `verify list` → `changes` | Never combine with a budget/target change on an existing campaign |
@@ -116,7 +116,7 @@ Always, in this order (matches the CLI's plan-first format):
 
 1. **Summary block** (one screen, account currency): type · goal + target · budget/day · research
    counts (ideas → kept → negated) · structure (ad groups, RSAs, keywords by match type) · copy
-   provider + lint score + pinning · targeting (geo / language / schedule / devices) · negatives
+   provider + lint score + pinning · targeting (geo / schedule / devices; language is research-only for Search) · negatives
    (shared sets, campaign-level, brand) · assets · safety verdicts (`validate`, `launch-check`,
    `smart-bidding-readiness`, sandbox policy) · **"Nothing launched"** unless it was.
 2. **Artifacts written**: `briefs/<slug>.yaml`, `research/`, `build/{structure,rsa,goals,spec}.json`,

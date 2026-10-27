@@ -76,7 +76,7 @@ apb-gads --pretty playbook list                        # the live registry (sour
 | `campaign-type-fit` | 30d | Per-ENABLED-campaign channel-type fit vs conversion signal: flags Demand Gen optimizing for conversions with no signal (→ Search) and PMax launched onto thin signal (→ Search-first). The type-level companion to the verdict; aligns with verdict G3. Read-only. |
 | `keyword-match-type-mix` | 30d | Distribution of BROAD/PHRASE/EXACT keywords; flag campaigns with imbalanced mix. |
 | `ad-extension-coverage` | 30d | Per-campaign sitelink, callout, and structured snippet coverage; flag thin extensions. |
-| `targeting-coverage` | 30d | Per-campaign targeting-dimension scorecard (geo/language/device/schedule/audience/demographic/placement/topic/brand/content_label) with missing-targeting flags for ENABLED campaigns. |
+| `targeting-coverage` | 30d | Per-campaign targeting-dimension scorecard (geo/language/device/schedule/audience/demographic/placement/topic/brand/content_label) with missing-targeting flags for ENABLED campaigns. SEARCH campaigns are never flagged `missing_language_targeting` (Google deprecated Search language criteria, Sept 2026); a SEARCH campaign still carrying one gets the info flag `legacy_language_criterion`. |
 | `experiment-readiness` | 30d | Flag ENABLED campaigns with sufficient baseline (30d conversions + clicks) that aren't already in a Google Ads Experiment. |
 | `smart-bidding-readiness` | 30d | Per-campaign 0-90 readiness score for moving from manual CPC to tCPA / tROAS / MAXIMIZE_CONVERSIONS. |
 | `match-type-sculpting` | 90d | Recommend match-type upgrades (PHRASE→EXACT) or downgrades (BROAD→PHRASE) per keyword based on 90d conv-rate. |

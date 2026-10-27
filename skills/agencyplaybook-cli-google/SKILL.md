@@ -139,6 +139,37 @@ launch leaves no hand-run checklist. A partial failure stops the tail, leaves th
 and **still exits 0** — read `.status`, then undo with `orchestrate rollback --from-receipt`.
 Blocks, formats, the pre-flight refusals and the ≤0.1.20 silent-drop trap:
 `references/workflows.md` § W6b.
+**Search language is research-only (0.3.4, Google deprecation Sept 2026).** Never add a language
+to a Search campaign: `--language`/`--language-id` only scope keyword research and are NOT copied
+into the spec; a `language_ids` in a Search spec is skipped at launch with the warning
+`language_criterion_skipped` (`validate campaign-spec` warns, never errors), and
+`mutate campaign-language-add` refuses a SEARCH campaign (clear a legacy one with
+`mutate campaign-criterion-remove`). PMax / Demand Gen still take `language_ids`. Network is always
+explicit: `plan campaign search|full` take `--search-partners <bool>` / `--display-expansion <bool>`
+(default `false`/`false`, written to `settings`); a spec that leaves them unset is filled with
+`false` and warns `network_setting_defaulted` (name the field). `playbook targeting-coverage`
+no longer flags `missing_language_targeting` on SEARCH (info flag `legacy_language_criterion`
+for Search campaigns still carrying one).
+**PMax launch completeness (0.3.5).** One PMax spec now carries the whole asset group: per asset
+group (or the flat single-group fields) `youtube_video_asset_resources` (<=5),
+`portrait_marketing_image_asset_resources` (<=20, 4:5), `call_to_action` (a v25 `CallToActionType`:
+LEARN_MORE, GET_QUOTE, APPLY_NOW, SIGN_UP, CONTACT_US, SUBSCRIBE, DOWNLOAD, BOOK_NOW, SHOP_NOW,
+BUY_NOW, DONATE_NOW, ORDER_NOW, PLAY_NOW, SEE_MORE, START_NOW, VISIT_SITE, WATCH_NOW) and asset-group
+tracking (`tracking_url_template`, `final_url_suffix`, `url_custom_parameters`); spec level
+`asset_automation {final_url_expansion, text_asset_automation, automated_video_crawl{enabled,urls[]}}`
+becomes the campaign's asset-automation settings at create. `plan campaign pmax` flags:
+`--youtube-video-asset`, `--portrait-marketing-image-asset` (repeatable), `--call-to-action`,
+`--final-url-expansion <bool>`, `--text-asset-automation <bool>`, `--automated-video-crawl <bool>`,
+`--video-crawl-url` (repeatable), `--tracking-url-template`, `--final-url-suffix`,
+`--url-custom-parameter key=value`. **The planner always emits `asset_automation` explicitly:**
+`final_url_expansion` = your flag; else `true` (Google's default) + info warning
+`final_url_expansion_defaulted_on`. For lead-gen / single-landing-page campaigns pass
+`--final-url-expansion false` — say it to the user. `validate pmax-spec`: warnings
+`pmax_no_video` (Google will auto-generate a video; add one for control) and `pmax_no_portrait`
+(weak Shorts/Discover inventory) never change the exit code; errors `invalid_call_to_action`,
+`youtube_video_count` (>5), `portrait_image_count` (>20) exit 3. `mutate pmax-launch --execute
+--validate-only` now reports `status: validated`. Assets must already exist (`asset-create-youtube-video`,
+`asset-create-image`).
 
 ## Recipes — one verb for a whole job
 
@@ -369,8 +400,10 @@ graduation).
 - **PMAX:** brand-exclude non-brand PMAX (~99% of cases); seed first-party audience signals
   (Customer Match > remarketing > in-market); **≤25 search themes per asset group**; one theme
   per asset group, 3-7 groups by margin/objective (not by audience); watch `report pmax-placements`
-  for junk; turn off Final URL expansion for lead-gen
-  (`mutate campaign-update-url-expansion-opt-out`).
+  for junk; turn off Final URL expansion for lead-gen (at launch: `plan campaign pmax
+  --final-url-expansion false`, the single-URL default; on a live campaign:
+  `mutate campaign-update-url-expansion-opt-out`); attach a video (`pmax_no_video`) and a portrait
+  image (`pmax_no_portrait`) so Google doesn't auto-generate them.
 - **Retail readiness (Shopping/PMAX with `--merchant-id`):** run `playbook feed-health-audit`
   **before and after** `plan campaign pmax --merchant-id` — before, to confirm the feed has
   serving inventory (a disapproved-heavy feed wastes the new campaign's budget from day one);

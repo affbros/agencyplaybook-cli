@@ -368,7 +368,7 @@ $B plan keyword-historical-metrics --keyword "running shoes" --keyword "marathon
 
 `plan keyword-ideas` wraps v25 `GenerateKeywordIdeas` (avg monthly searches, competition,
 top-of-page bid ranges) and is read-only — no three-gate safety applies. Default geo is `2840`
-(United States) and default language is `1000` (English); both are repeatable. Use
+(United States) and default language is `1000` (English); both are repeatable. The language scopes research only: since Sept 2026 Google rejects a manual language criterion on Search campaigns, so `plan campaign search`/`full` use `--language-id` for keyword research but never copy it into the launch spec (and now always write explicit `--search-partners` / `--display-expansion` network settings, default `false`). Use
 `keyword-historical-metrics` when you already have the exact keyword list and want backward-looking
 volume + competition. For the full greenfield search pipeline broken into inspectable stages —
 `plan keywords → plan structure → plan rsa → plan goals → plan campaign search` — see

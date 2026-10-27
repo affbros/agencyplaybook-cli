@@ -261,9 +261,11 @@ Usage: apb-gads plan campaign search [OPTIONS] --structure <STRUCTURE> --rsa <RS
 | `--daily-budget <DAILY_BUDGET>` | Daily budget in USD (e.g. 500). Required; converted to micros |
 | `--geo-target-id <GEO_TARGET_ID>` | Positive geo-target-constant ID (numeric). Repeatable. Default 2840 (US) |
 | `--location <LOCATION>` | Geo-target NAME (e.g. "United States"). Repeatable; resolved to an ID |
-| `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English) |
+| `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English). RESEARCH ONLY for Search since Sept 2026: used to scope keyword research, never copied into the launch spec (Google deprecated manual language targeting on Search campaigns) |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
-| `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
+| `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID. Research only for Search since Sept 2026 (see --language-id) |
+| `--search-partners <BOOL>` | Search-partners network: true \| false. Always written explicitly into the spec's settings; default false [possible values: true, false] |
+| `--display-expansion <BOOL>` | Display expansion (Search -> Display network): true \| false. Always written explicitly into the spec's settings; default false [possible values: true, false] |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD — sets/overrides TARGET_CPA bidding |
 | `--bid-aggressiveness <BID_AGGRESSIVENESS>` | Per-keyword CPC aggressiveness: conservative (0.75x) \| balanced (1.0x) \| aggressive (1.25x), or a raw multiplier like 0.85. Each keyword's bid = its suggested top-of-page bid × this. Requires --keywords-plan |
 | `--export <EXPORT>` | Write the bare spec JSON to this path (in addition to stdout) |
@@ -292,12 +294,14 @@ Usage: apb-gads plan campaign full [OPTIONS] --landing-page <LANDING_PAGE> --dai
 | `--geo-target-id <GEO_TARGET_ID>` | Geo-target-constant ID (numeric). Repeatable. Default 2840 (US) |
 | `--location <LOCATION>` | Geo-target NAME (e.g. "United States"). Repeatable; resolved to an ID |
 | `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
-| `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English) |
-| `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID |
+| `--language-id <LANGUAGE_ID>` | Language-constant ID (numeric). Repeatable. Default 1000 (English). RESEARCH ONLY for Search since Sept 2026: scopes keyword research, never copied into the launch specs (Google deprecated manual language targeting on Search campaigns) |
+| `--language <LANGUAGE>` | Language NAME (e.g. "English"). Repeatable; resolved to an ID. Research only for Search since Sept 2026 (see --language-id) |
 | `--network <NETWORK>` | Network: GOOGLE_SEARCH or GOOGLE_SEARCH_AND_PARTNERS [default: GOOGLE_SEARCH] |
+| `--search-partners <BOOL>` | Search-partners network: true \| false. Always written explicitly into every spec's settings; default false [possible values: true, false] |
+| `--display-expansion <BOOL>` | Display expansion: true \| false. Always written explicitly; default false [possible values: true, false] |
 | `--daily-budget <DAILY_BUDGET>` | Total daily budget in USD (split across campaigns by volume share) |
-| `--target-cpa <TARGET_CPA>` | Target CPA in USD (sets TARGET_CPA bidding) |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
+| `--target-cpa <TARGET_CPA>` | Target CPA in USD (sets TARGET_CPA bidding) |
 | `--target-roas <TARGET_ROAS>` | Target ROAS multiplier (e.g. 4.0) |
 | `--brand <BRAND>` | Brand name injected into RSA templates [default: ""] |
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
@@ -353,6 +357,16 @@ Usage: apb-gads plan campaign pmax [OPTIONS] --campaign-name <CAMPAIGN_NAME> --b
 | `--customer-acquisition-mode <CUSTOMER_ACQUISITION_MODE>` | New-customer-acquisition optimization mode: TARGET_ALL_EQUALLY \| BID_HIGHER_FOR_NEW_CUSTOMER \| TARGET_NEW_CUSTOMER (singular). The new-customer modes need an account-level existing-customer definition |
 | `--merchant-id <MERCHANT_ID>` | Merchant Center account ID (numeric) — makes this a RETAIL (Shopping) PMax that serves product ads from the linked feed. Pair with a fully-partitioned listing group (`mutate pmax-listing-group-filter-*`) |
 | `--feed-label <FEED_LABEL>` | Merchant Center feed label (e.g. "US") restricting which products serve. Only meaningful with --merchant-id |
+| `--youtube-video-asset <YOUTUBE_VIDEO_ASSET>` | Existing YOUTUBE_VIDEO asset resource (customers/<id>/assets/<id>), up to 5. Repeatable. Without one Google auto-generates a video (`pmax_no_video`). Create with `mutate asset-create-youtube-video` |
+| `--portrait-marketing-image-asset <PORTRAIT_MARKETING_IMAGE_ASSET>` | Existing portrait (4:5) IMAGE asset resource linked as PORTRAIT_MARKETING_IMAGE, up to 20. Repeatable |
+| `--call-to-action <CALL_TO_ACTION>` | Call to action (v25 CallToActionType, e.g. LEARN_MORE, GET_QUOTE, SIGN_UP, SHOP_NOW). Creates a call-to-action asset linked as CALL_TO_ACTION_SELECTION |
+| `--final-url-expansion <BOOL>` | Final-URL expansion: true \| false. ALWAYS written explicitly into `asset_automation`. Default: true (Google's default, + info warning `final_url_expansion_defaulted_on`); lead-gen: pass `--final-url-expansion false` [possible values: true, false] |
+| `--text-asset-automation <BOOL>` | Text-asset automation: true \| false (omitted = Google's default, opted in on PMax) [possible values: true, false] |
+| `--automated-video-crawl <BOOL>` | Automated video crawl (v25.2): true \| false. Implied true by --video-crawl-url [possible values: true, false] |
+| `--video-crawl-url <VIDEO_CRAWL_URL>` | URL for automated video crawling (landing page). Repeatable |
+| `--tracking-url-template <TRACKING_URL_TEMPLATE>` | Asset-group tracking URL template (v25.2), e.g. "{lpurl}?src=g" |
+| `--final-url-suffix <FINAL_URL_SUFFIX>` | Asset-group final URL suffix (v25.2), e.g. "utm_source=google" |
+| `--url-custom-parameter <URL_CUSTOM_PARAMETER>` | Asset-group URL custom parameter as `key=value` (v25.2). Repeatable |
 
 <a id="apb-gads-plan-campaign-demand-gen"></a>
 #### `apb-gads plan campaign demand-gen`

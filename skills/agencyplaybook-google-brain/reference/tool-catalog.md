@@ -188,7 +188,24 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 - **Backing (NO `--execute`):** `apb-gads plan campaign search|pmax …` (a pure transform, no API).
 - **Input:** `{ spec_kind:"campaign_spec"|"pmax_spec" (default campaign_spec), customer_id?,
   structure_path?, rsa_path?, goals_path?, keywords_plan_path?, final_url?, business_name?,
-  daily_budget?, budget_micros?, campaign_name?, landing_page?, target_cpa? }`. Search needs
+  daily_budget?, budget_micros?, campaign_name?, landing_page?, target_cpa?, search_partners?,
+  display_expansion?, youtube_video_asset_ids?, portrait_marketing_image_asset_ids?, call_to_action?,
+  final_url_expansion?, text_asset_automation?, automated_video_crawl? }`. The last six are PMAX only
+  (0.3.5): `youtube_video_asset_ids[]` (max 5, existing assets) and `portrait_marketing_image_asset_ids[]`
+  (max 20) become `--youtube-video-asset` / `--portrait-marketing-image-asset` (a bare id is expanded to
+  `customers/<id>/assets/<id>`); `call_to_action` is a v25 `CallToActionType` (LEARN_MORE, GET_QUOTE,
+  APPLY_NOW, SIGN_UP, CONTACT_US, SUBSCRIBE, DOWNLOAD, BOOK_NOW, SHOP_NOW, BUY_NOW, DONATE_NOW, ORDER_NOW,
+  PLAY_NOW, SEE_MORE, START_NOW, VISIT_SITE, WATCH_NOW; else `invalid_call_to_action`);
+  `final_url_expansion` / `text_asset_automation` / `automated_video_crawl` (booleans) feed the spec's
+  `asset_automation` block, which the planner ALWAYS emits explicitly — `final_url_expansion` defaults to
+  `true` (Google's default) with the output `warnings[]` info entry `final_url_expansion_defaulted_on`;
+  pass `false` for single-landing-page lead-gen. `gads_validate_spec` surfaces `pmax_no_video` /
+  `pmax_no_portrait` warnings (advisory) and the errors `invalid_call_to_action`, `youtube_video_count`
+  (>5), `portrait_image_count` (>20). `search_partners` / `display_expansion` (booleans, Search only) are forwarded as
+  `--search-partners` / `--display-expansion`; a Search spec ALWAYS carries explicit network `settings`
+  (default false/false). **Search language is research-only** (Google deprecated Search language
+  criteria, Sept 2026): the spec has no `language_ids`, and a hand-written Search spec that carries
+  them is skipped at launch with the warning `language_criterion_skipped`. PMAX specs keep `language_ids`. Search needs
   `structure_path` + `rsa_path` + `daily_budget`; PMAX needs `campaign_name` + `final_url` +
   `business_name` + a budget.
 
@@ -208,7 +225,8 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
   ```json
   {"spec_kind": "campaign_spec", "spec": {"campaign_name": "...", "budget_micros": 50000000}}
   ```
-- **Output:** `{ kind, customer_id, overall ("pass"|"fail"), report, requires_confirm_destructive
+- **Output:** `{ kind, customer_id, overall ("pass"|"fail"), report, warnings[] (the report's warnings passed
+  through, e.g. `language_criterion_skipped`, `network_setting_defaulted` — never a failure), requires_confirm_destructive
   (false for a spec), approval_token? (ONLY on pass), change_set_hash?, expires_at?, risk?, note }`.
   A failing validation mints **no token** — fix `report.errors` and re-validate.
 - **Note:** there is **no Google "launch" / plan-execute MCP tool** in this surface to consume a

@@ -155,6 +155,15 @@ $B playbook brand-exclusion-audit --output-spec /tmp/spec.json
 $B mutate campaign-brand-list-exclude --campaign-id <CAMPAIGN_ID> --shared-set-id <BRANDS_SET_ID>   # dry-run
 APB_GADS_ALLOW_MUTATIONS=true $B mutate campaign-brand-list-exclude --campaign-id <CAMPAIGN_ID> --shared-set-id <BRANDS_SET_ID> --execute
 
+# At LAUNCH instead (0.3.5): the planner writes asset_automation explicitly; it defaults to
+# final_url_expansion=true + info warning final_url_expansion_defaulted_on. Lead-gen: pass --final-url-expansion false.
+$B plan campaign pmax --campaign-name "Test-ok-to-delete PMax" --budget-micros 5000000 --final-url https://example.com \
+  --business-name "Example Co" --headline "H1" --headline "H2" --headline "H3" --long-headline "A long headline" \
+  --description "Short description" --description "Second description" \
+  --logo-asset customers/1234567890/assets/1 --marketing-image-asset customers/1234567890/assets/2 \
+  --square-marketing-image-asset customers/1234567890/assets/3 \
+  --youtube-video-asset customers/1234567890/assets/4 --portrait-marketing-image-asset customers/1234567890/assets/5 \
+  --call-to-action LEARN_MORE --final-url-expansion false --tracking-url-template "{lpurl}?src=g" > /tmp/pmax.json
 # Turn off Final URL expansion for lead-gen / landing-page control.
 $B mutate campaign-update-url-expansion-opt-out --campaign-id <CAMPAIGN_ID> --opt-out           # dry-run
 APB_GADS_ALLOW_MUTATIONS=true $B mutate campaign-update-url-expansion-opt-out --campaign-id <CAMPAIGN_ID> --opt-out --execute
@@ -377,6 +386,8 @@ $B plan campaign search --structure /tmp/structure.json --rsa /tmp/rsa.json --go
 $B validate campaign-spec --from-file /tmp/launch.json \
   && APB_GADS_ALLOW_MUTATIONS=true $B orchestrate campaign-launch --from-file /tmp/launch.json --execute
 ```
+
+Search language is research-only: `--language-id` scopes `plan keywords` but is not written into the launch spec (Google deprecated manual language targeting on Search, Sept 2026 — a language in a Search spec is skipped with a `language_criterion_skipped` warning). Pass `--search-partners false --display-expansion false` (the defaults) to make the network choice explicit, or `true` to opt in; the spec always carries both.
 
 `plan campaign full` (§9) is the fast path; this is the same pipeline broken into inspectable stages — useful when you want to hand-edit the keyword clusters, RSA copy, or bidding between steps. Each stage is a pure transform (`plan structure` / `plan rsa` take no API), so you can iterate on the intermediate JSON freely. The terminal `validate campaign-spec && orchestrate campaign-launch` is the same halt-on-fail launch from §14.
 

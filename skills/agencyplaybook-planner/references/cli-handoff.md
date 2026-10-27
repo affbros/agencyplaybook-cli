@@ -40,7 +40,8 @@ $G plan goals --mode lead-gen --target-cpa 18.00 --output build/goals.json      
 $G plan campaign search --structure build/structure.json --rsa build/rsa.json --goals build/goals.json \
    --keywords-plan research/keywords.json --campaign-name "Test-ok-to-delete Example Roasters — Whole Bean — US" \
    --landing-page https://www.example.com/whole-bean --daily-budget 75 \
-   --geo-target-id 2840 --language-id 1000 --target-cpa 18.00 --export build/spec.json
+   --geo-target-id 2840 --target-cpa 18.00 --search-partners false --display-expansion false \
+   --export build/spec.json   # no --language-id: language is research-only for Search (Sept 2026)
 
 # 6 validate (exit 3 = fail — fix the spec, never override)
 $G validate campaign-spec --from-file build/spec.json
@@ -58,7 +59,7 @@ $G verify list ; $G changes recent
 ### v1 spec ceiling → `build/post-launch.md`
 
 `CampaignLaunchSpec` carries: campaign · budget · ad groups (1 RSA + keywords + negatives) · campaign
-negatives · geo ids · language ids · bidding. Everything else the brief asks for, emit as post-launch
+negatives · geo ids · explicit network settings (`settings.search_partners` / `display_expansion`, default false) · bidding. (Language ids are NOT launched on Search since Sept 2026: a `language_ids` in the spec is skipped with a `language_criterion_skipped` warning.) Everything else the brief asks for, emit as post-launch
 commands (each dry-run first, `--execute` only after YES), using `<campaign_id>` from the launch receipt:
 
 | Brief block | Post-launch command |
@@ -80,8 +81,18 @@ Run `$G mutate <cmd> --help` for exact flags — don't guess them.
 
 `plan campaign pmax` → `validate pmax-spec` → `orchestrate pmax-build` (atomic single mutate, born
 PAUSED). `PmaxLaunchPlanSpec` already carries asset groups, signals, ad schedules, brand exclusions,
-customer acquisition. Assets (logos/images/videos) must pre-exist — `verify bootstrap-pmax-assets`
-on the sandbox. Demand Gen: `plan campaign demand-gen` → `validate demand-gen-spec` →
+customer acquisition, and (0.3.5) per asset group `youtube_video_asset_resources` (<=5),
+`portrait_marketing_image_asset_resources` (<=20), `call_to_action` (v25 `CallToActionType`),
+`tracking_url_template` / `final_url_suffix` / `url_custom_parameters`, plus a spec-level
+`asset_automation {final_url_expansion, text_asset_automation, automated_video_crawl}` block. Flags on
+`plan campaign pmax`: `--youtube-video-asset`, `--portrait-marketing-image-asset`, `--call-to-action`,
+`--final-url-expansion <bool>`, `--text-asset-automation <bool>`, `--automated-video-crawl <bool>`,
+`--video-crawl-url`, `--tracking-url-template`, `--final-url-suffix`, `--url-custom-parameter k=v`.
+**Default rule:** the planner always emits `asset_automation` explicitly; `final_url_expansion` is the
+flag, else `true` (Google's default) + info warning `final_url_expansion_defaulted_on` — for lead-gen /
+single-landing-page clients pass `--final-url-expansion false`; tell the client. `validate pmax-spec` warns `pmax_no_video` / `pmax_no_portrait`
+(advisory) and errors on `invalid_call_to_action` or >5 videos / >20 portraits. Assets
+(logos/images/videos) must pre-exist — `verify bootstrap-pmax-assets` on the sandbox. Demand Gen: `plan campaign demand-gen` → `validate demand-gen-spec` →
 `orchestrate demand-gen-build`.
 
 ## Today — Meta, whole-campaign brief (`apb recipe build`)

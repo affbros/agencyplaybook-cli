@@ -36,7 +36,7 @@ structure:
 
 targeting:
   geo: { include: ["US"], exclude: [], type: PRESENCE }   # include [v1] as geo ids; exclude + type [v2]
-  languages: ["en"]                       # [v1]
+  languages: ["en"]                       # [v1] RESEARCH ONLY for Search (Google deprecated Search language criteria, Sept 2026): scopes keyword research, never launched as a campaign criterion
   schedule: null                          # [v2] { days: [MON..FRI], hours: "06-22", timezone: America/Los_Angeles }
   devices: null                           # [v2] { mobile: +10, tablet: -100 }  (-100 = exclude; modifiers are no-ops under most Smart Bidding — the CLI warns)
   audiences: { observation: [], targeting: [] }           # [v2]
@@ -54,6 +54,10 @@ assets:                                   # [v2] all optional; char limits enfor
   snippets: null                          # { header, values[] }
   call: null                              # { number, country }
   images: []                              # pre-uploaded asset resource names only
+  # PMAX only (recipe build --type pmax; refused by name on search / demand-gen):
+  # youtube_videos: []                    # pre-existing YouTube video asset resource names, max 5 (warning pmax_no_video when absent)
+  # portrait_images: []                   # pre-existing 4:5 image asset resource names, max 20 (warning pmax_no_portrait when absent)
+  # call_to_action: LEARN_MORE            # v25 CallToActionType
 
 copy:
   provider: agent                         # heuristic (CLI templates; Title Case, generic) | agent (planner writes it — see copy-doctrine.md)
@@ -65,7 +69,9 @@ copy:
 settings:                                 # [v2]
   networks: { search_partners: false, display_expansion: false }
   ad_rotation: OPTIMIZE
-  url_expansion: false
+  url_expansion: false                    # PMAX: final-URL expansion (asset_automation.final_url_expansion). Unset => true (Google's default) + info warning final_url_expansion_defaulted_on; lead-gen: set false
+  # text_asset_automation: true           # PMAX only: TEXT_ASSET_AUTOMATION opt in/out (omit = Google's default)
+  # video_crawl_urls: ["https://www.example.com/whole-bean"]   # PMAX only: automated video crawl landing pages
   ai_max: false                           # requires Google Ads API v25 (api-bump-google-v25)
 
 safety:

@@ -44,7 +44,24 @@ disrupt a converged Smart-Bidding campaign (tROAS/tCPA in a healthy learning sta
   The 66-playbook catalogue spans account-health, waste, learning/scaling/turnaround, PMAX, RSA
   quality, bid-strategy audits, and more. Examples: waste → `waste-audit`; overall → `account-health`;
   PMAX → `pmax-audit`; ad copy → `rsa-quality-audit`.
+- **PMax spec warnings (0.3.5).** `gads_validate_spec` on a PMax spec: `pmax_no_video` means Google will
+  auto-generate a video (add `youtube_video_asset_ids` for control), `pmax_no_portrait` means weak
+  Shorts/Discover inventory (add `portrait_marketing_image_asset_ids`). Both are advisory — a spec with
+  only these still passes. `final_url_expansion_defaulted_on` (from `gads_build_campaign_spec`) means the
+  planner left final-URL expansion ON (Google's default) because none was given; say so to the user and
+  pass `final_url_expansion:false` for a single-landing-page lead-gen campaign. Errors: `invalid_call_to_action`
+  (not a v25 CallToActionType), `youtube_video_count` (>5), `portrait_image_count` (>20).
 - An unknown slug returns `error.code:"invalid_audit"` (no subprocess) — list first if unsure.
+- **`targeting-coverage` and Search language (Sept 2026).** Google deprecated manual language targeting on
+  Search campaigns, so a SEARCH campaign is **never** flagged `missing_language_targeting` and you must not
+  recommend adding a language to one. A SEARCH campaign that still carries a language criterion gets the
+  **info** flag `legacy_language_criterion` — harmless, not a gap (it does not count toward
+  `enabled_with_targeting_gaps`). `missing_language_targeting` still applies to non-Search channels.
+- **Launch-spec warnings** (from `gads_validate_spec.warnings[]` and launch plans/receipts):
+  `language_criterion_skipped` (a Search spec's `language_ids` were dropped — language is research-only for
+  Search; tell the user, don't retry) and `network_setting_defaulted` (a Search network field was unset and
+  filled with an explicit `false`; confirm that is what the user wants, or set `search_partners` /
+  `display_expansion` deliberately).
 
 ## Performance / GAQL (`gads_get_performance`, `gads_run_gaql`)
 
