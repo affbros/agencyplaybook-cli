@@ -4,6 +4,89 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.5] — 2026-10-27 (PMax launch completeness: video, portrait, CTA, asset automation, asset-group tracking)
+
+**A patch bump — additive, optional spec fields; a spec without them behaves exactly as before.**
+gads-build-gaps-001 S2. One `PmaxLaunchPlanSpec` / `PmaxLaunchSpec` can now describe a complete PMax
+campaign, and `mutate pmax-launch` (atomic and `--legacy-sequential`), `orchestrate pmax-build` and
+`recipe build --type pmax` apply it.
+
+### Added
+
+- **Asset-group media + CTA** (per asset group in `asset_groups[]`, and the flat single-group fields):
+  `youtube_video_asset_resources` (<=5, `YOUTUBE_VIDEO`), `portrait_marketing_image_asset_resources`
+  (<=20, `PORTRAIT_MARKETING_IMAGE`), `call_to_action` (v25 `CallToActionType`; a `callToActionAsset` is created
+  and linked as `CALL_TO_ACTION_SELECTION`). Assets must already exist (same contract as the image fields).
+- **Asset-group tracking** (v25.2): `tracking_url_template`, `final_url_suffix`, `url_custom_parameters`
+  written on the asset-group create op. `recipe build --type pmax` maps `business.url_template` /
+  `final_url_suffix` / `custom_params` onto them (no longer refused for PMax; still refused for Demand Gen).
+- **`asset_automation` block** on the PMax spec -> `Campaign.asset_automation_settings`:
+  `final_url_expansion` (`FINAL_URL_EXPANSION_TEXT_ASSET_AUTOMATION`), `text_asset_automation`
+  (`TEXT_ASSET_AUTOMATION`), `automated_video_crawl {enabled, urls[{url, source_platform}]}`
+  (`AUTOMATED_VIDEO_CRAWL`, v25.2). Field paths verified against the v25 protos; SERVER_VALIDATED at create
+  (no follow-up update needed on the atomic path; the legacy sequential path writes it as one update).
+  A hand-written spec without the block is byte-for-byte unchanged.
+- `plan campaign pmax` flags: `--youtube-video-asset`, `--portrait-marketing-image-asset` (repeatable),
+  `--call-to-action`, `--final-url-expansion <bool>`, `--text-asset-automation <bool>`,
+  `--automated-video-crawl <bool>`, `--video-crawl-url` (repeatable), `--tracking-url-template`,
+  `--final-url-suffix`, `--url-custom-parameter key=value` (repeatable).
+- **Planner default rule (behaviour change, owner decision 2026-10-27):** the planner ALWAYS emits `asset_automation`
+  explicitly. `final_url_expansion` = the flag / brief value / MCP param; else `true` (Google's default) plus an info
+  warning `final_url_expansion_defaulted_on`. Lead-gen / single-landing-page operators opt out with
+  `--final-url-expansion false` (brief: `settings.url_expansion: false`).
+- `validate pmax-spec`: warnings `pmax_no_video` (actionable) and `pmax_no_portrait`; errors
+  `invalid_call_to_action`, `youtube_video_count`, `portrait_image_count` (exit code behaviour unchanged:
+  warnings never fail).
+- `mutate pmax-launch --execute --validate-only` now returns `status: "validated"` instead of failing on the
+  empty validate-only response.
+- `verify pmax-launch` (code only; the LIVE run was declined for this release, validate-only): the chain now
+  also sets and reads back video / portrait / CTA / `final_url_expansion=false`; `pmax_asset_config` gains the
+  optional `youtube_video_asset_ids` / `portrait_marketing_image_asset_ids`. The CTA asset-create + link ops
+  are appended last and the default chain spec now carries `LEARN_MORE` + `final_url_expansion=false`
+  (op count 14 -> 16).
+- Brief (`recipe build --type pmax`): `assets.youtube_videos`, `assets.portrait_images`,
+  `assets.call_to_action`, `settings.url_expansion`, `settings.text_asset_automation`,
+  `settings.video_crawl_urls` (refused by name on Search / Demand Gen).
+
+### QA harness
+
+- `qa_test_account.sh` expected counts: no change needed (no manifest case asserts the PMax verify-chain op count).
+
+## [0.3.4] — 2026-10-27 (Search launch correctness: language deprecation + explicit network settings)
+
+**A patch bump — two documented behaviour changes, no new commands.** gads-build-gaps-001 S1.
+A Search launch built by `apb-gads` no longer emits a request Google rejects, and no longer
+inherits network defaults the operator did not choose.
+
+### Changed (behaviour)
+
+- **Search language criterion is skipped.** Google deprecated manual `CampaignCriterion.language`
+  on SEARCH campaigns (Sept 2026; `ContextError.OPERATION_NOT_PERMITTED_FOR_CONTEXT`). `orchestrate
+  campaign-launch` (plan, receipt, `--validate-only`) and `recipe build --type search` no longer emit a
+  `campaign-language-add` step; they raise the warning
+  `{"code":"language_criterion_skipped","reason":"google_deprecated_2026_09","language_ids":[...]}`.
+  PMax and Demand Gen language handling is unchanged. `validate campaign-spec` no longer *requires*
+  `language_ids` and only warns when a Search spec carries them.
+- **Search network settings are always explicit.** `plan campaign search`, `plan campaign full --type search`
+  and `recipe build` Search output always emit `settings.search_partners` / `settings.display_expansion`
+  (default `false`/`false`; the brief wins). A Search launch spec with `settings` absent or a network
+  field unset gets `false` filled in and a `network_setting_defaulted` warning naming the field.
+
+### Added
+
+- `plan campaign search|full`: `--search-partners <bool>` / `--display-expansion <bool>`. `--language` /
+  `--language-id` keep scoping keyword research but are no longer copied into the Search launch spec.
+- `mutate campaign-language-add` refuses a SEARCH campaign pre-flight (message cites the deprecation and
+  `campaign-criterion-remove`; no mutate call is made).
+- `playbook targeting-coverage`: SEARCH campaigns are no longer flagged `missing_language_targeting`;
+  SEARCH campaigns still carrying a language criterion get the info flag `legacy_language_criterion`.
+- `docs/tasks/version-bump-checklist.md`: dated "Current API changes" ledger.
+
+### QA harness
+
+- `qa_test_account.sh` expected counts: no manifest case asserts a Search `campaign-language-add`, so no
+  expected-count change was needed.
+
 ## [0.3.3] — 2026-09-16 (developer_token optional)
 
 **A patch bump — config/docs change, no new commands.** google-devtoken-sunset-001 gd-003:
