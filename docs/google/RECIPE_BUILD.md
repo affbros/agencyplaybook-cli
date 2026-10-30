@@ -118,12 +118,24 @@ assets:
   callouts: ["Roasted to order", "Free shipping over $40"]
 copy:
   provider: heuristic              # heuristic | agent
+  # provider: agent only - per-ad-group copy, keyed by ad group NAME. A group with no
+  # entry reuses the shared copy.headlines/descriptions and the build warns
+  # `shared_copy_reused` (once per such group).
+  # by_ad_group:
+  #   adgroup-espresso: { headlines: [...], descriptions: [...] }
+claims: []                         # claims you actually make; heuristic starter copy keeps
+                                   # "free shipping" / "best" / prices / guarantees ONLY if listed
 settings:
   networks: { search_partners: false }
 safety:
   name_prefix: "Test-ok-to-delete"  # required on the sandbox
   born_paused: true
 ```
+
+`structure.rsa_per_ad_group` (1-3, default 1 for `recipe build`) is honoured: extra RSAs are
+variants of the ad group's own copy. Heuristic copy is run through the **claim filter** - "best",
+"#1", "free shipping", prices and "guarantee(d)" are removed unless listed in `claims[]`; agent-supplied
+copy is never filtered.
 
 YAML or JSON — both go through the same parser. Unknown keys are **ignored**, so
 a brief written for a newer binary still loads.

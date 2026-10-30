@@ -69,13 +69,44 @@ Exact commands, artifact paths and the JSON contracts are in `references/cli-han
 | Step | Command | You add |
 |---|---|---|
 | Research | `plan keywords --seed-keyword … [--seed-keyword …] --geo-target-id … --language-id … --output research/keywords.json` | Apply the brief's `exclude_intents`; note dropped clusters in the summary |
-| Structure | `plan structure --from research/keywords.json --output build/structure.json` | Enforce `structure.max_ad_groups` and the consolidation doctrine — few ad groups, one strong RSA each |
-| Copy | **`--provider heuristic`** → `plan rsa --from build/structure.json --brand … --final-url … --output build/rsa.json` **or `agent`** → you write `build/rsa.json` in the same shape (§3) | Lint result goes in the summary either way |
+| Structure | `plan structure --from research/keywords.json [--intent-split off] [--grouping-file build/grouping.json] --output build/structure.json` | Enforce `structure.max_ad_groups` and the consolidation doctrine — few ad groups, one strong RSA each |
+| Copy | **`--provider heuristic`** → `plan rsa --from build/structure.json --brand … --final-url … [--claim "<a claim the advertiser really makes>"] --output build/rsa.json` **or `agent`** → you write `build/rsa.json` in the same shape (§3) | Lint result goes in the summary either way |
 | Goals | `plan goals --mode … --target-cpa … --output build/goals.json` | From `context show`, never from memory |
-| Assemble | `plan campaign search --structure build/structure.json --rsa build/rsa.json --goals build/goals.json --keywords-plan research/keywords.json --campaign-name … --landing-page … --daily-budget … --geo-target-id … [--search-partners false] [--display-expansion false] --export build/spec.json` | Language is research-only for Search (Sept 2026): `--language-id` scopes the Research row only, never goes into the spec. Network settings are always written explicitly (default false/false; a brief `settings.networks` wins). PMAX / Demand Gen: `plan campaign pmax` / `demand-gen`. PMAX adds `--youtube-video-asset` / `--portrait-marketing-image-asset` / `--call-to-action` and the explicit `asset_automation` block (`--final-url-expansion <bool>`; default `true` + info warning `final_url_expansion_defaulted_on`; lead-gen: `false`) — see `references/cli-handoff.md` |
+| Assemble | `plan campaign search --structure build/structure.json --rsa build/rsa.json --goals build/goals.json --keywords-plan research/keywords.json --campaign-name … --landing-page … --daily-budget … --geo-target-id … [--search-partners false] [--display-expansion false] [--sitelinks-file build/sitelinks.json] [--callouts-file build/callouts.json] [--snippets-file build/snippets.json] [--tracking-template …] [--final-url-suffix …] [--rsa-per-ad-group 2] [--brand …] --export build/spec.json` | Language is research-only for Search (Sept 2026): `--language-id` scopes the Research row only, never goes into the spec. Network settings are always written explicitly (default false/false; a brief `settings.networks` wins). PMAX / Demand Gen: `plan campaign pmax` / `demand-gen`. PMAX adds `--youtube-video-asset` / `--portrait-marketing-image-asset` / `--call-to-action` and the explicit `asset_automation` block (`--final-url-expansion <bool>`; default `true` + info warning `final_url_expansion_defaulted_on`; lead-gen: `false`) — see `references/cli-handoff.md` |
 | Validate | `validate campaign-spec --from-file build/spec.json` (exit 3 = fail; fix, don't override) | Plus `playbook launch-check`, `playbook smart-bidding-readiness` |
 | Plan | `orchestrate campaign-launch --from-file build/spec.json > build/launch-dryrun.json` (dry-run; the `steps[]` JSON + guard verdict IS the review artifact). ⚠️ `--plan build/plan.md` currently writes an EMPTY doc for launches (plan-first renderer only knows bulk-mutation ops — campaign-build-001 followup P1); write `build/SUMMARY.md` from the dry-run instead | Add `--validate-only --execute` (with `APB_GADS_ALLOW_MUTATIONS=true`) for a SERVER_VALIDATED round-trip |
 | Launch | **Only after a human YES:** `… --execute` (born PAUSED) → `verify list` → `changes` | Never combine with a budget/target change on an existing campaign |
+
+**Search planner depth (apb-gads 0.3.6).** The stage-by-stage `plan campaign search` now builds the
+same spec blocks as `recipe build` (one shared builder), so the "v1 can't carry assets" caveat below is
+history. Use it like this:
+
+- **Asset files** - `--sitelinks-file` (`[{text,url,desc1,desc2}]`), `--callouts-file` (`["…"]`),
+  `--snippets-file` (`{header,values}`): the brief's `assets` schema. Fill them ONLY from the scraped
+  landing page / client-supplied facts. No file means the spec carries none and warns
+  `missing_sitelinks` / `missing_callouts` / `missing_snippets` - **never invent assets to silence a
+  warning**; list the gap in the summary instead.
+- **Goals + tracking** - `--goals build/goals.json` (a `plan goals` file; add `conversion_actions`
+  ids/resource names and `customer_acquisition` there and they land in `conversion_goals`),
+  `--tracking-template`, `--final-url-suffix`.
+- **`--rsa-per-ad-group <1-3>`** (default 2). RSA #2+ are variants of the ad group's own copy - the
+  lead keyword headline kept, other headlines/descriptions rotated - so two RSAs need >= ~8
+  distinct headlines and >= 3 descriptions per group; otherwise it warns `rsa_variant_skipped`. In
+  a **brand-intent** group RSA #1 pins the brand headline to `HEADLINE_1` (pass `--brand`); RSA #2 is
+  unpinned. Do not add other pins.
+- **Per-ad-group copy (brief)** - with `copy.provider: agent`, give `copy.by_ad_group:
+  {<ad group name>: {headlines, descriptions}}`; a group with no entry reuses the shared copy and
+  warns `shared_copy_reused` (write the missing entry rather than ship shared copy to a group with a
+  different theme).
+- **`claims[]` (brief) / `plan rsa --claim`** - the heuristic provider strips "best", "#1" / "no. 1",
+  "free shipping", prices/currency amounts and "guarantee(d)" unless the advertiser actually makes
+  that claim and it is listed. This is the binary-side twin of the no-fabrication rule in section 3:
+  list a claim only when the landing page or the client states it.
+- **Grouping control** - `plan structure --intent-split off` puts every intent in one campaign
+  (`campaign-all`, ad groups `adgroup-<intent>-<cluster>`); `--grouping-file {"ad group":
+  ["keyword",…]}` overrides clustering exactly (unknown keywords warn `grouping_unknown_keyword`,
+  omitted ones are listed under `dropped[]`). Use it when the consolidation doctrine or the client's
+  account structure disagrees with lexical clustering.
 
 **Advanced features the v1 `CampaignLaunchSpec` still can't carry** (schedules, device modifiers,
 geo exclusions / presence type, audiences, sitelinks / callouts / snippets, shared negative sets,

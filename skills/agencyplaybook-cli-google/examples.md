@@ -383,6 +383,13 @@ $B plan goals --mode ecommerce --target-roas 4.0 --output /tmp/goals.json
 # Assemble the launch spec from the pieces, then validate → launch (as in §9).
 $B plan campaign search --structure /tmp/structure.json --rsa /tmp/rsa.json --goals /tmp/goals.json \
   --daily-budget 100 --location "United States" --export /tmp/launch.json
+# 0.3.6 depth (all optional): asset FILES (brief `assets` schema), tracking, 2 RSAs per ad group (default),
+# brand-headline pin. No asset file => no sitelinks/callouts/snippets + missing_* warnings, never invented.
+#   --sitelinks-file /tmp/sitelinks.json --callouts-file /tmp/callouts.json --snippets-file /tmp/snippets.json \
+#   --tracking-template '{lpurl}?utm_source=google' --final-url-suffix 'utm_medium=cpc' \
+#   --rsa-per-ad-group 2 --brand "YourBrand"
+# Grouping control on the structure step: `plan structure --from /tmp/kw.json --intent-split off`
+# or `--grouping-file /tmp/grouping.json` ({"ad group": ["keyword", ...]}).
 $B validate campaign-spec --from-file /tmp/launch.json \
   && APB_GADS_ALLOW_MUTATIONS=true $B orchestrate campaign-launch --from-file /tmp/launch.json --execute
 ```

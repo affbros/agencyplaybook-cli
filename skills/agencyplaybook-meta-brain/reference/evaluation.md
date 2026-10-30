@@ -4,7 +4,7 @@ The brain skill is judged not by how many tools exist, but by whether an LLM wit
 AgencyPlaybook MCP can answer realistic, complex, read-only Meta questions — by selecting and
 sequencing the right tools and interpreting the results. Two complementary tracks:
 
-## 1. MCP tool evals — `evals/meta-brain.xml`
+## 1. MCP tool evals — `evals/meta-brain.xml` *(maintainer-only — not shipped in the public skill)*
 
 Ten questions in the mcp-builder evaluation format:
 
@@ -45,7 +45,7 @@ python ~/.claude/skills/mcp-builder/scripts/evaluation.py \
 | 7 | choose the right playbook by description, read grade | `agency_list_audits` → `meta_run_audit{waste-audit}` | `C` |
 | 8 | dominant verdict across the account | `meta_get_verdict{include_paused}` | `TIGHTEN` |
 | 9 | multi-hop: top-spend campaign → its verdict | `meta_get_performance` + `meta_get_verdict` | `TIGHTEN` |
-| 10 | resolve the account display name | `meta_list_accounts` / `meta_resolve_account` | `scandalouscoffee's ad account` |
+| 10 | resolve the account display name | `meta_list_accounts` / `meta_resolve_account` | the test account's display name |
 
 Coverage rationale: the set spans **discovery** (1), **catalogue + aggregation** (2,3),
 **reporting with paging + multi-metric ranking** (4,5), **playbook selection + grading** (6,7),
@@ -57,10 +57,10 @@ matching Q4 (most-impressions ≠ most-spend), and Q9 forces two tools in sequen
 ### Live verification (done during authoring)
 
 All 10 answers were reproduced live — read-only, against the running MCP over stdio with the
-solo read key and the Scandalous default account (`act_535043909388877`) — by driving the
+solo read key and the internal test account — by driving the
 exact tools above end-to-end. Result: **10/10 reproduced** (pillar distribution
-signal 13 / scaling 10 / learning 5 / turnaround 4 confirms Q3; the top-spend campaign "Meta
-Recommendation Ad" carries verdict TIGHTEN, confirming Q9). A token-leak scan over the full
+signal 13 / scaling 10 / learning 5 / turnaround 4 confirms Q3; the top-spend campaign carries
+verdict TIGHTEN, confirming Q9). A token-leak scan over the full
 tool output (`EAA…` / `access_token`) returned **0**.
 
 > Stability caveat: the live-data questions (4–9) are pinned to a **365-day** window on a
@@ -68,7 +68,7 @@ tool output (`EAA…` / `access_token`) returned **0**.
 > stable), so day-to-day noise won't flip them. If the test account is materially changed,
 > re-derive the affected answers with a quick read-only pass before relying on the suite.
 
-## 2. Brain-skill behavior evals (scenario-level) — `evals/scenario-execution.md`
+## 2. Brain-skill behavior evals (scenario-level) — `evals/scenario-execution.md` *(maintainer-only — not shipped in the public skill)*
 
 Beyond the value-matching evals, the skill is checked on **behavior** for both read prompts
 ("audit my Meta account", "why did CPA spike", "what should I scale", "weekly summary") and the

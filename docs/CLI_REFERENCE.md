@@ -356,17 +356,17 @@ apb account profile remove <name>
 | Flag | Type | Description |
 |------|------|-------------|
 | `--account` | string | Account ID (`act_` prefix) bound to this profile |
-| `--token-env` | string | Name of the env var holding this account's Meta token (e.g. `SCANDALOUS_TOKEN`) — not the token itself |
+| `--token-env` | string | Name of the env var holding this account's Meta token (e.g. `ACME_TOKEN`) — not the token itself |
 
 **Example — flip between two BYO accounts with one command each:**
 ```
-export SCANDALOUS_TOKEN=EAAR...      # set in your shell/.env (instead of META_ACCESS_TOKEN)
-export ENGINESEO_TOKEN=EAAB...
-apb account profile add scandalous --account act_535043909388877 --token-env SCANDALOUS_TOKEN
-apb account profile add engineseo  --account act_1886644758637992 --token-env ENGINESEO_TOKEN
-apb account use scandalous          # account + token both switch
-apb campaign list                   # runs against Scandalous
-apb account use engineseo           # one command flips everything
+export ACME_TOKEN=EAAR...      # set in your shell/.env (instead of META_ACCESS_TOKEN)
+export GLOBEX_TOKEN=EAAB...
+apb account profile add acme --account act_1234567890 --token-env ACME_TOKEN
+apb account profile add globex --account act_9876543210 --token-env GLOBEX_TOKEN
+apb account use acme                # account + token both switch
+apb campaign list                   # runs against Acme
+apb account use globex              # one command flips everything
 ```
 An explicit `META_ACCESS_TOKEN` in your env always wins over a profile's `token_env` (least surprise).
 
@@ -908,7 +908,7 @@ Creative management.
 
 ### Creative format auditor (v0.2.0, all `create-*` + `update` commands)
 
-Every `creative create-*` and `creative update` command runs a format auditor before any write. The auditor traverses the spec and detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / product_set_id / etc.) — the failure mode that surfaced as the Scandalous Coffee incident on 2026-05-23. See [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md) for the full 11-variant risk taxonomy.
+Every `creative create-*` and `creative update` command runs a format auditor before any write. The auditor traverses the spec and detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / product_set_id / etc.) — the failure mode that surfaced as a customer-account incident on 2026-05-23. See [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md) for the full 11-variant risk taxonomy.
 
 **AI-disclosure advisory (v0.5.24, july9-meta-compliance-001 A3):** every audit — dry-run and `--execute` alike — also surfaces one non-fatal, non-blocking INFO line reminding the operator that Meta requires the AI-disclosure toggle (Ad Library transparency label) if any visual asset in the creative is AI-generated. apb cannot detect AI-generated imagery from the Graph API, so this is an operator-confirmed reminder, not an enforced check — it never blocks `--execute` and has no `--allow-*` flag. Surfaces in the `format_audit.advisories` array of the JSON response alongside `findings`.
 
@@ -1849,7 +1849,7 @@ apb playbook event-downgrade-ladder [--days N] [--json]
 
 Walks the Meta event ladder (Purchase → InitiateCheckout → AddToCart → ViewContent) and recommends downgrading the optimization event for adsets running below the 50/week learning threshold. Higher-volume events give Meta's algorithm more signal to optimize against, accelerating learning exit.
 
-**Sample output (Scandalous Coffee, 90d):**
+**Sample output (example account, 90d):**
 ```
 TOF Reverse Psych Ad Set [TOF Reverse Psych]
   current_goal: OFFSITE_CONVERSIONS

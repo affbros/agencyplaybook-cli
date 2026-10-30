@@ -427,11 +427,11 @@ Every leaf command, grouped. Click through to the parameter-level page.
 
 - [`apb-gads verify preflight`](verify.md#apb-gads-verify-preflight) — Report the live-verify policy shape for the target customer.
 - [`apb-gads verify noop`](verify.md#apb-gads-verify-noop) — W2 scaffold probe: exercises the verification state machine end-to-end (lock → manifest → stages → ledger) without touching the Google Ads API.
-- [`apb-gads verify smoke`](verify.md#apb-gads-verify-smoke) — W2 server-side gate: submit a synthetic Scandalous-shaped campaign-budget create payload to Google with `validateOnly=true`.
+- [`apb-gads verify smoke`](verify.md#apb-gads-verify-smoke) — W2 server-side gate: submit a synthetic production-shaped campaign-budget create payload to Google with `validateOnly=true`.
 - [`apb-gads verify search-lifecycle`](verify.md#apb-gads-verify-search-lifecycle) — W3 Chain 1: full search-campaign lifecycle, CampaignLaunchSpec v2 shape.
 - [`apb-gads verify pmax-launch`](verify.md#apb-gads-verify-pmax-launch) — W4 Chain 2: full PMAX launch (Path 3 — production-asset reuse).
 - [`apb-gads verify rsa-lifecycle`](verify.md#apb-gads-verify-rsa-lifecycle) — P5 Chain 3: full RSA create + refresh lifecycle.
-- [`apb-gads verify bootstrap-pmax-assets`](verify.md#apb-gads-verify-bootstrap-pmax-assets) — Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end.
+- [`apb-gads verify bootstrap-pmax-assets`](verify.md#apb-gads-verify-bootstrap-pmax-assets) — Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a test account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end.
 - [`apb-gads verify list`](verify.md#apb-gads-verify-list) — List recent verification runs from the append-only ledger
 - [`apb-gads verify cleanup`](verify.md#apb-gads-verify-cleanup) — List pending cleanup entries from prior crashed or partial runs.
 

@@ -5,7 +5,7 @@ keep you honest. They are about which customer the MCP reads — entirely read-o
 
 ## Always resolve + CONFIRM before a costed read
 
-1. **Resolve the hint.** A user says "audit Scandalous" or "1234567890". Call
+1. **Resolve the hint.** A user says "audit Acme" or "1234567890". Call
    `gads_resolve_customer { hint }`:
    - numeric / `customers/<id>` → resolves directly to a bare numeric `customer_id` (no subprocess).
    - a name → matched (case-insensitive; exact then substring) against `gads_list_customers`. One
@@ -16,7 +16,7 @@ keep you honest. They are about which customer the MCP reads — entirely read-o
    `allowed_accounts` (empty = allow-all); an unauthorized customer → `error.code:"not_authorized"`
    (context unchanged).
 3. **Confirm.** State the customer you're about to read ("Reading customer 1234567890 —
-   Scandalous") and let the user correct you. Never silently assume.
+   Acme") and let the user correct you. Never silently assume.
 4. **Report what you read.** Every read echoes `customer_id`; surface it in the answer.
 
 ## Customer-context resolution order (every customer-scoped tool)

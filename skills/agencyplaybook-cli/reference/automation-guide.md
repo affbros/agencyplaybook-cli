@@ -166,7 +166,7 @@ API parity: every CLI command has a paired `POST /api/v1/creatives/...` (or `/ap
 
 ## Creative format auditor (v0.2.0, exit 2)
 
-Every creative `create-*` subcommand and `apb creative update` runs a pure-function auditor on the spec before any write. Detects 11 unintended Meta v25 format-expansion variants (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / `template_url` / `{{product.*}}` / etc. — the Scandalous Coffee class).
+Every creative `create-*` subcommand and `apb creative update` runs a pure-function auditor on the spec before any write. Detects 11 unintended Meta v25 format-expansion variants (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / `template_url` / `{{product.*}}` / etc. — the Example Coffee Co class).
 
 For CI / unattended pipelines:
 - `--strict-format` upgrades dry-run findings to exit 2 (fail loud on any finding). Use this in pre-merge checks.

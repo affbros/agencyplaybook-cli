@@ -16,11 +16,11 @@ Sprint W — live-execute verification. Opt-in chains that write to a real Googl
 |---|---|
 | [`preflight`](#apb-gads-verify-preflight) | Report the live-verify policy shape for the target customer. |
 | [`noop`](#apb-gads-verify-noop) | W2 scaffold probe: exercises the verification state machine end-to-end (lock → manifest → stages → ledger) without touching the Google Ads API. |
-| [`smoke`](#apb-gads-verify-smoke) | W2 server-side gate: submit a synthetic Scandalous-shaped campaign-budget create payload to Google with `validateOnly=true`. |
+| [`smoke`](#apb-gads-verify-smoke) | W2 server-side gate: submit a synthetic production-shaped campaign-budget create payload to Google with `validateOnly=true`. |
 | [`search-lifecycle`](#apb-gads-verify-search-lifecycle) | W3 Chain 1: full search-campaign lifecycle, CampaignLaunchSpec v2 shape. |
 | [`pmax-launch`](#apb-gads-verify-pmax-launch) | W4 Chain 2: full PMAX launch (Path 3 — production-asset reuse). |
 | [`rsa-lifecycle`](#apb-gads-verify-rsa-lifecycle) | P5 Chain 3: full RSA create + refresh lifecycle. |
-| [`bootstrap-pmax-assets`](#apb-gads-verify-bootstrap-pmax-assets) | Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. |
+| [`bootstrap-pmax-assets`](#apb-gads-verify-bootstrap-pmax-assets) | Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a test account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. |
 | [`list`](#apb-gads-verify-list) | List recent verification runs from the append-only ledger |
 | [`cleanup`](#apb-gads-verify-cleanup) | List pending cleanup entries from prior crashed or partial runs. |
 
@@ -67,7 +67,7 @@ Usage: apb-gads verify noop [OPTIONS]
 <a id="apb-gads-verify-smoke"></a>
 ### `apb-gads verify smoke`
 
-W2 server-side gate: submit a synthetic Scandalous-shaped campaign-budget create payload to Google with `validateOnly=true`. Exercises auth + wire schema + LiveVerifyPolicy permission + Google's server-side validation pipeline. Creates nothing
+W2 server-side gate: submit a synthetic production-shaped campaign-budget create payload to Google with `validateOnly=true`. Exercises auth + wire schema + LiveVerifyPolicy permission + Google's server-side validation pipeline. Creates nothing
 
 **Usage**
 
@@ -143,7 +143,7 @@ Usage: apb-gads verify rsa-lifecycle [OPTIONS]
 <a id="apb-gads-verify-bootstrap-pmax-assets"></a>
 ### `apb-gads verify bootstrap-pmax-assets`
 
-Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a non-Scandalous account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. Uploads 3 images (logo / marketing / square-marketing) and creates 7 text assets (1 BUSINESS_NAME + 3 HEADLINE + 1 LONG_HEADLINE + 2 DESCRIPTION). Standalone assets persist (AssetService has no remove op — verified through v25); Google de-dups by content (re-run safe — same IDs returned). Emits a `yaml_paste_block` ready for `safety.profiles.<id>.live_verify_policy:`
+Sprint W5 Phase 5/6: bootstrap standalone PMAX assets on a test account so its LiveVerifyPolicy.pmax_asset_config can be populated and `verify pmax-launch` can run end-to-end. Uploads 3 images (logo / marketing / square-marketing) and creates 7 text assets (1 BUSINESS_NAME + 3 HEADLINE + 1 LONG_HEADLINE + 2 DESCRIPTION). Standalone assets persist (AssetService has no remove op — verified through v25); Google de-dups by content (re-run safe — same IDs returned). Emits a `yaml_paste_block` ready for `safety.profiles.<id>.live_verify_policy:`
 
 **Usage**
 

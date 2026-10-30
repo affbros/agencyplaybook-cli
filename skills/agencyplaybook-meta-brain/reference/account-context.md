@@ -5,7 +5,7 @@ rules keep you honest. They are about which account the MCP reads — entirely r
 
 ## Always resolve + CONFIRM before a costed read
 
-1. **Resolve the hint.** A user says "audit Scandalous" or "act_123". Call
+1. **Resolve the hint.** A user says "audit Acme" or "act_123". Call
    `meta_resolve_account { hint }`:
    - numeric / `act_<id>` → resolves directly to `act_<digits>`.
    - a name → matched (exact, then substring) against `meta_list_accounts`. One match →
@@ -15,7 +15,7 @@ rules keep you honest. They are about which account the MCP reads — entirely r
 2. **Pin it.** `agency_set_context { platform:"meta", account_id }` — or pass `account_id` on
    each read. `agency_set_context` validates against the tenant's `allowed_accounts` (empty =
    allow-all); an unauthorized account → `error.code:"not_authorized"` (context unchanged).
-3. **Confirm.** State the account you're about to read ("Reading act_… — scandalouscoffee's
+3. **Confirm.** State the account you're about to read ("Reading act_… — Acme's
    ad account") and let the user correct you. Never silently assume.
 4. **Report what you read.** Every read echoes `account_context`; surface it in the answer.
 

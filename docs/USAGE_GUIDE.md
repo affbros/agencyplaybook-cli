@@ -6,7 +6,7 @@ Practical guide for using `apb` (Rust) to manage Meta Marketing API campaigns. C
 >
 > **Active ad account:** a command targets `--account` if given, else `META_AD_ACCOUNT_ID` from the `.env`/env where you ran `apb`, else the persisted global default in `~/.apb/config.json` (set via `apb account set-default --account act_…`). **The `.env` value wins over the global default (v0.2.1+)** — if they differ, `apb` prints a loud `note:`. Every run prints `[apb] account: … (source: …)` so the active account is never a mystery. Full precedence: CLI_REFERENCE.md → "Account resolution precedence".
 >
-> **Switching accounts the easy way (cli-account-switching):** save a profile once — `apb account profile add scandalous --account act_… --token-env SCANDALOUS_TOKEN` — then `apb account use scandalous` flips the account **and** its token together in one command. `apb account current` shows the active account and whether your token can actually reach it (catching a mismatch before it 403s).
+> **Switching accounts the easy way (cli-account-switching):** save a profile once — `apb account profile add acme --account act_… --token-env ACME_TOKEN` — then `apb account use acme` flips the account **and** its token together in one command. `apb account current` shows the active account and whether your token can actually reach it (catching a mismatch before it 403s).
 >
 > **Naming uploaded assets (v0.2.2+):** image/video uploads accept an explicit name — `--name` on `creative upload-image`/`upload-video`, and per-asset `--image-name`/`--video-name`/`--thumbnail-name`/`--hero-image-name` on the `create-*` builders. Omit it and the asset is named by the file's basename. See CLI_REFERENCE.md → "Naming uploaded assets".
 
@@ -337,13 +337,13 @@ apb dataset creative-pipeline --days 30 --json
 
 ### Workflow 5a: Format audit guard (v0.2.0)
 
-Every `creative create-*` and `creative update` runs a format auditor before any write — detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / etc.) that can cause Meta to render an ad in a format the operator never intended. This is the Scandalous Coffee fix (incident 2026-05-23). Full taxonomy at [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md).
+Every `creative create-*` and `creative update` runs a format auditor before any write — detects unintended Meta v25 format-expansion fields (CAROUSEL / COLLECTION / FORMAT_AUTOMATION / `product_set_id` / etc.) that can cause Meta to render an ad in a format the operator never intended. This is the Example Coffee Co fix (incident 2026-05-23). Full taxonomy at [`CREATIVE_AUDITOR.md`](./CREATIVE_AUDITOR.md).
 
 ```bash
 # Inspect a spec without writing (audit-only)
 apb creative create-image --name "review" --spec-file ./ad.json --audit-only --json | jq '.format_audit'
 
-# Trap a creative spec with unintended formats (Scandalous-style trap)
+# Trap a creative spec with unintended formats (format-expansion trap)
 cat >/tmp/trap.json <<JSON
 {"object_story_spec":{"page_id":"P","link_data":{"image_hash":"H","link":"https://x"}},
  "asset_feed_spec":{"ad_formats":["CAROUSEL","COLLECTION"],"optimization_type":"FORMAT_AUTOMATION"}}
@@ -399,8 +399,8 @@ Six ergonomic builders that take flags and generate the v25 `AdCreative` spec in
 ```bash
 # Single-image creative — no JSON authoring needed.
 apb creative create-image-simple --name "Q2 promo" --page-id PAGE \
-  --image ./hero.jpg --headline "Bold coffee" --body "Try Scandalous" \
-  --url https://scandalous.example --cta SHOP_NOW --execute
+  --image ./hero.jpg --headline "Bold coffee" --body "Try Example Coffee" \
+  --url https://www.example.com --cta SHOP_NOW --execute
 
 # Video creative with thumbnail (both auto-uploaded if paths).
 apb creative create-video-simple --name "Q2 video" --page-id PAGE \

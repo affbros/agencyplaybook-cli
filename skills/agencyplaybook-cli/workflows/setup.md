@@ -78,7 +78,7 @@ apb account set-default --account act_1234567890
 
 # Better for multiple accounts — save a profile (account + its token, by env-var NAME),
 # then switch account AND token together with one command:
-apb account profile add <name> --account act_535043909388877 --token-env SCANDALOUS_TOKEN
+apb account profile add <name> --account act_1234567890 --token-env ACME_TOKEN
 apb account use <name>     # flips account + token
 apb account current            # shows the active account and whether the token reaches it
 ```

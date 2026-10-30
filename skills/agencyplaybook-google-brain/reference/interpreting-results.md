@@ -51,6 +51,12 @@ disrupt a converged Smart-Bidding campaign (tROAS/tCPA in a healthy learning sta
   planner left final-URL expansion ON (Google's default) because none was given; say so to the user and
   pass `final_url_expansion:false` for a single-landing-page lead-gen campaign. Errors: `invalid_call_to_action`
   (not a v25 CallToActionType), `youtube_video_count` (>5), `portrait_image_count` (>20).
+- **Search spec warnings (0.3.6).** `gads_build_campaign_spec` (Search) returns `_generation.warnings`:
+  `missing_sitelinks` / `missing_callouts` / `missing_snippets` mean no asset file was passed - the spec
+  has none of them (the planner never invents assets), so ask the user for the facts or pass
+  `sitelinks_file` / `callouts_file` / `snippets_file`; `rsa_variant_skipped` means an ad group had too
+  little distinct copy for a 2nd RSA; `brand_pin_skipped` means a brand-intent group had no `brand` /
+  matching headline. Search specs now default to 2 RSAs per ad group (`rsa_per_ad_group`; 1 = old shape).
 - An unknown slug returns `error.code:"invalid_audit"` (no subprocess) — list first if unsure.
 - **`targeting-coverage` and Search language (Sept 2026).** Google deprecated manual language targeting on
   Search campaigns, so a SEARCH campaign is **never** flagged `missing_language_targeting` and you must not

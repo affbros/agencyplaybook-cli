@@ -5,7 +5,7 @@ AgencyPlaybook MCP can answer realistic, complex, read-only Google Ads questions
 sequencing the right tools and interpreting the results — and can walk the execution handshake
 safely. Two complementary tracks:
 
-## 1. MCP tool evals — `evals/google-brain.xml`
+## 1. MCP tool evals — `evals/google-brain.xml` *(maintainer-only — not shipped in the public skill)*
 
 Questions in the mcp-builder evaluation format:
 
@@ -41,12 +41,12 @@ ranking**, **GAQL**, **playbook selection + reading a nested payload**, and **th
 (verdict distribution + a multi-hop top-spend→verdict chain). Several require multiple tool calls and
 result-store paging. The set deliberately includes structural/stable answers (catalogue sizes, the
 API version, a resolved display name) so most of the suite is drift-proof; the few live-data questions
-are pinned to a fixed lookback on the closed Scandalous child customer.
+are pinned to a fixed lookback on a closed internal test customer.
 
 ### Anchoring + stability
 
-The live-data questions are anchored to the deliberate test customer (the Scandalous child
-`1234567890` under the test MCC `1111111111`, per AGENTS.md rule #10) over a fixed lookback. The
+The live-data questions are anchored to the deliberate test customer (an internal child
+`1234567890` under a test MCC `1111111111`, per AGENTS.md rule #10) over a fixed lookback. The
 test child's campaigns are PAUSED, so verdict questions pass `include_paused:true` and report
 questions use a `-365d` window — a short/active-only window is legitimately empty (empty ≠ broken).
 Grades/distributions are coarse buckets; rankings are by campaign **name** (very stable). If the test
@@ -54,7 +54,7 @@ customer is materially changed, re-derive the affected answers with a quick read
 relying on the suite. Structural answers (catalogue counts, API version, display name) are stable
 regardless. No question requires a write.
 
-## 2. Brain-skill behavior evals (scenario-level) — `evals/scenario-execution.md`
+## 2. Brain-skill behavior evals (scenario-level) — `evals/scenario-execution.md` *(maintainer-only — not shipped in the public skill)*
 
 Beyond the value-matching evals, the skill is checked on **behavior** for both read prompts ("audit
 my Google account", "why did CPA spike", "what should I scale", "weekly summary") and the **execution**

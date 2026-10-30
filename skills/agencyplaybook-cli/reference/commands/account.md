@@ -217,8 +217,8 @@ Save a profile binding an account to its token (by env-var NAME, not plaintext)
 
 | Flag | Value | Description |
 |---|---|---|
-| `--account` | `<ACCOUNT>` | Ad account id (e.g. act_535043909388877) |
-| `--token-env` | `<TOKEN_ENV>` | Name of the env var holding this account's Meta token (e.g. SCANDALOUS_TOKEN) |
+| `--account` | `<ACCOUNT>` | Ad account id (e.g. act_1234567890) |
+| `--token-env` | `<TOKEN_ENV>` | Name of the env var holding this account's Meta token (e.g. ACME_TOKEN) |
 | `--json` |  | Output as JSON |
 | `--execute` |  | Apply changes (opposite of dry-run) |
 | `--dry-run` |  | Preview only, do not mutate |

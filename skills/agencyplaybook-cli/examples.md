@@ -302,7 +302,7 @@ For full manual control, pass Meta's schedule JSON directly with `--adset-schedu
 
 ## 17. Creative format auditor — catch unintended format expansion (v0.2.0)
 
-The Scandalous Coffee incident on 2026-05-23 surfaced a class of creative-spec failure: a single-image-intent creative whose `asset_feed_spec.ad_formats` carried `["CAROUSEL","COLLECTION"]` + `optimization_type: "FORMAT_AUTOMATION"` rendered as a carousel in delivery. The auditor (v0.2.0) catches this BEFORE any write.
+A customer-account incident on 2026-05-23 surfaced a class of creative-spec failure: a single-image-intent creative whose `asset_feed_spec.ad_formats` carried `["CAROUSEL","COLLECTION"]` + `optimization_type: "FORMAT_AUTOMATION"` rendered as a carousel in delivery. The auditor (v0.2.0) catches this BEFORE any write.
 
 ```bash
 # Inspect a spec without writing anything.
@@ -351,8 +351,8 @@ apb adset create … --placements feed-stories-reels
 ```bash
 # Single image — image is hash or path (auto-uploaded).
 apb creative create-image-simple --name "Promo" --page-id PAGE \
-  --image ./hero.jpg --headline "Bold coffee" --body "Try Scandalous" \
-  --url https://scandalous.example --cta SHOP_NOW --execute
+  --image ./hero.jpg --headline "Bold coffee" --body "Try Example Coffee" \
+  --url https://www.example.com --cta SHOP_NOW --execute
 
 # Lead-form ad — first lead_gen_form_id injection in the codebase.
 apb creative create-lead-form-ad --name "Lead Q2" --page-id PAGE --form-id FORM_999 \

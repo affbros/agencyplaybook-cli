@@ -166,6 +166,8 @@ Usage: apb-gads plan structure [OPTIONS] --from <FROM>
 | Option | Description |
 |---|---|
 | `--from <FROM>` | Path to the keywords-plan JSON produced by `plan keywords` |
+| `--intent-split <on|off>` | Split intents into separate campaigns (`on`, default) or put every intent in ONE campaign (`off`) whose ad groups are named by intent [default: on] [possible values: on, off] |
+| `--grouping-file <GROUPING_FILE>` | JSON `{"ad group name": ["keyword", ...]}` that REPLACES lexical clustering exactly (ad groups emitted in name order). Keywords not in the keywords plan are reported under `warnings[]` as `grouping_unknown_keyword`; keywords the file omits are listed under `dropped[]` |
 | `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
 | `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
@@ -187,9 +189,10 @@ Usage: apb-gads plan rsa [OPTIONS] --from <FROM>
 |---|---|
 | `--from <FROM>` | Path to the campaign-structure JSON produced by `plan structure` |
 | `--provider <PROVIDER>` | Generation provider: heuristic (default) \| disabled [default: heuristic] |
-| `--brand <BRAND>` | Brand name to inject into templates (e.g. "Scandalous Coffee") [default: ""] |
-| `--final-url <FINAL_URL>` | Base final URL for the ads (e.g. "https://www.scandalouscoffee.com") [default: ""] |
+| `--brand <BRAND>` | Brand name to inject into templates (e.g. "Example Coffee Co") [default: ""] |
+| `--final-url <FINAL_URL>` | Base final URL for the ads (e.g. "https://www.example.com") [default: ""] |
 | `--no-color` | Disable ANSI color in any output this invocation writes (equivalent to NO_COLOR=1). No-op when output is JSON — apb-gads never colors JSON — but every human-readable surface (eprintln progress lines, a future colorized renderer) checks this instead of assuming a TTY, so scripts and CI can pass it unconditionally (sprint-g05c, CONTRACTS.md § 10.4). |
+| `--claim <CLAIM>` | A claim the advertiser has actually made (e.g. "free shipping") that the heuristic copy may keep. Repeatable. Without it the heuristic provider strips "best", "#1", "free shipping", price amounts and "guarantee(d)" |
 | `--debug` | Print extra operator-facing progress lines to stderr (JSON stdout output is unaffected). Currently used by `plan forecast`'s scenario runner to show inter-call pacing (1 QPS/CID). |
 | `--fonts <FONTS>` | system (default) \| web — font source for any .html plan output this invocation writes (--plan <path>.html, `recipe build`'s plan.html). `web` adds a Google Fonts <link>; `system` stays fully offline-safe. [default: system] |
 
@@ -268,6 +271,13 @@ Usage: apb-gads plan campaign search [OPTIONS] --structure <STRUCTURE> --rsa <RS
 | `--display-expansion <BOOL>` | Display expansion (Search -> Display network): true \| false. Always written explicitly into the spec's settings; default false [possible values: true, false] |
 | `--target-cpa <TARGET_CPA>` | Target CPA in USD — sets/overrides TARGET_CPA bidding |
 | `--bid-aggressiveness <BID_AGGRESSIVENESS>` | Per-keyword CPC aggressiveness: conservative (0.75x) \| balanced (1.0x) \| aggressive (1.25x), or a raw multiplier like 0.85. Each keyword's bid = its suggested top-of-page bid × this. Requires --keywords-plan |
+| `--sitelinks-file <SITELINKS_FILE>` | Sitelinks JSON — an array of `{"text","url","desc1","desc2"}` (the brief's `assets.sitelinks` schema). Absent => no sitelinks and a `missing_sitelinks` warning; none are ever invented |
+| `--callouts-file <CALLOUTS_FILE>` | Callouts JSON — an array of strings (the brief's `assets.callouts`) |
+| `--snippets-file <SNIPPETS_FILE>` | Structured-snippet JSON — `{"header","values":[...]}` (the brief's `assets.snippets`) |
+| `--tracking-template <TRACKING_TEMPLATE>` | Campaign tracking template, e.g. `{lpurl}?utm_source=google` |
+| `--final-url-suffix <FINAL_URL_SUFFIX>` | Final-URL suffix, e.g. `utm_source=google&utm_medium=cpc` |
+| `--rsa-per-ad-group <RSA_PER_AD_GROUP>` | RSAs per ad group (1-3, default 2). Extra RSAs are variants of the ad group's own copy. 1 reproduces the pre-0.3.6 single-RSA output [default: 2] |
+| `--brand <BRAND>` | Brand name — used to pin the brand headline to HEADLINE_1 in RSA #1 of brand-intent ad groups |
 | `--export <EXPORT>` | Write the bare spec JSON to this path (in addition to stdout) |
 
 <a id="apb-gads-plan-campaign-full"></a>

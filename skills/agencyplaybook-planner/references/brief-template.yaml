@@ -65,6 +65,9 @@ copy:
   descriptions: []                        # 2–4, ≤90 chars
   pins: {}                                # partial pinning only: { position_1: ["…", "…"] }
   paths: []                               # ≤2 × ≤15 chars
+  by_ad_group: {}                         # [0.3.6] agent copy per ad group NAME: { "adgroup-x": { headlines: [...], descriptions: [...] } }; unlisted groups reuse the shared copy (warning shared_copy_reused)
+
+claims: []                                # [0.3.6] claims the advertiser really makes ("free shipping", a price, a guarantee…); heuristic copy strips them otherwise. Source every entry (ad-copy-verification-standard).
 
 settings:                                 # [v2]
   networks: { search_partners: false, display_expansion: false }

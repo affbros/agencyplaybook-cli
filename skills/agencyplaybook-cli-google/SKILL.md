@@ -150,6 +150,16 @@ explicit: `plan campaign search|full` take `--search-partners <bool>` / `--displ
 `false` and warns `network_setting_defaulted` (name the field). `playbook targeting-coverage`
 no longer flags `missing_language_targeting` on SEARCH (info flag `legacy_language_criterion`
 for Search campaigns still carrying one).
+**Search planner depth (0.3.6).** `plan campaign search` builds the same spec blocks as `recipe build`
+(shared builders): `--sitelinks-file` / `--callouts-file` / `--snippets-file` (the brief's `assets`
+schema; absent => nothing emitted + warnings `missing_sitelinks|callouts|snippets` - never invent
+assets), `--tracking-template`, `--final-url-suffix`, `--goals` (a goals JSON may carry
+`conversion_actions` + `customer_acquisition` -> `conversion_goals`), `--rsa-per-ad-group <1-3>`
+(default **2**, was 1; extra RSAs are variants of the ad group's own copy) and `--brand` (RSA #1 of a
+brand-intent group pins the brand headline to `HEADLINE_1`). `plan structure` takes `--intent-split
+<on|off>` and `--grouping-file {"ad group": [keywords]}`. Heuristic copy no longer asserts "best",
+"#1", "free shipping", prices or "guarantee(d)" unless listed (`plan rsa --claim`, brief `claims[]`);
+a brief may give `copy.by_ad_group` (unlisted groups warn `shared_copy_reused`).
 **PMax launch completeness (0.3.5).** One PMax spec now carries the whole asset group: per asset
 group (or the flat single-group fields) `youtube_video_asset_resources` (<=5),
 `portrait_marketing_image_asset_resources` (<=20, 4:5), `call_to_action` (a v25 `CallToActionType`:

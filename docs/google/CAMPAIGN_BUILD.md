@@ -46,6 +46,38 @@ You can also hand-author the spec file directly (copy
 [`examples/campaign-launch-spec.json`](examples/campaign-launch-spec.json) and
 edit it) and skip straight to step 4.
 
+### Search, stage by stage (`plan structure` -> `plan rsa` -> `plan campaign search`)
+
+The same pipeline, broken into inspectable stages. Since 0.3.6 the assembled spec is as
+complete as `recipe build`'s: the **asset, tracking and conversion-goal blocks come from the
+same builder functions the recipe uses**, so the two paths cannot drift.
+
+```bash
+apb-gads plan structure --from kw.json --intent-split on --output structure.json
+apb-gads plan rsa --from structure.json --brand "Example Coffee Co" --final-url https://example.com \
+  --claim "free shipping" --output rsa.json            # --claim: only claims you actually make
+apb-gads plan campaign search --structure structure.json --rsa rsa.json --goals goals.json \
+  --daily-budget 20 --brand "Example Coffee Co" \
+  --sitelinks-file sitelinks.json --callouts-file callouts.json --snippets-file snippets.json \
+  --tracking-template '{lpurl}?utm_source=google' --final-url-suffix 'utm_medium=cpc' \
+  --rsa-per-ad-group 2 --export spec.json
+```
+
+| Flag | Effect |
+|---|---|
+| `--sitelinks-file` / `--callouts-file` / `--snippets-file` | JSON in the brief's `assets` schema: sitelinks `[{text,url,desc1,desc2}]`, callouts `[string]`, snippets `{header,values}`. **No file = nothing emitted** plus a `missing_sitelinks` / `missing_callouts` / `missing_snippets` warning in `_generation.warnings[]`. Assets are never invented. |
+| `--tracking-template`, `--final-url-suffix` | Land in the spec's `tracking` block. |
+| `--goals <file>` | A `plan goals` JSON; it may also carry `conversion_actions` (ids or resource names) and `customer_acquisition {optimize_new_customers, value_bid}`, which land in `conversion_goals`. |
+| `--rsa-per-ad-group <1-3>` | Default **2** (was 1 before 0.3.6; `1` reproduces the old output). RSA #2+ are *variants of the ad group's own copy* (lead keyword headline kept, other headlines and descriptions rotated) - no new wording. A group without enough distinct copy emits fewer and warns `rsa_variant_skipped`. |
+| `--brand` | In a **brand-intent** ad group, RSA #1 pins the brand headline to `HEADLINE_1`; RSA #2+ are unpinned; there are no other auto-pins. `brand_pin_skipped` when nothing matches. |
+| `plan structure --intent-split off` | One `campaign-all` campaign; ad groups are named by intent (`adgroup-<intent>-<cluster>`) and carry an `intent` field. Default `on` is unchanged. |
+| `plan structure --grouping-file <json>` | `{"ad group": ["keyword", ...]}` replaces lexical clustering **exactly** (ad groups in name order). A keyword not in the keywords plan is skipped with `grouping_unknown_keyword`; keywords the file omits are listed under `dropped[]`. |
+
+The heuristic copy provider no longer asserts claims you never made: "best", "#1" / "no. 1",
+"free shipping", price/currency amounts and "guarantee(d)" are stripped unless you list them
+(`claims[]` in a brief, `plan rsa --claim`). It also guarantees each ad group's top keyword theme
+leads at least three headlines.
+
 ### Performance Max
 
 PMAX is identical except its asset groups reference **image assets that must

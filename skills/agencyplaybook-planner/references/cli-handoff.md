@@ -27,10 +27,14 @@ $G plan keywords --seed-keyword "whole bean coffee" --seed-keyword "fresh roaste
 # 2 structure
 $G plan structure --from research/keywords.json --output build/structure.json
 #   planner: enforce structure.max_ad_groups; merge thin clusters (consolidation doctrine)
+#   optional (0.3.6): --intent-split off  (one campaign, intent-named ad groups)
+#                     --grouping-file build/grouping.json  ({"ad group": ["keyword", ...]} replaces clustering)
 
 # 3 copy — pick ONE
 $G plan rsa --from build/structure.json --brand "Example Roasters" \
    --final-url https://www.example.com/whole-bean --output build/rsa.json        # provider=heuristic
+#   heuristic copy has "best" / "#1" / "free shipping" / prices / "guarantee" stripped; add
+#   --claim "<claim>" ONLY for a claim the advertiser really makes (brief claims[])
 #   or provider=agent: YOU write build/rsa.json (rsa-artifact-shape.md) after scraping the landing page
 
 # 4 goals (from context, not memory)
@@ -41,6 +45,9 @@ $G plan campaign search --structure build/structure.json --rsa build/rsa.json --
    --keywords-plan research/keywords.json --campaign-name "Test-ok-to-delete Example Roasters — Whole Bean — US" \
    --landing-page https://www.example.com/whole-bean --daily-budget 75 \
    --geo-target-id 2840 --target-cpa 18.00 --search-partners false --display-expansion false \
+   --sitelinks-file build/sitelinks.json --callouts-file build/callouts.json --snippets-file build/snippets.json \
+   --tracking-template '{lpurl}?utm_source=google' --final-url-suffix 'utm_medium=cpc' \
+   --rsa-per-ad-group 2 --brand "Example Roasters" \
    --export build/spec.json   # no --language-id: language is research-only for Search (Sept 2026)
 
 # 6 validate (exit 3 = fail — fix the spec, never override)

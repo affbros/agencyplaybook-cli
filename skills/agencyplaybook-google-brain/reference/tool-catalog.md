@@ -189,8 +189,12 @@ These are **pure-local** (no Google API call) — they build an artifact / valid
 - **Input:** `{ spec_kind:"campaign_spec"|"pmax_spec" (default campaign_spec), customer_id?,
   structure_path?, rsa_path?, goals_path?, keywords_plan_path?, final_url?, business_name?,
   daily_budget?, budget_micros?, campaign_name?, landing_page?, target_cpa?, search_partners?,
-  display_expansion?, youtube_video_asset_ids?, portrait_marketing_image_asset_ids?, call_to_action?,
-  final_url_expansion?, text_asset_automation?, automated_video_crawl? }`. The last six are PMAX only
+  display_expansion?, rsa_per_ad_group?, sitelinks_file?, callouts_file?, snippets_file?,
+  tracking_template?, final_url_suffix?, brand?, youtube_video_asset_ids?, portrait_marketing_image_asset_ids?, call_to_action?,
+  final_url_expansion?, text_asset_automation?, automated_video_crawl? }`. Search (0.3.6): `rsa_per_ad_group` (1-3, CLI default 2),
+  the three `*_file` params (PATHS forwarded to the CLI; the MCP never opens them; absent => no sitelinks/
+  callouts/snippets and `missing_*` warnings), `tracking_template`, `final_url_suffix`, `brand` (brand
+  headline pinned to HEADLINE_1 in RSA #1 of brand-intent groups). The last six are PMAX only
   (0.3.5): `youtube_video_asset_ids[]` (max 5, existing assets) and `portrait_marketing_image_asset_ids[]`
   (max 20) become `--youtube-video-asset` / `--portrait-marketing-image-asset` (a bare id is expanded to
   `customers/<id>/assets/<id>`); `call_to_action` is a v25 `CallToActionType` (LEARN_MORE, GET_QUOTE,
