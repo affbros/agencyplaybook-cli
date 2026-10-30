@@ -4,6 +4,37 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.6] — 2026-10-29 (Search planner depth: assets, goals, tracking, 2 RSAs, per-group copy, grouping control)
+
+**BEHAVIOUR CHANGE: `plan campaign search` now emits 2 RSAs per ad group by default (was 1).** Pass
+`--rsa-per-ad-group 1` to reproduce the 0.3.5 single-RSA output. Everything else is additive; a spec or
+brief without the new fields is byte-identical to 0.3.5. gads-build-gaps-001 S3.
+
+### Added
+
+- `plan campaign search`: `--sitelinks-file`, `--callouts-file`, `--snippets-file` (JSON, the brief's `assets`
+  schema), `--tracking-template`, `--final-url-suffix`, `--rsa-per-ad-group <1-3>` (default 2), `--brand`.
+  The asset, tracking and conversion-goal blocks are built by the SAME functions `recipe build` uses, so the
+  two paths cannot drift. With no asset file the spec carries no sitelinks/callouts/snippets (nothing is
+  invented) and the `_generation.warnings[]` list gains `missing_sitelinks` / `missing_callouts` /
+  `missing_snippets`. `--goals` now lands in the spec: a goals JSON may carry `conversion_actions` (ids or
+  resource names) and `customer_acquisition` -> `conversion_goals`.
+- Extra RSAs are variants of the ad group's own copy (lead keyword headline kept, next headlines and first
+  descriptions rotated out) - never new wording. A group with too little copy for a variant is reported
+  (`rsa_variant_skipped`).
+- Brand pin: in a brand-intent ad group, RSA #1 pins the brand headline to `HEADLINE_1` (RSA #2+ unpinned,
+  no other auto-pins); `brand_pin_skipped` when no `--brand` / no matching headline.
+- `plan structure --intent-split <on|off>` (default `on` = unchanged; `off` = one `campaign-all` campaign with
+  intent-named ad groups) and `--grouping-file <json>` (`{ad group: [keywords]}` replaces clustering exactly;
+  `grouping_unknown_keyword` warning; unlisted keywords reported under `dropped[]`).
+- Brief: `copy.by_ad_group {<ad group name>: {headlines, descriptions}}` (`copy.provider: agent`; groups with
+  no entry reuse the shared copy and warn `shared_copy_reused`) and `claims[]`. `structure.rsa_per_ad_group`
+  is now honoured (it was parsed but ignored).
+- Claim filter (pure, unit-tested): heuristic starter copy no longer asserts "best", "#1" / "no. 1", "free
+  shipping", price/currency amounts or "guarantee(d)" unless the advertiser lists the claim (`claims[]`,
+  `plan rsa --claim`). The heuristic provider also guarantees each ad group's top keyword theme in >= 3
+  headlines.
+
 ## [0.3.5] — 2026-10-27 (PMax launch completeness: video, portrait, CTA, asset automation, asset-group tracking)
 
 **A patch bump — additive, optional spec fields; a spec without them behaves exactly as before.**
