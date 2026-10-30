@@ -399,7 +399,7 @@ No command-surface change (still 246 leaves). Behavioral/UX only, with safe defa
 ### Known limitation
 - Meta does not support deleting a `value_rule_set` through this API path on all accounts/tokens (returns "Unsupported delete request"); `value-rule delete` surfaces that error — delete in Ads Manager if rejected.
 
-## [0.4.1] — 2026-05-29 (EngineSEO live-test fixes)
+## [0.4.1] — 2026-05-29 (customer live-test fixes)
 
 Fixes surfaced by an end-to-end live validation of the v0.4.0 write surface against a real Meta ad account (image + video DCO campaigns, paused). No new commands or scopes (`cli_leaf_count` stays 242).
 
@@ -427,7 +427,7 @@ Single batched release of the 3-tier Meta Marketing API v25 write-field-coverage
 ### Added — Meta v25 field coverage, Tier 2 (capability) — `meta-v25-field-coverage`
 - **Ad set Advantage+ relaxation:** `--advantage-detailed-targeting` (sets `targeting_automation.advantage_audience=1`), `--advantage-lookalike` / `--advantage-custom-audience` (build `targeting.targeting_relaxation`).
 - **Ad set min-ROAS / bid caps:** `--bid-constraints` (raw JSON, e.g. `{"roas_average_floor":12000}`) with validation — `LOWEST_COST_WITH_MIN_ROAS` requires a positive floor; `COST_CAP`/`LOWEST_COST_WITH_BID_CAP` require `--bid-amount`.
-- **Creative enhancements (Advantage+):** `--enhancements standard|none|<csv>` on the image/video simple builders → per-feature `degrees_of_freedom_spec.creative_features_spec.*.enroll_status` (the dead `enable_standard_enhancements` bundle is never emitted). A deliberate opt-in is whitelisted in the creative auditor; the carousel/collection/FORMAT_AUTOMATION ("Scandalous") trap still blocks.
+- **Creative enhancements (Advantage+):** `--enhancements standard|none|<csv>` on the image/video simple builders → per-feature `degrees_of_freedom_spec.creative_features_spec.*.enroll_status` (the dead `enable_standard_enhancements` bundle is never emitted). A deliberate opt-in is whitelisted in the creative auditor; the carousel/collection/FORMAT_AUTOMATION format-expansion trap still blocks.
 - **Inline DCO completeness:** `creative create-dynamic` gains `--description`, `--video` (pre-uploaded IDs), and `--optimization-type` on the inline `asset_feed_spec` path.
 - **CAPI value optimization:** `pixel send-event` gains `--contents` (`custom_data.contents[]`), `--content-category`, `--predicted-ltv`, plus `--lead-id` / `--subscription-id` / `--fb-login-id` on `user_data` (unhashed IDs — closes the leadgen → offline-conversion loop).
 - **Value-based audiences:** `audience create --value-based` (sets `is_value_based=true`) + `LTV` / `VALUE` schema codes for `audience users-add` (numeric, sent unhashed) — value-based audiences are now buildable end-to-end.
@@ -449,7 +449,7 @@ Single batched release of the 3-tier Meta Marketing API v25 write-field-coverage
 ### Added — ergonomic account switching (cli-account-switching)
 Switch the active ad account by **name**, and — with a profile — switch its Meta token at the same time, so the "token can't reach this account" `(#200)` mismatch can't recur.
 - **`apb account use <profile|name|act_…|123456>`** — set the active account by profile name, account-name substring, `act_` id, or numeric id; a bare name is matched against the accounts the current token can reach; prints the resolved account + a reachability hint.
-- **`apb account profile add|list|remove`** — named profiles binding an account to its token. The token is referenced by the **name of an env var** (`--token-env SCANDALOUS_TOKEN`), never stored in plaintext. In `META_OAUTH=DISABLED` mode the active profile's `token_env` supplies the BYO Meta token (an explicit `META_ACCESS_TOKEN` still wins).
+- **`apb account profile add|list|remove`** — named profiles binding an account to its token. The token is referenced by the **name of an env var** (`--token-env ACME_TOKEN`), never stored in plaintext. In `META_OAUTH=DISABLED` mode the active profile's `token_env` supplies the BYO Meta token (an explicit `META_ACCESS_TOKEN` still wins).
 - **`apb account current`** — shows the active account, its profile, and which accounts the token actually reaches — flagging a token/account mismatch before a command 403s.
 - Net **+5 CLI leaves (236 → 241)**; CLI-local (no new API endpoints). `~/.apb/config.json` gains `account_profiles` + `active_profile`, both back-compatible with older binaries.
 
@@ -503,7 +503,7 @@ No new commands, endpoints, or scopes (stays 236/236). Pure CLI resolution chang
 
 ### Added — Creative format auditor (Phase 1, Sprint 1)
 
-- **`apb creative create-*` / `update` now audit specs for unintended Meta v25 format-expansion fields.** Detects 11 risks (CAROUSEL, COLLECTION, AUTOMATIC_FORMAT, CAROUSEL_IMAGE, CAROUSEL_VIDEO, FORMAT_AUTOMATION, degrees_of_freedom_spec, contextual_multi_ads, product_set_id, template_url, `{{product.*}}` syntax). When `--execute` is set with unwhitelisted findings, exits **2** with an actionable error naming each detected risk and the `--allow-*` flag that whitelists it. Fires BEFORE the env-var write gate so the spec-fix message surfaces first. CI use: `--strict-format` upgrades dry-run findings to errors. Spec-review: `--audit-only` runs the auditor and exits 0 without writing. The Scandalous Coffee fix: a single-image creative whose `asset_feed_spec` carried `CAROUSEL/COLLECTION/FORMAT_AUTOMATION` is now blocked at dry-run. See `rust/docs/CREATIVE_AUDITOR.md`.
+- **`apb creative create-*` / `update` now audit specs for unintended Meta v25 format-expansion fields.** Detects 11 risks (CAROUSEL, COLLECTION, AUTOMATIC_FORMAT, CAROUSEL_IMAGE, CAROUSEL_VIDEO, FORMAT_AUTOMATION, degrees_of_freedom_spec, contextual_multi_ads, product_set_id, template_url, `{{product.*}}` syntax). When `--execute` is set with unwhitelisted findings, exits **2** with an actionable error naming each detected risk and the `--allow-*` flag that whitelists it. Fires BEFORE the env-var write gate so the spec-fix message surfaces first. CI use: `--strict-format` upgrades dry-run findings to errors. Spec-review: `--audit-only` runs the auditor and exits 0 without writing. The customer-account fix: a single-image creative whose `asset_feed_spec` carried `CAROUSEL/COLLECTION/FORMAT_AUTOMATION` is now blocked at dry-run. See `rust/docs/CREATIVE_AUDITOR.md`.
 - 8 new flags on each affected creative command: `--allow-carousel`, `--allow-collection`, `--allow-automatic-format`, `--allow-format-automation`, `--allow-catalog-template`, `--strict-format`, `--audit-only`, `--creative-format <kind>`.
 - API parity: matching `allow_*` / `strict_format` / `audit_only` JSON body fields on `POST /api/v1/creatives` + `/dynamic` + `/collection` + `PATCH /api/v1/creatives/{id}`.
 
