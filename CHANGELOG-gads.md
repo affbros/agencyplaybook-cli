@@ -4,6 +4,16 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.7] — 2026-10-29 (removed legacy hardcoded verify defaults; genericized examples)
+
+### Changed
+
+- `verify pmax-launch` no longer carries built-in asset defaults. Its asset configuration comes only from
+  `safety.profiles.<customer>.live_verify_policy.pmax_asset_config`; without it the command fails with the
+  existing "no PMAX asset config" error (run `verify bootstrap-pmax-assets` or configure the profile).
+- Genericized built-in example values in the Search / RSA lifecycle verify chains and in help text.
+- Test fixtures use placeholder names and ids throughout.
+
 ## [0.3.6] — 2026-10-29 (Search planner depth: assets, goals, tracking, 2 RSAs, per-group copy, grouping control)
 
 **BEHAVIOUR CHANGE: `plan campaign search` now emits 2 RSAs per ad group by default (was 1).** Pass
