@@ -6,6 +6,11 @@ Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is
 
 ## [Unreleased]
 
+## [0.6.1] — 2026-10-29 (genericized examples)
+
+### Changed
+- Genericized account ids and profile names in help-text examples, the shipped catalogue and test fixtures. No behaviour change.
+
 ## [0.6.0] — 2026-09-10 (compose v2, recipe build, planning twins, plannable creates, v26)
 
 **279 leaf commands across 42 domains** (was 267/39). Headline: a Meta campaign can now be described as a brief and built end-to-end (`recipe build`), every op a v2 plan can carry is now executable from a plan file (`plan apply --from-file` handles creates, not just updates), plan documents can be merged/forecast/exported/read back (`plan merge|forecast|export|get`), A/B tests run through a new `experiment` domain, a multi-account budget allocator ships (`agency portfolio plan`), and the Graph/Marketing API default moves to **v26.0**.
