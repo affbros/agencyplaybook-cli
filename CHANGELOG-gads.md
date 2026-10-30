@@ -4,6 +4,30 @@ All notable changes to the `apb-gads` CLI binary distribution.
 
 Format inspired by [Keep a Changelog](https://keepachangelog.com/). This file is mirrored to the public repo `affbros/agencyplaybook-cli` (as `CHANGELOG-gads.md`, beside `apb`'s `CHANGELOG.md`) on every `gads-v*` release tag. apb-gads has its own version line (`0.1.x`) and tags (`gads-vX.Y.Z`), independent of `apb`.
 
+## [0.3.8] — 2026-10-30 (complete PMax plans, full Editor CSV export, plan approval bound to the spec)
+
+### Fixed
+
+- **`--plan` for `orchestrate pmax-build` / `demand-gen-build` and `recipe build --type pmax` now lists the whole
+  build.** A build with a sequential tail (e.g. brand exclusions) used to write a plan holding only the tail;
+  the atomic build itself (budget, campaign, criteria, assets, asset groups, links, signals) was missing from
+  the review document, while `recipe build`'s `apply-plan --execute` still ran it. The plan now lists the atomic
+  build first, then the tail, all in atomic group `g1`.
+- PMax text and call-to-action asset creates now map to the `pmax-asset-attach` leaf, so a PMax plan with real
+  copy can be written at all (it previously failed with "cannot map the Google mutate operation assetOperation/create").
+- **Google Ads Editor CSV export** (`recipe build`, `plan export --format editor-csv`):
+  - negatives, sitelinks, callouts and structured snippets from a launch plan are exported (the launch's
+    nested param shapes were skipped before), each row tied to its campaign through `campaign-asset-attach`;
+  - negative keywords carry Editor's scoped criterion types (`Campaign Negative Phrase`, `Negative Exact`, …);
+  - `campaigns.csv` shows the campaign's real bid strategy (from `campaign-update-bidding-strategy`) and its
+    locations / languages, instead of the create-time Manual CPC with empty location.
+
+### Security
+
+- `mutate apply-plan --execute` on a `recipe build` plan now refuses (`plan_spec_mismatch`, nothing submitted) when
+  the build spec it would re-drive no longer matches the approved, integrity-hashed `source.spec_hash`. Before,
+  an edit to that (unhashed) spec that kept the same operation names passed the consistency check.
+
 ## [0.3.7] — 2026-10-29 (removed legacy hardcoded verify defaults; genericized examples)
 
 ### Changed
